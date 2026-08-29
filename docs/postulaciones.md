@@ -83,26 +83,32 @@ Va sin barra final a propósito: el navegador manda el `Origin` sin ella y la
 comparación es exacta. Si algún día el catálogo pasa a un dominio propio del
 colegio, hay que cambiarlo en esos cuatro sitios y en `SITE_URL`.
 
-## 5. Los dos build args que faltan en EasyPanel
+## 5. Conectar el formulario con el webhook
 
-Hoy el sitio está desplegado **sin ninguno de los dos**, y eso se nota:
+`SITE_URL` ya **no hace falta**: el dominio real es el valor por defecto en
+`astro.config.mjs`, así que el sitemap y los `canonical` salen bien aunque no se
+configure nada. La variable sigue funcionando como anulación si algún día el
+catálogo pasa a un dominio propio del colegio.
 
-| Build arg | Valor | Qué pasa si falta |
-|---|---|---|
-| `SITE_URL` | `https://catologonegocios.26zlav.easypanel.host` | El sitemap y los `canonical` apuntan a `liceoingles.edu.co`: Google indexa direcciones que no existen y lo que se comparte por WhatsApp lleva al sitio equivocado |
-| `N8N_REGISTRO_URL` | La URL de producción del webhook | `/registrar` se construye con el formulario deshabilitado |
+Queda una sola variable, `N8N_REGISTRO_URL`. Sin ella, `/registrar` se
+construye con el formulario deshabilitado y el correo de contacto a la vista.
 
-La URL del webhook aparece cuando **activas** el workflow de recepción, y tiene
-esta forma:
+En EasyPanel: ficha del servicio → pestaña **Environment** → añadir la línea
 
 ```
-https://n8n-n8n.26zlav.easypanel.host/webhook/fli-catalogo-registro-8b31d7e2-4a05-4f19-9c26-1de8a7b34f90
+N8N_REGISTRO_URL=https://n8n-n8n.26zlav.easypanel.host/webhook/fli-catalogo-registro-8b31d7e2-4a05-4f19-9c26-1de8a7b34f90
 ```
 
-Ojo: la de *test* (`/webhook-test/`) solo funciona mientras tengas el editor
-abierto escuchando. La que va en EasyPanel es la de producción, `/webhook/`.
+→ guardar → **Deploy**.
 
-Después de añadir los dos, redespliega.
+La URL solo responde cuando el workflow de recepción está **activo**. Y ojo: la
+de *test* (`/webhook-test/`) solo funciona mientras tengas el editor de n8n
+abierto escuchando; la que va aquí es la de producción, con `/webhook/`.
+
+Para comprobar que quedó, abre `/registrar` y mira el HTML: si el formulario
+está conectado, el `<form>` trae un atributo `data-endpoint` con esa URL. Si en
+cambio aparece "El formulario todavía no está conectado", la variable no llegó
+al build.
 
 ## Probar antes de anunciarlo
 

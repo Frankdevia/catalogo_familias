@@ -2,7 +2,10 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-const POR_DEFECTO = 'https://liceoingles.edu.co';
+// El dominio real donde vive el catálogo hoy. Es el valor por defecto para
+// que un despliegue sin SITE_URL siga generando sitemap y canonical correctos;
+// la variable de entorno sigue mandando si algún día hay dominio propio.
+const POR_DEFECTO = 'https://catologonegocios.26zlav.easypanel.host';
 
 /*
  * Ojo con `||` en vez de `??`: en el Dockerfile, `ENV SITE_URL=$SITE_URL` sin
