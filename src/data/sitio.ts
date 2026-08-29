@@ -11,7 +11,7 @@ export const SITIO = {
     'Catálogo de negocios de las familias de la Fundación Liceo Inglés. Cuando les compras, fortaleces la economía de la familia FLI.',
   /** Formulario de postulación, en el propio sitio. */
   signupUrl: '/registrar',
-  contactEmail: 'familiasfli@liceoingles.edu.co',
+  contactEmail: 'tecnologia@liceoingles.edu.co',
   direccion: ['Km 5 Vía Cerritos, Entrada 17', 'Pereira, Risaralda · Colombia'],
   telefonos: ['+57 606 349 7750', '+57 300 912 1109'],
   /** Indicativo de país que se antepone a los teléfonos de los negocios. */

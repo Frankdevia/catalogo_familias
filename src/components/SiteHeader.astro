@@ -36,11 +36,10 @@ const enlaces = [
             </li>
           ))
         }
-        <li>
-          <a class="cta" href={SITIO.signupUrl}>Inscribe tu negocio</a>
-        </li>
       </ul>
     </nav>
+
+    <a class="cta" href={SITIO.signupUrl}>Inscribe tu negocio</a>
   </div>
 </header>
 
@@ -57,8 +56,10 @@ const enlaces = [
     padding-block: var(--space-3);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-6);
+  }
+  nav {
+    margin-left: auto;
   }
   .marca {
     display: flex;
@@ -108,6 +109,15 @@ const enlaces = [
     color: var(--li-red);
   }
   .cta {
+    /* Antes heredaba esta tipografía de `nav ul`. Al sacar el botón de la lista
+       para que comparta fila con el logo en móvil, hay que declararla aquí. */
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
     background: var(--li-red);
     color: var(--li-white);
     padding: 11px 22px;
@@ -124,7 +134,7 @@ const enlaces = [
   @media (max-width: 860px) {
     .barra {
       flex-wrap: wrap;
-      gap: var(--space-3);
+      gap: var(--space-3) var(--space-4);
     }
     .lema {
       display: none;
@@ -134,15 +144,41 @@ const enlaces = [
       flex-wrap: wrap;
     }
   }
+
+  /*
+   * En móvil el botón sube a compartir fila con el logo y los enlaces bajan a
+   * la suya. Así el header pasa de tres filas a dos —recupera unos 30px de
+   * pantalla— y el botón deja de quedar pegado a los enlaces, que era el
+   * problema real: el row-gap de 8px no separaba nada.
+   */
   @media (max-width: 520px) {
+    .marca {
+      order: 1;
+    }
+    .cta {
+      order: 2;
+      margin-left: auto;
+      padding: 9px 14px;
+    }
+    nav {
+      order: 3;
+      flex-basis: 100%;
+      margin-left: 0;
+    }
     nav ul {
       width: 100%;
       justify-content: space-between;
-      gap: var(--space-2);
+      column-gap: var(--space-2);
       font-size: var(--text-3xs);
     }
+  }
+
+  /* Por debajo de ~390px el botón deja de caber junto al logo y el header
+     volvería a tres filas. Se encoge lo justo para conservar dos. */
+  @media (max-width: 390px) {
     .cta {
-      padding: 9px 14px;
+      font-size: var(--text-3xs);
+      padding: 8px 12px;
     }
   }
 </style>
