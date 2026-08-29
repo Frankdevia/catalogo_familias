@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import { SITIO } from '../data/sitio';
+import fondo from '../assets/photos/cta-negocio.webp';
+---
+
+<section class="hero">
+  <Image
+    class="fondo"
+    src={fondo}
+    alt=""
+    aria-hidden="true"
+    widths={[768, 1280, 1920]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="velo" aria-hidden="true"></div>
+
+  <div class="contenido li-container">
+    <p class="eyebrow">Familias FLI · Catálogo de negocios</p>
+    <h1>Apoya los negocios de nuestras familias</h1>
+    <p class="entrada">
+      Detrás de cada negocio de este catálogo hay una familia de nuestra comunidad.
+      Cuando les compras, fortaleces la economía de la familia FLI.
+    </p>
+    <div class="acciones">
+      <a class="li-btn" href="#catalogo">Ver el catálogo</a>
+      <a class="secundario" href={SITIO.signupUrl}>Inscribe tu negocio</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+  }
+  .fondo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .velo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(35, 45, 117, 0.88) 0%,
+      rgba(35, 45, 117, 0.55) 55%,
+      rgba(35, 45, 117, 0.12) 100%
+    );
+  }
+  .contenido {
+    position: relative;
+    padding-block: var(--space-24);
+  }
+  .contenido > * {
+    max-width: 640px;
+  }
+  .eyebrow {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--li-yellow);
+    font-weight: var(--weight-semibold);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.6vw, 46px);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--li-white);
+    margin: 0 0 18px;
+    font-weight: var(--weight-bold);
+  }
+  .entrada {
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--li-white);
+    margin: 0 0 30px;
+    max-width: 48ch;
+    text-wrap: pretty;
+  }
+  .acciones {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .secundario {
+    font-family: var(--font-subhead);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--li-white);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .secundario:hover {
+    color: var(--li-yellow);
+  }
+  .hero :global(:focus-visible) {
+    outline-color: var(--li-yellow);
+  }
+
+  /* En pantallas estrechas el degradado horizontal deja el texto sin
+     contraste: se vuelve vertical y más opaco. */
+  @media (max-width: 760px) {
+    .hero {
+      min-height: 460px;
+    }
+    .contenido {
+    position: relative;
+      padding-block: var(--space-16);
+    }
+    .velo {
+      background: linear-gradient(
+        180deg,
+        rgba(35, 45, 117, 0.82) 0%,
+        rgba(35, 45, 117, 0.88) 100%
+      );
+    }
+  }
+</style>

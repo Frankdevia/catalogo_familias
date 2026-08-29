@@ -1,0 +1,133 @@
+---
+import { SITIO } from '../data/sitio';
+
+const anio = new Date().getFullYear();
+---
+
+<footer id="contacto">
+  <div class="cuerpo li-container">
+    <div class="marca">
+      <img
+        src="/assets/logo-horizontal-white.svg"
+        alt={SITIO.organizacion}
+        width="84"
+        height="48"
+      />
+      <p class="lema">{SITIO.descripcion}</p>
+    </div>
+
+    <div>
+      <h2 class="titulo">Dirección</h2>
+      <address>
+        {SITIO.direccion.map((linea, i) => <>{i > 0 && <br />}{linea}</>)}
+      </address>
+    </div>
+
+    <div>
+      <h2 class="titulo">Teléfonos</h2>
+      <p class="lista">
+        {
+          SITIO.telefonos.map((t, i) => (
+            <>
+              {i > 0 && <br />}
+              <a href={`tel:${t.replace(/\s/g, '')}`}>{t}</a>
+            </>
+          ))
+        }
+      </p>
+    </div>
+
+    <div>
+      <h2 class="titulo">Correo</h2>
+      <p class="lista">
+        <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="legal">
+    <div class="li-container">
+      © {anio} {SITIO.organizacion}. Todos los derechos reservados.
+    </div>
+  </div>
+</footer>
+
+<style>
+  footer {
+    background: var(--li-navy);
+    color: var(--li-white);
+  }
+  .cuerpo {
+    padding: var(--space-16) var(--gutter) 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    gap: var(--space-10);
+  }
+  .marca {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+  .marca img {
+    height: 48px;
+    width: auto;
+    display: block;
+    justify-self: start;
+  }
+  .lema {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--li-sky);
+  }
+  /* Los rótulos del pie son <h2> por estructura, pero visualmente son eyebrows. */
+  .titulo {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--li-yellow);
+    margin: 0 0 var(--space-3);
+  }
+  address,
+  .lista {
+    margin: 0;
+    font-style: normal;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+  .cuerpo a {
+    color: var(--li-white);
+  }
+  .cuerpo a:hover {
+    color: var(--li-yellow);
+  }
+  .legal {
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .legal :global(.li-container) {
+    padding-block: 18px;
+    font-size: var(--text-xs);
+    color: var(--li-sky);
+  }
+  footer :global(:focus-visible) {
+    outline-color: var(--li-yellow);
+  }
+
+  @media (max-width: 900px) {
+    .cuerpo {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-8);
+    }
+    .marca {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 520px) {
+    .cuerpo {
+      grid-template-columns: 1fr;
+      padding-top: var(--space-12);
+    }
+  }
+</style>

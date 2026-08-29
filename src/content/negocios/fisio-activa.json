@@ -1,0 +1,13 @@
+{
+  "nombre": "Fisio Activa",
+  "categoria": "Salud y bienestar",
+  "descripcion": "Fisioterapia deportiva y rehabilitación a domicilio o en consultorio.",
+  "familia": "Familia — grado 5A",
+  "foto": "../../assets/photos/biz-fisio.webp",
+  "telefono": "312 345 6789",
+  "direccion": "Cll 14 # 7-89, Consultorio 204, Pereira",
+  "web": "fisioactiva.co",
+  "instagram": "@fisio.activa",
+  "facebook": "Fisio Activa Pereira",
+  "orden": 4
+}

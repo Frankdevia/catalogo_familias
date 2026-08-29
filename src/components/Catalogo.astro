@@ -1,0 +1,158 @@
+---
+import { getImage } from 'astro:assets';
+import Filtros from './Filtros.astro';
+import TarjetaNegocio from './TarjetaNegocio.astro';
+import ModalNegocio from './ModalNegocio.astro';
+import {
+  telHref,
+  webHref,
+  instagramHref,
+  anchoSeguro,
+  type Negocio,
+} from '../data/negocio';
+import type { NegocioModal } from '../scripts/tipos';
+
+interface Props {
+  negocios: Negocio[];
+}
+
+const { negocios } = Astro.props;
+
+// El modal se rellena en el cliente, así que las fotos se optimizan aquí
+// (2x de los 520x200 que mide la cabecera del diálogo).
+const datos: NegocioModal[] = await Promise.all(
+  negocios.map(async (n) => {
+    // 2x de los 520x200 del diálogo, sin pasarse del original (ratio 2.6:1).
+    const ancho = anchoSeguro(n.data.foto, 1040);
+    const foto = await getImage({
+      src: n.data.foto,
+      width: ancho,
+      height: Math.round(ancho / 2.6),
+      format: 'webp',
+    });
+    return {
+      slug: n.id,
+      nombre: n.data.nombre,
+      categoria: n.data.categoria,
+      familia: n.data.familia,
+      descripcion: n.data.descripcion,
+      foto: foto.src,
+      telefono: n.data.telefono,
+      telHref: telHref(n.data.telefono),
+      direccion: n.data.direccion,
+      web: n.data.web,
+      webHref: n.data.web ? webHref(n.data.web) : undefined,
+      instagram: n.data.instagram,
+      instagramHref: n.data.instagram ? instagramHref(n.data.instagram) : undefined,
+      facebook: n.data.facebook,
+      ficha: `/negocio/${n.id}/`,
+    };
+  }),
+);
+
+// Escapa "<" para que ningún dato pueda cerrar el <script> antes de tiempo.
+const datosJson = JSON.stringify(datos).replace(/</g, '\\u003c');
+---
+
+<section id="catalogo">
+  <div class="li-container">
+    <div class="encabezado">
+      <div>
+        <p class="li-eyebrow">Familias FLI</p>
+        <h2>Catálogo de negocios</h2>
+        <p class="entrada">
+          Todo lo que ofrecen las familias de la Fundación Liceo Inglés, a un clic.
+        </p>
+      </div>
+      <Filtros negocios={negocios} />
+    </div>
+
+    <p id="catalogo-conteo" class="li-sr-only" role="status" aria-live="polite">
+      {negocios.length} negocios
+    </p>
+
+    <div class="rejilla">
+      {negocios.map((negocio) => <TarjetaNegocio negocio={negocio} />)}
+    </div>
+
+    <p id="catalogo-vacio" class="vacio" hidden>
+      Todavía no hay negocios en esta categoría.
+    </p>
+
+    <p class="nota">
+      Negocios de muestra — se reemplazan con los negocios reales de las familias.
+    </p>
+  </div>
+</section>
+
+<ModalNegocio />
+
+<script id="negocios-datos" type="application/json" is:inline set:html={datosJson} />
+
+<script>
+  import '../scripts/catalogo.ts';
+</script>
+
+<style>
+  section {
+    padding-block: var(--space-20);
+  }
+  .encabezado {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+  .encabezado :global(.li-eyebrow) {
+    display: block;
+    margin: 0 0 var(--space-3);
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: 0 0 var(--space-3);
+  }
+  .entrada {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--text-body);
+    max-width: 60ch;
+  }
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  .vacio {
+    margin: var(--space-10) 0 0;
+    text-align: center;
+    font-size: var(--text-base);
+    color: var(--text-muted);
+  }
+  .nota {
+    margin: var(--space-6) 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .rejilla {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    section {
+      padding-block: var(--space-12);
+    }
+    .rejilla {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

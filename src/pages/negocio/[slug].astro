@@ -1,0 +1,217 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaInscribe from '../../components/CtaInscribe.astro';
+import { telHref, webHref, instagramHref, anchoSeguro } from '../../data/negocio';
+import { SITIO } from '../../data/sitio';
+
+export const getStaticPaths = (async () => {
+  const negocios = await getCollection('negocios');
+  return negocios.map((negocio) => ({
+    params: { slug: negocio.id },
+    props: { negocio },
+  }));
+}) satisfies GetStaticPaths;
+
+const { negocio } = Astro.props;
+const d = negocio.data;
+
+// La ficha muestra la foto a 2:1; se pide como mucho el ancho original.
+const ancho = anchoSeguro(d.foto, 1040);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: d.nombre,
+  description: d.descripcion,
+  telephone: `${SITIO.indicativo}${d.telefono.replace(/\s/g, '')}`,
+  address: { '@type': 'PostalAddress', streetAddress: d.direccion, addressCountry: 'CO' },
+  ...(d.web ? { url: webHref(d.web) } : {}),
+  ...(d.instagram ? { sameAs: [instagramHref(d.instagram)] } : {}),
+};
+---
+
+<BaseLayout title={`${d.nombre} · ${SITIO.nombre}`} description={d.descripcion}>
+  <article class="ficha li-container">
+    <nav class="miga" aria-label="Ruta">
+      <a href="/">Catálogo</a>
+      <span aria-hidden="true">›</span>
+      <span>{d.nombre}</span>
+    </nav>
+
+    <div class="cabecera">
+      <Image
+        class="foto"
+        src={d.foto}
+        alt={`Foto de ${d.nombre}`}
+        width={ancho}
+        height={Math.round(ancho / 2)}
+      />
+
+      <div class="intro">
+        <p class="li-eyebrow">{d.categoria}</p>
+        <h1>{d.nombre}</h1>
+        <p class="familia">{d.familia}</p>
+        <p class="descripcion">{d.descripcion}</p>
+        <a class="li-btn" href={telHref(d.telefono)}>Llamar</a>
+      </div>
+    </div>
+
+    <h2 class="titulo-datos">Datos de contacto</h2>
+    <dl class="datos">
+      <div>
+        <dt>Teléfono</dt>
+        <dd><a href={telHref(d.telefono)}>{d.telefono}</a></dd>
+      </div>
+      <div>
+        <dt>Dirección</dt>
+        <dd>{d.direccion}</dd>
+      </div>
+      {
+        d.web && (
+          <div>
+            <dt>Página web</dt>
+            <dd>
+              <a href={webHref(d.web)} target="_blank" rel="noopener noreferrer">
+                {d.web} <span aria-hidden="true">↗</span>
+              </a>
+            </dd>
+          </div>
+        )
+      }
+      {
+        d.instagram && (
+          <div>
+            <dt>Instagram</dt>
+            <dd>
+              <a href={instagramHref(d.instagram)} target="_blank" rel="noopener noreferrer">
+                {d.instagram} <span aria-hidden="true">↗</span>
+              </a>
+            </dd>
+          </div>
+        )
+      }
+      {
+        d.facebook && (
+          <div>
+            <dt>Facebook</dt>
+            <dd>{d.facebook}</dd>
+          </div>
+        )
+      }
+    </dl>
+
+    <p class="volver"><a href="/#catalogo">← Volver al catálogo</a></p>
+  </article>
+
+  <CtaInscribe />
+</BaseLayout>
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+<style>
+  .ficha {
+    padding-block: var(--space-12) var(--space-20);
+  }
+  .miga {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-8);
+  }
+
+  .cabecera {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-10);
+    align-items: start;
+  }
+  .foto {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md);
+  }
+  .intro :global(.li-eyebrow) {
+    display: block;
+    margin: 0 0 var(--space-3);
+  }
+  h1 {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-2xl);
+    letter-spacing: 0;
+    color: var(--text-heading);
+    line-height: var(--leading-snug);
+    margin: 0 0 var(--space-2);
+  }
+  .familia {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .descripcion {
+    margin: 0 0 var(--space-6);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+  }
+
+  .titulo-datos {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: var(--space-16) 0 var(--space-5);
+  }
+  .datos {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    max-width: 640px;
+  }
+  .datos div {
+    display: flex;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .datos dt {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    min-width: 120px;
+    flex-shrink: 0;
+  }
+  .datos dd {
+    margin: 0;
+  }
+
+  .volver {
+    margin: var(--space-12) 0 0;
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-sm);
+  }
+
+  @media (max-width: 860px) {
+    .cabecera {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+  @media (max-width: 480px) {
+    .datos div {
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+  }
+</style>

@@ -1,0 +1,10 @@
+:root{
+--duration-fast:120ms;
+--duration-base:200ms;
+--duration-slow:360ms;
+--ease-standard:cubic-bezier(.2,.6,.2,1);
+--ease-out:cubic-bezier(0,.6,.3,1);
+--ease-in-out:cubic-bezier(.6,0,.3,1);
+--motion-lift:translateY(-2px);
+--motion-press:scale(.98);
+}

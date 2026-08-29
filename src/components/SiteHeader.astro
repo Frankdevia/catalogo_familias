@@ -1,0 +1,142 @@
+---
+import { SITIO } from '../data/sitio';
+
+/**
+ * En la portada los enlaces de sección son anclas puras: no recargan la página
+ * y el scroll sale suave. Desde una ficha tienen que llevar a "/" primero.
+ */
+const enPortada = Astro.url.pathname === '/';
+const seccion = (id: string) => (enPortada ? `#${id}` : `/#${id}`);
+
+const enlaces = [
+  { href: seccion('catalogo'), texto: 'Catálogo' },
+  { href: seccion('apoyar'), texto: 'Cómo apoyar' },
+  { href: seccion('contacto'), texto: 'Contacto' },
+];
+---
+
+<header>
+  <div class="barra li-container">
+    <a class="marca" href="/">
+      <img
+        src="/assets/logo-horizontal.svg"
+        alt={SITIO.organizacion}
+        width="80"
+        height="46"
+      />
+      <span class="lema" aria-hidden="true">we love it!</span>
+    </a>
+
+    <nav aria-label="Principal">
+      <ul>
+        {
+          enlaces.map((e) => (
+            <li>
+              <a href={e.href}>{e.texto}</a>
+            </li>
+          ))
+        }
+        <li>
+          <a class="cta" href={SITIO.signupUrl}>Inscribe tu negocio</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .barra {
+    padding-block: var(--space-3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .marca:hover {
+    text-decoration: none;
+  }
+  .marca img {
+    height: 46px;
+    width: auto;
+    display: block;
+  }
+  .lema {
+    font-family: var(--font-script);
+    font-size: var(--text-lg);
+    color: var(--li-red);
+    white-space: nowrap;
+  }
+  nav ul {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--text-heading);
+  }
+  nav a:hover {
+    color: var(--li-red);
+  }
+  .cta {
+    background: var(--li-red);
+    color: var(--li-white);
+    padding: 11px 22px;
+    border-radius: var(--radius-control);
+    transition: background var(--duration-fast) var(--ease-standard);
+  }
+  .cta:hover {
+    background: var(--li-red-700);
+    color: var(--li-white);
+    text-decoration: none;
+  }
+
+  /* El menú horizontal no cabe en móvil: se apila y el lema se oculta. */
+  @media (max-width: 860px) {
+    .barra {
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+    .lema {
+      display: none;
+    }
+    nav ul {
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+  }
+  @media (max-width: 520px) {
+    nav ul {
+      width: 100%;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-size: var(--text-3xs);
+    }
+    .cta {
+      padding: 9px 14px;
+    }
+  }
+</style>

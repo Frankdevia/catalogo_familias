@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITIO } from '../data/sitio';
+---
+
+<BaseLayout
+  title={`Página no encontrada · ${SITIO.nombre}`}
+  description="La página que buscas no existe o cambió de dirección."
+>
+  <section class="li-container">
+    <p class="li-eyebrow">Error 404</p>
+    <h1>No encontramos esta página</h1>
+    <p>
+      Es posible que el enlace esté roto o que el negocio ya no esté en el catálogo.
+    </p>
+    <a class="li-btn" href="/">Ir al catálogo</a>
+  </section>
+</BaseLayout>
+
+<style>
+  section {
+    padding-block: var(--space-24);
+    text-align: center;
+  }
+  .li-eyebrow {
+    margin: 0 0 var(--space-3);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    margin: 0 0 var(--space-4);
+  }
+  p {
+    margin: 0 auto var(--space-8);
+    max-width: 48ch;
+  }
+</style>

@@ -1,0 +1,68 @@
+:root{
+/* --- Brand palette (Manual de Marca, p.10) --- */
+--li-red:#960E0B;            /* Pantone 2350 C — primary */
+--li-navy:#232D75;           /* Pantone 3591 C */
+--li-sky:#6EB6E6;            /* Pantone 292 C */
+--li-yellow:#FCCB01;         /* Pantone 116 C */
+--li-charcoal:#444242;       /* Pantone 446 C */
+--li-gray:#939297;           /* Cool Gray 7 C */
+--li-gray-100:#E3E3E3;       /* Pantone 663 C */
+--li-white:#FFFFFF;
+/* Logo ink: the artwork in the manual is drawn in this red, slightly warmer
+   than the palette red. Use ONLY inside logo/crest artwork, never for UI. */
+--li-logo-red:#AE1A27;
+/* Tints derived from the palette (oklch, same hue as the source token) */
+--li-red-700:oklch(from var(--li-red) calc(l - 0.06) c h);
+--li-red-300:oklch(from var(--li-red) calc(l + 0.30) calc(c * 0.55) h);
+--li-red-50:oklch(from var(--li-red) 0.96 calc(c * 0.10) h);
+--li-navy-700:oklch(from var(--li-navy) calc(l - 0.07) c h);
+--li-navy-50:oklch(from var(--li-navy) 0.96 calc(c * 0.12) h);
+--li-sky-50:oklch(from var(--li-sky) 0.97 calc(c * 0.25) h);
+--li-yellow-50:oklch(from var(--li-yellow) 0.96 calc(c * 0.25) h);
+--li-gray-50:#F5F5F5;
+--li-gray-200:#CFCFD1;
+--li-gray-600:#6B6A6E;
+/* --- Core value colours (Manual de Marca, p.3) ---
+   Leadership=red, Citizenship=blue, Caring=yellow, Integrity=dark blue,
+   Personal Best=green. The manual names green but gives no hex; the value
+   below is derived, NOT from the manual. Confirm with the brand team. */
+--li-value-leadership:var(--li-red);
+--li-value-citizenship:var(--li-sky);
+--li-value-caring:var(--li-yellow);
+--li-value-integrity:var(--li-navy);
+--li-value-personal-best:#2E8B57;
+
+/* --- Semantic aliases --- */
+--brand-primary:var(--li-red);
+--brand-primary-hover:var(--li-red-700);
+--brand-secondary:var(--li-navy);
+--brand-accent:var(--li-yellow);
+
+--text-heading:var(--li-navy);
+--text-body:var(--li-charcoal);
+--text-muted:var(--li-gray);
+--text-on-brand:var(--li-white);
+--text-link:var(--li-red);
+--text-link-hover:var(--li-red-700);
+
+--surface-page:var(--li-white);
+--surface-card:var(--li-white);
+--surface-subtle:var(--li-gray-50);
+--surface-muted:var(--li-gray-100);
+--surface-brand:var(--li-red);
+--surface-brand-soft:var(--li-red-50);
+--surface-navy:var(--li-navy);
+--surface-navy-soft:var(--li-navy-50);
+--surface-sky-soft:var(--li-sky-50);
+--surface-accent:var(--li-yellow);
+
+--border-subtle:var(--li-gray-100);
+--border-strong:var(--li-gray-200);
+--border-brand:var(--li-red);
+--focus-ring:var(--li-navy);
+
+--state-success:#2E8B57;
+--state-warning:var(--li-yellow);
+--state-danger:var(--li-red);
+--state-info:var(--li-navy);
+}

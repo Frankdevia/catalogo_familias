@@ -1,0 +1,27 @@
+{
+  "name": "catalogo-familias",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "deploy": "test -n \"$DESTINO_SSH\" || { echo \"Falta DESTINO_SSH, p. ej. DESTINO_SSH=usuario@servidor:/var/www/catalogo npm run deploy\"; exit 1; } && npm run build && rsync -avz --delete dist/ \"$DESTINO_SSH\""
+  },
+  "dependencies": {
+    "astro": "^5.6.1",
+    "@astrojs/sitemap": "^3.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.8.3"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.25.12": true,
+    "sharp@0.34.5": true,
+    "fsevents@2.3.3": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "nombre": "Café de Origen Cerritos",
+  "categoria": "Gastronomía",
+  "descripcion": "Café especial cultivado en finca familiar. Venta por libra y suscripción mensual.",
+  "familia": "Familia — grado 1B",
+  "foto": "../../assets/photos/biz-cafe.webp",
+  "telefono": "320 987 6543",
+  "direccion": "Vereda Cerritos, Km 7, Pereira",
+  "web": "cafecerritos.co",
+  "instagram": "@cafe.cerritos",
+  "facebook": "Café de Origen Cerritos",
+  "orden": 5
+}

@@ -1,0 +1,99 @@
+---
+import { Image } from 'astro:assets';
+import { SITIO } from '../data/sitio';
+import fondo from '../assets/photos/cta-tecnologia.webp';
+---
+
+<section class="cta">
+  <Image
+    class="fondo"
+    src={fondo}
+    alt=""
+    aria-hidden="true"
+    widths={[768, 1280, 1920]}
+    sizes="100vw"
+    loading="lazy"
+  />
+  <div class="velo" aria-hidden="true"></div>
+
+  <div class="contenido li-container">
+    <p class="script">¿tu familia tiene un negocio?</p>
+    <h2>Inscríbelo en el catálogo</h2>
+    <p class="entrada">
+      Llega a toda la comunidad del Liceo Inglés. La inscripción es gratuita para
+      las familias del colegio.
+    </p>
+    <a class="li-btn" href={SITIO.signupUrl}>Inscribe tu negocio</a>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+  }
+  .fondo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .velo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(35, 45, 117, 0.9) 0%,
+      rgba(35, 45, 117, 0.5) 60%,
+      rgba(35, 45, 117, 0.1) 100%
+    );
+  }
+  .contenido {
+    position: relative;
+    padding-block: 72px;
+  }
+  .contenido > * {
+    max-width: 560px;
+  }
+  .script {
+    font-family: var(--font-script);
+    font-size: var(--text-2xl);
+    color: var(--li-yellow);
+    margin: 0 0 var(--space-2);
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--li-white);
+    margin: 0 0 14px;
+  }
+  .entrada {
+    margin: 0 0 26px;
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--li-white);
+  }
+  .cta :global(:focus-visible) {
+    outline-color: var(--li-yellow);
+  }
+
+  @media (max-width: 760px) {
+    .contenido {
+    position: relative;
+      padding-block: var(--space-12);
+    }
+    .velo {
+      background: linear-gradient(
+        180deg,
+        rgba(35, 45, 117, 0.84) 0%,
+        rgba(35, 45, 117, 0.9) 100%
+      );
+    }
+  }
+</style>

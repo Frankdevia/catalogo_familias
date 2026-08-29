@@ -1,0 +1,158 @@
+---
+/**
+ * Diálogo único, vacío en el HTML y rellenado por `catalogo.ts` con los datos
+ * del negocio seleccionado. Se usa <dialog> nativo para heredar gratis el
+ * atrapado de foco, el cierre con Esc y el ::backdrop.
+ *
+ * Sin JavaScript nunca se abre: las tarjetas enlazan a la ficha /negocio/<slug>/
+ * y el script solo intercepta el clic. */
+---
+
+<dialog id="modal-negocio" aria-labelledby="modal-nombre">
+  <div class="cabecera">
+    <img id="modal-foto" alt="" width="1040" height="400" />
+    <button type="button" id="modal-cerrar" class="cerrar" aria-label="Cerrar">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+
+  <div class="cuerpo">
+    <p class="meta"><span id="modal-categoria"></span> · <span id="modal-familia"></span></p>
+    <h2 id="modal-nombre"></h2>
+    <p id="modal-descripcion" class="descripcion"></p>
+
+    <dl id="modal-datos" class="datos"></dl>
+
+    <div class="acciones">
+      <a id="modal-llamar" class="li-btn" href="#">Llamar</a>
+      <a id="modal-ficha" class="li-btn li-btn--outline" href="#">Ver ficha</a>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  dialog {
+    padding: 0;
+    border: none;
+    background: var(--surface-card);
+    border-radius: var(--radius-card);
+    max-width: 520px;
+    width: calc(100% - 48px);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(35, 45, 117, 0.35);
+    color: var(--text-body);
+  }
+  dialog::backdrop {
+    background: rgba(35, 45, 117, 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  .cabecera {
+    position: relative;
+    height: 200px;
+    background: var(--surface-subtle);
+  }
+  .cabecera img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cerrar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-pill);
+    border: none;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--li-navy);
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cerrar:hover {
+    background: var(--li-white);
+  }
+
+  .cuerpo {
+    padding: 28px;
+  }
+  .meta {
+    margin: 0 0 6px;
+    font-family: var(--font-subhead);
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--li-red);
+    font-weight: var(--weight-semibold);
+  }
+  h2 {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-xl);
+    color: var(--text-heading);
+    letter-spacing: 0;
+    margin: 0 0 var(--space-2);
+  }
+  .descripcion {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--text-body);
+  }
+
+  .datos {
+    display: grid;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-body);
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 18px;
+    margin: 0;
+  }
+  /* Cada fila es un par <dt>/<du> envuelto en un <div> por el script. */
+  .datos :global(div) {
+    display: flex;
+    gap: var(--space-3);
+  }
+  .datos :global(dt) {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    min-width: 92px;
+    flex-shrink: 0;
+  }
+  .datos :global(dd) {
+    margin: 0;
+  }
+
+  .acciones {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+  .acciones a {
+    flex: 1;
+    text-align: center;
+    padding: 12px 20px;
+  }
+
+  @media (max-width: 420px) {
+    .cuerpo {
+      padding: var(--space-5);
+    }
+    .acciones {
+      flex-direction: column;
+    }
+    .datos :global(div) {
+      flex-direction: column;
+      gap: 2px;
+    }
+  }
+</style>

@@ -1,0 +1,39 @@
+:root{
+/* Families — see readme.md for the licensed originals each stands in for */
+--font-display:"Syncopate","Arial Black",sans-serif;      /* titles, H1 */
+--font-subhead:"Poppins","Helvetica Neue",sans-serif;      /* subtitles, short text boxes */
+--font-body:"Nunito","Segoe UI",sans-serif;                /* paragraphs, UI */
+--font-script:"Caveat Brush","Segoe Script",cursive;       /* short emphatic phrases */
+
+--text-3xs:11px;
+--text-2xs:12px;
+--text-xs:13px;
+--text-sm:14px;
+--text-base:16px;
+--text-md:18px;
+--text-lg:20px;
+--text-xl:24px;
+--text-2xl:30px;
+--text-3xl:38px;
+--text-4xl:48px;
+--text-5xl:64px;
+--text-6xl:80px;
+
+--leading-tight:1.1;
+--leading-snug:1.25;
+--leading-normal:1.5;
+--leading-relaxed:1.7;
+
+--weight-light:300;
+--weight-regular:400;
+--weight-medium:500;
+--weight-semibold:600;
+--weight-bold:700;
+--weight-black:800;
+
+/* Syncopate is very wide; it is set with extra tracking only in small sizes */
+--tracking-display:0.02em;
+--tracking-eyebrow:0.18em;
+--tracking-caps:0.08em;
+--tracking-body:0;
+}

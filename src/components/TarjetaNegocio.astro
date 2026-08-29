@@ -1,0 +1,133 @@
+---
+import { Image } from 'astro:assets';
+import { anchoSeguro, type Negocio } from '../data/negocio';
+
+interface Props {
+  negocio: Negocio;
+}
+
+const { negocio } = Astro.props;
+const { nombre, categoria, descripcion, familia, foto } = negocio.data;
+const href = `/negocio/${negocio.id}/`;
+
+// 2x del recuadro de 400x170 de la tarjeta (ratio 2.35:1).
+const ancho = anchoSeguro(foto, 800);
+---
+
+<article class="tarjeta" data-negocio data-categoria={categoria}>
+  <a class="foto" href={href} data-abrir={negocio.id}>
+    <Image
+      src={foto}
+      alt={`Foto de ${nombre}`}
+      width={ancho}
+      height={Math.round(ancho / 2.35)}
+      loading="lazy"
+    />
+  </a>
+
+  <div class="cuerpo">
+    <p class="categoria">{categoria}</p>
+    <h3 class="nombre">{nombre}</h3>
+    <p class="descripcion">{descripcion}</p>
+
+    <div class="pie">
+      <span class="familia">{familia}</span>
+      <a class="contactar" href={href} data-abrir={negocio.id}>
+        Contactar <span aria-hidden="true">↗</span>
+        <span class="li-sr-only">a {nombre}</span>
+      </a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .tarjeta {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-md);
+    transition:
+      transform var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .tarjeta:hover {
+    transform: var(--motion-lift);
+    box-shadow: var(--shadow-lg);
+  }
+  /* El script de filtrado alterna este atributo. */
+  .tarjeta[hidden] {
+    display: none;
+  }
+
+  .foto {
+    display: block;
+    height: 170px;
+    background: var(--surface-subtle);
+    overflow: hidden;
+  }
+  .foto :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cuerpo {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1;
+  }
+  .categoria {
+    margin: 0;
+    font-family: var(--font-subhead);
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--li-red);
+    font-weight: var(--weight-semibold);
+  }
+  .nombre {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-lg);
+    color: var(--text-heading);
+    letter-spacing: 0;
+    line-height: var(--leading-snug);
+    margin: 0;
+  }
+  .descripcion {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    flex: 1;
+  }
+  .pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: 6px;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .familia {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .contactar {
+    text-decoration: none;
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-link);
+    white-space: nowrap;
+  }
+</style>

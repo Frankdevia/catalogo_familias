@@ -1,0 +1,74 @@
+---
+import { CATEGORIAS, TODOS } from '../data/categorias';
+import type { Negocio } from '../data/negocio';
+
+interface Props {
+  negocios: Negocio[];
+}
+
+const { negocios } = Astro.props;
+
+const chips = [
+  { etiqueta: TODOS, cuenta: negocios.length },
+  ...CATEGORIAS.map((c) => ({
+    etiqueta: c,
+    cuenta: negocios.filter((n) => n.data.categoria === c).length,
+  })),
+  // Una categoría sin negocios no se muestra; "Todos" siempre sí.
+].filter((c) => c.etiqueta === TODOS || c.cuenta > 0);
+---
+
+<div class="filtros" role="group" aria-label="Filtrar por categoría">
+  {
+    chips.map((c, i) => (
+      <button
+        type="button"
+        class="chip"
+        data-filtro={c.etiqueta}
+        aria-pressed={i === 0 ? 'true' : 'false'}
+      >
+        {c.etiqueta} <span class="cuenta">{c.cuenta}</span>
+      </button>
+    ))
+  }
+</div>
+
+<style>
+  .filtros {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    padding: 9px 16px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    border: 1px solid var(--li-gray-200);
+    background: var(--li-white);
+    color: var(--li-navy);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition:
+      background var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+  .chip:hover {
+    border-color: var(--li-navy);
+  }
+  /* El chip activo se marca con aria-pressed, así el estado visual
+     y el estado accesible no pueden desincronizarse. */
+  .chip[aria-pressed='true'] {
+    background: var(--li-navy);
+    border-color: var(--li-navy);
+    color: var(--li-white);
+  }
+  .cuenta {
+    opacity: 0.65;
+    font-weight: var(--weight-regular);
+  }
+</style>
