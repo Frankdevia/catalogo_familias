@@ -57,34 +57,20 @@ publica algo.
 Es la copia para revisar. Una vez publicado el negocio, la foto definitiva vive
 en este repositorio y esta carpeta queda solo como respaldo de lo pendiente.
 
-## 3. Token de GitHub — pendiente
+## 3. Token de GitHub — ya conectado
 
-Es lo único que no puede crear nadie más que tú, porque da permiso de escritura
-sobre el repositorio.
+**Hecho.** La credencial `GitHub catálogo FLI` (Header Auth) está asignada a los
+tres nodos HTTP Request del workflow de publicación: *¿Ya existe ese slug?*,
+*Subir foto al repo* y *Subir ficha al repo*.
 
-1. Entra a <https://github.com/settings/personal-access-tokens/new>
-   (o: foto de perfil → *Settings* → *Developer settings* → *Personal access
-   tokens* → *Fine-grained tokens* → *Generate new token*).
-2. **Token name:** `n8n catálogo FLI`.
-3. **Expiration:** ponle fecha y **anótala en el calendario**. Cuando expire, la
-   publicación deja de funcionar y el síntoma es confuso: las solicitudes se
-   aprueban en el Sheet pero nunca aparecen en el catálogo.
-4. **Repository access:** *Only select repositories* → `catalogo_familias`.
-   No uses *All repositories*.
-5. **Permissions** → *Repository permissions* → **Contents: Read and write**.
-   Ningún permiso más: con eso basta para crear los dos archivos.
-6. *Generate token* y copia el `github_pat_...`. **GitHub solo lo muestra una
-   vez.**
+Dos cosas que conviene recordar sobre ese token:
 
-Luego, en n8n → *Credentials* → *Create credential* → **Header Auth**:
-
-| Campo | Valor |
-|---|---|
-| Name | `Authorization` |
-| Value | `Bearer github_pat_...` (con `Bearer ` delante) |
-
-Y asígnala a los tres nodos HTTP Request del workflow de publicación:
-*¿Ya existe ese slug?*, *Subir foto al repo* y *Subir ficha al repo*.
+- **Caduca.** Cuando lo haga, el síntoma es confuso: las solicitudes se aprueban
+  en el Sheet pero nunca aparecen en el catálogo, y nadie recibe un error.
+  Ten la fecha en el calendario.
+- **El repositorio es público**, así que el nodo que solo *lee* funcionaría
+  aunque el token estuviera mal escrito. El primero que delata un problema de
+  autenticación es *Subir foto al repo*, con un `401` o `403`.
 
 ## 4. Marcadores — ya reemplazados
 
