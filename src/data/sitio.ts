@@ -5,6 +5,8 @@
 export const SITIO = {
   nombre: 'Apoye a Nuestras Familias',
   organizacion: 'Fundación Liceo Inglés',
+  /** Lema que acompaña al logo en la cabecera. */
+  lema: 'Still we rise!',
   descripcion:
     'Catálogo de negocios de las familias de la Fundación Liceo Inglés. Cuando les compras, fortaleces la economía de la familia FLI.',
   /** Formulario de postulación, en el propio sitio. */

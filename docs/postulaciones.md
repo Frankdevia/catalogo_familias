@@ -23,10 +23,11 @@ push a main → EasyPanel redespliega → el negocio aparece en el catálogo
 Los dos workflows están creados y **desactivados**. Faltan cinco cosas que solo
 se pueden hacer desde las consolas.
 
-## 1. Google Sheet "Solicitudes negocios"
+## 1. Google Sheet "Solicitudes negocios" — ya creado
 
-Crea el documento con una pestaña llamada exactamente `Solicitudes` y esta
-primera fila, en este orden:
+**Hecho.** El documento existe en tu Drive con las 20 columnas en su orden:
+
+<https://docs.google.com/spreadsheets/d/1fw4W8RB55_92vxzCbzTSoolqLpK7B7bIyoV5dfcktFE/edit>
 
 ```
 marca_temporal · estado · codigo_familia · grado · acudiente_nombre ·
@@ -35,11 +36,14 @@ categoria · descripcion · negocio_telefono · direccion · web · instagram ·
 facebook · foto_drive_url · notas_revision · slug · publicado_en
 ```
 
-Los nombres tienen que coincidir letra por letra: el workflow mapea las columnas
-por nombre.
+Los dos workflows ya apuntan a él. La pestaña se referencia por su **gid
+(288760056)**, no por su nombre, así que puedes renombrarla —Google la dejó como
+`Untitled`— sin romper nada. Lo que sí importa son los nombres de las columnas:
+el workflow mapea por nombre, letra por letra.
 
-En la columna `estado`, pon validación de datos con `pendiente`, `aprobado` y
-`rechazado`. Es la única palanca que publica algo.
+Queda una cosa por hacer a mano: en la columna `estado`, añadir validación de
+datos con `pendiente`, `aprobado` y `rechazado`. Es la única palanca que
+publica algo.
 
 > Las siete primeras columnas son datos internos. **Nunca salen de este Sheet.**
 > Compártelo solo con quien revisa.
@@ -75,14 +79,11 @@ Busca `CAMBIAR` en los dos workflows. Son estos:
 | Responder familia no encontrada | El mismo dominio |
 | Responder OK | El mismo dominio |
 | Subir foto a Drive | El id de la carpeta del paso 2 |
-| Guardar solicitud | El id del Sheet del paso 1 |
 
 **FLI · catálogo — publicar aprobados**
 
 | Nodo | Qué poner |
 |---|---|
-| Leer aprobados | El id del Sheet |
-| Marcar como publicado | El id del Sheet |
 | Avisar al acudiente | El dominio, en el enlace del correo |
 
 El dominio del `Access-Control-Allow-Origin` no es un detalle: si no coincide
