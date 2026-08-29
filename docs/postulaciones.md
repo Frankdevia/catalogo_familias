@@ -83,32 +83,30 @@ Va sin barra final a propósito: el navegador manda el `Origin` sin ella y la
 comparación es exacta. Si algún día el catálogo pasa a un dominio propio del
 colegio, hay que cambiarlo en esos cuatro sitios y en `SITE_URL`.
 
-## 5. Conectar el formulario con el webhook
+## 5. Configuración del despliegue — resuelta
 
-`SITE_URL` ya **no hace falta**: el dominio real es el valor por defecto en
-`astro.config.mjs`, así que el sitemap y los `canonical` salen bien aunque no se
-configure nada. La variable sigue funcionando como anulación si algún día el
-catálogo pasa a un dominio propio del colegio.
+No hace falta configurar nada en EasyPanel. El dominio del catálogo y la URL del
+webhook son **valores por defecto en el código**:
 
-Queda una sola variable, `N8N_REGISTRO_URL`. Sin ella, `/registrar` se
-construye con el formulario deshabilitado y el correo de contacto a la vista.
+| Dónde | Qué |
+|---|---|
+| `astro.config.mjs` | `SITE_URL` → dominio del catálogo |
+| `src/pages/registrar.astro` | `N8N_REGISTRO_URL` → webhook de recepción |
 
-En EasyPanel: ficha del servicio → pestaña **Environment** → añadir la línea
+Las variables de entorno siguen funcionando como anulación, pero **no sirven
+desde EasyPanel**: sus "Variables de entorno" son del contenedor en ejecución,
+no del `docker build`. Este sitio es estático y se hornea al construir, así que
+esos valores nunca llegan. Si alguna vez hace falta cambiarlos por despliegue,
+hay que pasarlos como *build args* al Dockerfile, no como variables de entorno.
 
-```
-N8N_REGISTRO_URL=https://n8n-n8n.26zlav.easypanel.host/webhook/fli-catalogo-registro-8b31d7e2-4a05-4f19-9c26-1de8a7b34f90
-```
+La URL del webhook no es un secreto: acaba en el JavaScript de `/registrar` de
+todos modos. Lo que protege el endpoint es la validación del código de familia,
+el campo trampa y la aprobación humana.
 
-→ guardar → **Deploy**.
+### Si cambia la URL del webhook
 
-La URL solo responde cuando el workflow de recepción está **activo**. Y ojo: la
-de *test* (`/webhook-test/`) solo funciona mientras tengas el editor de n8n
-abierto escuchando; la que va aquí es la de producción, con `/webhook/`.
-
-Para comprobar que quedó, abre `/registrar` y mira el HTML: si el formulario
-está conectado, el `<form>` trae un atributo `data-endpoint` con esa URL. Si en
-cambio aparece "El formulario todavía no está conectado", la variable no llegó
-al build.
+Pasa si se borra y recrea el workflow de recepción. Hay que actualizar el valor
+por defecto en `src/pages/registrar.astro` y volver a desplegar.
 
 ## Probar antes de anunciarlo
 
