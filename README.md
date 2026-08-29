@@ -172,6 +172,9 @@ Detalles que importan al tocar esta parte:
   n8n tiene que repetir todas las comprobaciones: cualquiera puede enviar un
   POST al webhook sin pasar por esta página.
 
+La puesta en marcha de n8n, el Sheet y el token de GitHub está en
+[`docs/postulaciones.md`](docs/postulaciones.md).
+
 ### Qué se publica y qué no
 
 El repositorio es público. El formulario recoge dos grupos de datos y **solo uno
