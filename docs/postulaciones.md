@@ -134,6 +134,31 @@ Por eso ahora el workflow distingue los dos casos:
 Si algún día cambia la base de datos oficial del colegio, hay que actualizar el
 documento y la pestaña en ese nodo.
 
+## Qué credencial usa cada nodo de Google
+
+No todas usan la misma, y no es un descuido:
+
+| Nodo | Credencial | Por qué |
+|---|---|---|
+| Buscar código de familia | `ASISTENTE TECNOLOGIA` | Es la que tiene acceso a la Base de Datos Oficial del colegio |
+| Guardar solicitud | `Google Sheets account 2` | Es la cuenta con la que está compartido el Sheet de solicitudes |
+| Leer aprobados / Marcar como publicado | `Google Sheets account 2` | Mismo Sheet |
+| Subir foto a Drive | `Google Drive account` | Dueña de la carpeta de fotos |
+
+El Sheet de solicitudes lo creé con la cuenta `frodriguez@` y está compartido
+con `aprendizsistemas2@`, que es la cuenta detrás de `Google Sheets account 2`.
+La credencial `ASISTENTE TECNOLOGIA` **no** tiene acceso a ese documento: si se
+cambia el nodo para que la use, aparece un `403 PERMISSION_DENIED`.
+
+Si algún día quieres unificarlo, la vía limpia es compartir el Sheet de
+solicitudes con la cuenta de `ASISTENTE TECNOLOGIA` y cambiar los tres nodos.
+Mientras tanto, funciona.
+
+> La credencial de Google Drive caducó una vez y hubo que reconectarla. Si el
+> cliente de OAuth del colegio está en modo *Testing* en Google Cloud, los
+> refresh tokens caducan cada 7 días y volverá a pasar. El síntoma es
+> `The credential ... needs to be reconnected` en las ejecuciones.
+
 ## Probar antes de anunciarlo
 
 1. Enviar el formulario con un código de familia inventado → tiene que aparecer
