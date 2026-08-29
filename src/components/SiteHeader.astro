@@ -96,9 +96,15 @@ const enlaces = [
   }
   nav a {
     text-decoration: none;
+  }
+  /* El botón rojo queda fuera: lleva su propio color.
+     Astro añade el atributo de scope a CADA compuesto del selector, así que
+     "nav a" pesa (0,2,2) y ".cta" solo (0,2,1). Sin este :not(), el azul de
+     los enlaces de sección le gana al blanco del botón. */
+  nav a:not(.cta) {
     color: var(--text-heading);
   }
-  nav a:hover {
+  nav a:not(.cta):hover {
     color: var(--li-red);
   }
   .cta {
