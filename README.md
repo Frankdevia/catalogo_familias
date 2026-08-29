@@ -97,26 +97,52 @@ token, o la próxima sincronización del design system borrará el cambio.
 
 ## Despliegue
 
-Genera archivos estáticos: sirve `dist/` con cualquier servidor web.
+El sitio es estático. El repo trae un `Dockerfile` multi-etapa que lo construye
+y lo sirve con nginx — probado localmente: rutas, redirecciones, 404 y cabeceras
+de caché.
+
+### EasyPanel (desde el repositorio)
+
+1. Crea un servicio **App** y conéctalo a `Frankdevia/catalogo_familias`, rama `main`.
+2. En **Build**, elige **Dockerfile** (no Nixpacks: Nixpacks buscaría un
+   `npm start` que no existe, porque aquí no hay servidor de aplicación).
+3. Puerto expuesto: **80**.
+4. En **Build Args** (no en variables de entorno de runtime: el dominio se
+   incrusta durante el build):
+
+   | Arg | Valor |
+   |---|---|
+   | `SITE_URL` | `https://catalogo.liceoingles.edu.co` — el dominio real |
+   | `BASE_PATH` | Solo si cuelga de un subdirectorio, p. ej. `/apoye-familias` |
+
+5. Añade el dominio en **Domains** y activa el certificado.
+
+`SITE_URL` no es cosmético: de ahí salen el `sitemap.xml`, las URL canónicas y
+las etiquetas Open Graph. Si se queda en el valor por defecto, Google indexa
+direcciones equivocadas y los enlaces compartidos en WhatsApp apuntan mal.
+
+Cada `git push` a `main` dispara un despliegue nuevo. Añadir un negocio es
+commitear un JSON y una foto.
+
+### Comprobar la imagen antes de subirla
 
 ```bash
-npm run build
+docker build --build-arg SITE_URL=https://catalogo.liceoingles.edu.co -t catalogo .
+docker run --rm -p 8099:80 catalogo   # http://localhost:8099
+```
+
+### Alternativa: servidor propio por rsync
+
+Si en vez de EasyPanel se sirve desde un directorio del servidor del colegio:
+
+```bash
+SITE_URL=https://catalogo.liceoingles.edu.co \
 DESTINO_SSH=usuario@servidor:/var/www/catalogo npm run deploy
 ```
 
 `npm run deploy` hace `rsync --delete`, es decir **borra en el servidor lo que no
 esté en `dist/`**. Apunta a un directorio dedicado al catálogo, nunca a la raíz
 de otro sitio.
-
-### Antes del primer despliegue
-
-En `astro.config.mjs`:
-
-1. `site` está como `https://liceoingles.edu.co`. Ponlo con el dominio real: de
-   ahí salen el sitemap, las URL canónicas y las etiquetas Open Graph.
-2. Si el catálogo vive en un subdirectorio (`/apoye-familias/`), añade
-   `base: '/apoye-familias'`. Sin eso, todos los enlaces y las imágenes apuntan
-   a la raíz y dan 404.
 
 ## Notas sobre los recursos importados
 

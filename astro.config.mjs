@@ -2,15 +2,21 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// TODO: reemplazar por el dominio real del colegio antes del primer deploy.
-// Si el sitio vive en un subdirectorio, añadir tambien `base: '/catalogo'`.
+// El dominio se pasa por entorno en el build (ver Dockerfile y README).
+// De `site` salen el sitemap, las URL canónicas y las etiquetas Open Graph.
+const site = process.env.SITE_URL ?? 'https://liceoingles.edu.co';
+
+// Solo si el catálogo cuelga de un subdirectorio, p. ej. "/apoye-familias".
+const base = process.env.BASE_PATH || undefined;
+
 export default defineConfig({
-  site: 'https://liceoingles.edu.co',
+  site,
+  ...(base ? { base } : {}),
   output: 'static',
   trailingSlash: 'ignore',
   integrations: [sitemap()],
   build: {
-    // El servidor propio sirve archivos planos: /negocio/panaderia.html
+    // El servidor sirve archivos planos: /negocio/<slug>/index.html
     format: 'directory',
   },
 });
