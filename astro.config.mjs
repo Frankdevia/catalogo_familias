@@ -29,7 +29,10 @@ export default defineConfig({
   ...(base ? { base } : {}),
   output: 'static',
   trailingSlash: 'ignore',
-  integrations: [sitemap()],
+  integrations: [
+    // /registrar es un formulario, no contenido del catálogo: fuera del sitemap.
+    sitemap({ filter: (pagina) => !pagina.includes('/registrar') }),
+  ],
   build: {
     // El servidor sirve archivos planos: /negocio/<slug>/index.html
     format: 'directory',

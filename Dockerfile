@@ -13,8 +13,13 @@ COPY . .
 # canónicas y las etiquetas Open Graph. Ver README > Despliegue.
 ARG SITE_URL
 ARG BASE_PATH
+# Webhook de n8n que recibe las postulaciones de negocios. Si no se pasa, la
+# página /registrar se construye con el formulario deshabilitado y el correo
+# de contacto a la vista, en vez de fallar al enviar.
+ARG N8N_REGISTRO_URL
 ENV SITE_URL=$SITE_URL
 ENV BASE_PATH=$BASE_PATH
+ENV N8N_REGISTRO_URL=$N8N_REGISTRO_URL
 
 RUN npm run build
 

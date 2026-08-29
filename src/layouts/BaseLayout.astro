@@ -9,9 +9,11 @@ interface Props {
   description?: string;
   /** Ruta de la imagen para compartir en redes. Absoluta se construye con Astro.site. */
   ogImage?: string;
+  /** Para páginas que no son contenido de catálogo, como el formulario. */
+  noindex?: boolean;
 }
 
-const { title, description = SITIO.descripcion, ogImage } = Astro.props;
+const { title, description = SITIO.descripcion, ogImage, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : undefined;
 ---
@@ -24,6 +26,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : undefined;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 

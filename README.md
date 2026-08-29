@@ -114,6 +114,7 @@ de caché.
    |---|---|
    | `SITE_URL` | `https://catalogo.liceoingles.edu.co` — el dominio real |
    | `BASE_PATH` | Solo si cuelga de un subdirectorio, p. ej. `/apoye-familias` |
+   | `N8N_REGISTRO_URL` | Webhook de n8n que recibe las postulaciones (ver *Postulación de negocios*) |
 
 5. Añade el dominio en **Domains** y activa el certificado.
 
@@ -143,6 +144,48 @@ DESTINO_SSH=usuario@servidor:/var/www/catalogo npm run deploy
 `npm run deploy` hace `rsync --delete`, es decir **borra en el servidor lo que no
 esté en `dist/`**. Apunta a un directorio dedicado al catálogo, nunca a la raíz
 de otro sitio.
+
+## Postulación de negocios
+
+`/registrar` es el formulario que llenan las familias. Es HTML y JavaScript
+estático: envía un `multipart/form-data` al webhook de n8n indicado en
+`N8N_REGISTRO_URL`. **El sitio sigue siendo estático**, no hay servidor de
+aplicación ni base de datos en este repo.
+
+Si `N8N_REGISTRO_URL` no se define, la página se construye igual pero con el
+formulario deshabilitado y el correo de contacto a la vista, en vez de fallar al
+enviar.
+
+Detalles que importan al tocar esta parte:
+
+- **La lista de categorías sale de `src/data/categorias.ts`**, la misma que
+  valida el catálogo. Por eso el formulario vive aquí y no en un Google Form:
+  así no se pueden desincronizar.
+- **La foto se comprime en el navegador** antes de enviarla (máx 1600 px, WebP).
+  Una foto de celular de 12 MB llega en ~200 KB. Sin esto, un envío con datos
+  móviles se cae por tiempo de espera.
+- **Los valores se normalizan antes de enviarse** con las funciones de
+  `src/data/registro.ts`: el teléfono pierde el `+57`, la web el `https://` y el
+  Instagram gana la arroba. Es exactamente lo que exige el esquema Zod de
+  `src/content.config.ts`, para que el JSON publicado valide a la primera.
+- **La validación del navegador es comodidad, no seguridad.** El workflow de
+  n8n tiene que repetir todas las comprobaciones: cualquiera puede enviar un
+  POST al webhook sin pasar por esta página.
+
+### Qué se publica y qué no
+
+El repositorio es público. El formulario recoge dos grupos de datos y **solo uno
+llega al repo**:
+
+| Se queda en el Google Sheet | Se publica en el catálogo |
+|---|---|
+| Código de familia | Nombre, categoría, descripción del negocio |
+| Nombre del acudiente | `familia`: `"Familia — grado 3B"`, sin apellido |
+| Teléfono y correo del acudiente | Teléfono **del negocio**, dirección, foto, redes |
+
+El workflow que publica arma el JSON campo por campo desde una lista blanca.
+Nunca pasa de largo el objeto que recibió: así un campo nuevo en el formulario
+no puede filtrarse solo a un repositorio público.
 
 ## Notas sobre los recursos importados
 

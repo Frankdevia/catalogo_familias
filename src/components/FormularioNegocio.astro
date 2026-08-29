@@ -1,0 +1,468 @@
+---
+import { CATEGORIAS } from '../data/categorias';
+import { SITIO } from '../data/sitio';
+import { LIMITES, PATRON_TELEFONO, FOTO, CAMPO_TRAMPA } from '../data/registro';
+
+interface Props {
+  /** URL del webhook de n8n. Vacía = el formulario se muestra deshabilitado. */
+  endpoint: string;
+}
+
+const { endpoint } = Astro.props;
+---
+
+<form id="form-negocio" data-endpoint={endpoint} novalidate>
+  {
+    !endpoint && (
+      <p class="aviso aviso--error">
+        El formulario todavía no está conectado. Escríbenos a{' '}
+        <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>.
+      </p>
+    )
+  }
+
+  <noscript>
+    <p class="aviso aviso--error">
+      Este formulario necesita JavaScript. Si no puedes activarlo, mándanos los
+      datos de tu negocio a{' '}
+      <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>.
+    </p>
+  </noscript>
+
+  <fieldset>
+    <legend>1. Verifica tu familia</legend>
+    <p class="ayuda-bloque">
+      Solo para confirmar que perteneces a la comunidad. <strong>Nada de esta
+      sección se publica</strong> en el catálogo.
+    </p>
+
+    <div class="campo">
+      <label for="codigo_familia">Código de familia</label>
+      <input
+        id="codigo_familia"
+        name="codigo_familia"
+        type="text"
+        required
+        maxlength={LIMITES.codigoFamilia.max}
+        autocomplete="off"
+        aria-describedby="ayuda-codigo"
+      />
+      <p id="ayuda-codigo" class="ayuda">
+        El mismo que usas en la plataforma del colegio.
+      </p>
+      <p class="error" data-error-de="codigo_familia" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="acudiente_nombre">Nombre del padre, madre o acudiente</label>
+      <input
+        id="acudiente_nombre"
+        name="acudiente_nombre"
+        type="text"
+        required
+        maxlength={LIMITES.acudienteNombre.max}
+        autocomplete="name"
+      />
+      <p class="error" data-error-de="acudiente_nombre" hidden></p>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="acudiente_telefono">Tu teléfono</label>
+        <input
+          id="acudiente_telefono"
+          name="acudiente_telefono"
+          type="tel"
+          required
+          pattern={PATRON_TELEFONO}
+          autocomplete="tel"
+          inputmode="tel"
+          aria-describedby="ayuda-tel-acudiente"
+        />
+        <p id="ayuda-tel-acudiente" class="ayuda">Para contactarte sobre tu solicitud.</p>
+        <p class="error" data-error-de="acudiente_telefono" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="acudiente_correo">Tu correo</label>
+        <input
+          id="acudiente_correo"
+          name="acudiente_correo"
+          type="email"
+          required
+          autocomplete="email"
+          aria-describedby="ayuda-correo"
+        />
+        <p id="ayuda-correo" class="ayuda">Te avisamos ahí cuando se publique.</p>
+        <p class="error" data-error-de="acudiente_correo" hidden></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>2. Datos de tu negocio</legend>
+    <p class="ayuda-bloque">Esto es lo que verá la comunidad en el catálogo.</p>
+
+    <div class="campo">
+      <label for="negocio_nombre">Nombre del negocio</label>
+      <input
+        id="negocio_nombre"
+        name="negocio_nombre"
+        type="text"
+        required
+        maxlength={LIMITES.negocioNombre.max}
+      />
+      <p class="error" data-error-de="negocio_nombre" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="categoria">Categoría</label>
+      <select id="categoria" name="categoria" required>
+        <option value="">Elige una…</option>
+        {CATEGORIAS.map((c) => <option value={c}>{c}</option>)}
+      </select>
+      <p class="error" data-error-de="categoria" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">¿Qué ofreces?</label>
+      <textarea
+        id="descripcion"
+        name="descripcion"
+        required
+        rows="3"
+        maxlength={LIMITES.descripcion.max}
+        aria-describedby="contador-descripcion"
+      ></textarea>
+      <p id="contador-descripcion" class="ayuda contador" aria-live="polite">
+        0 de {LIMITES.descripcion.max} caracteres
+      </p>
+      <p class="error" data-error-de="descripcion" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="foto">Foto del negocio</label>
+      <input
+        id="foto"
+        name="foto"
+        type="file"
+        required
+        accept={FOTO.accept}
+        aria-describedby="ayuda-foto"
+      />
+      <p id="ayuda-foto" class="ayuda">
+        Horizontal se ve mejor. La reducimos automáticamente, no te preocupes por
+        el peso.
+      </p>
+      <p class="error" data-error-de="foto" hidden></p>
+      <div class="previsualizacion" hidden>
+        <img alt="Vista previa de la foto que subiste" />
+        <p class="ayuda" data-peso-foto></p>
+      </div>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="negocio_telefono">Teléfono del negocio</label>
+        <input
+          id="negocio_telefono"
+          name="negocio_telefono"
+          type="tel"
+          required
+          pattern={PATRON_TELEFONO}
+          inputmode="tel"
+          aria-describedby="ayuda-tel-negocio"
+        />
+        <p id="ayuda-tel-negocio" class="ayuda">Este sí se publica.</p>
+        <p class="error" data-error-de="negocio_telefono" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="direccion">Dirección</label>
+        <input
+          id="direccion"
+          name="direccion"
+          type="text"
+          required
+          maxlength={LIMITES.direccion.max}
+          aria-describedby="ayuda-direccion"
+        />
+        <p id="ayuda-direccion" class="ayuda">O la ciudad, si atiendes a domicilio.</p>
+        <p class="error" data-error-de="direccion" hidden></p>
+      </div>
+    </div>
+
+    <div class="fila fila--tres">
+      <div class="campo">
+        <label for="web">Página web <span class="opcional">(opcional)</span></label>
+        <input id="web" name="web" type="text" maxlength={LIMITES.web.max} placeholder="tunegocio.co" />
+      </div>
+      <div class="campo">
+        <label for="instagram">Instagram <span class="opcional">(opcional)</span></label>
+        <input id="instagram" name="instagram" type="text" maxlength={LIMITES.instagram.max} placeholder="@tunegocio" />
+      </div>
+      <div class="campo">
+        <label for="facebook">Facebook <span class="opcional">(opcional)</span></label>
+        <input id="facebook" name="facebook" type="text" maxlength={LIMITES.facebook.max} placeholder="Nombre de la página" />
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="campo campo--consentimiento">
+    <label class="consentimiento">
+      <input id="consentimiento" name="consentimiento" type="checkbox" required />
+      <span>
+        Autorizo a la Fundación Liceo Inglés a publicar los datos de mi negocio
+        —nombre, descripción, foto, teléfono, dirección y redes— en el catálogo
+        público. Mis datos personales y el código de familia no se publican.
+      </span>
+    </label>
+    <p class="error" data-error-de="consentimiento" hidden></p>
+  </div>
+
+  {/* Campo trampa: oculto para personas, irresistible para bots. */}
+  <div class="trampa" aria-hidden="true">
+    <label for={CAMPO_TRAMPA}>No llenes este campo</label>
+    <input id={CAMPO_TRAMPA} name={CAMPO_TRAMPA} type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="acciones">
+    <button type="submit" class="li-btn" disabled={!endpoint}>Enviar solicitud</button>
+    <p class="ayuda">Revisamos cada solicitud antes de publicarla.</p>
+  </div>
+
+  <p class="aviso" data-estado role="status" aria-live="polite" hidden></p>
+</form>
+
+<div id="exito" class="exito" hidden>
+  <p class="li-eyebrow">Solicitud enviada</p>
+  <h2>Gracias, ya la recibimos</h2>
+  <p>
+    La revisaremos y te escribiremos al correo que nos diste. Si aprobamos tu
+    negocio, aparecerá en el catálogo.
+  </p>
+  <a class="li-btn" href="/">Volver al catálogo</a>
+</div>
+
+<style>
+  form {
+    display: grid;
+    gap: var(--space-10);
+    max-width: 720px;
+  }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-5);
+  }
+  legend {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    padding: 0;
+    margin-bottom: var(--space-2);
+  }
+  .ayuda-bloque {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    background: var(--surface-subtle);
+    border-left: 3px solid var(--li-yellow);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xs);
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+  .fila--tres {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .campo {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  label {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-sm);
+    color: var(--text-heading);
+  }
+  .opcional {
+    font-weight: var(--weight-regular);
+    color: var(--text-muted);
+  }
+
+  input[type='text'],
+  input[type='tel'],
+  input[type='email'],
+  select,
+  textarea {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-body);
+    background: var(--surface-card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    padding: 11px 14px;
+    width: 100%;
+    transition: border-color var(--duration-fast) var(--ease-standard);
+  }
+  textarea {
+    resize: vertical;
+    line-height: var(--leading-normal);
+  }
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--li-navy);
+  }
+  /* El estado de error lo marca el script con aria-invalid, así el color y
+     lo que anuncia el lector de pantalla no pueden separarse. */
+  [aria-invalid='true'] {
+    border-color: var(--li-red);
+  }
+
+  input[type='file'] {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--text-body);
+  }
+  input[type='file']::file-selector-button {
+    font-family: var(--font-subhead);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    background: var(--surface-subtle);
+    color: var(--li-navy);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    padding: 9px 16px;
+    margin-right: var(--space-3);
+    cursor: pointer;
+  }
+  input[type='file']::file-selector-button:hover {
+    border-color: var(--li-navy);
+  }
+
+  .ayuda {
+    margin: 0;
+    font-size: var(--text-xs);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+  .contador {
+    justify-self: end;
+  }
+  .error {
+    margin: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--li-red);
+  }
+
+  .previsualizacion {
+    display: grid;
+    gap: 6px;
+    margin-top: var(--space-2);
+  }
+  .previsualizacion img {
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    display: block;
+  }
+
+  .campo--consentimiento {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: var(--space-6);
+  }
+  .consentimiento {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+    font-weight: var(--weight-regular);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    cursor: pointer;
+  }
+  .consentimiento input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--li-red);
+  }
+
+  /* Fuera de la vista pero no `display:none`: algunos bots ignoran lo
+     que está oculto de esa forma. */
+  .trampa {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .acciones {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .acciones button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .aviso {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+    color: var(--text-body);
+  }
+  .aviso--error {
+    background: var(--surface-brand-soft);
+    color: var(--li-red-700);
+    border: 1px solid var(--li-red-300);
+  }
+
+  .exito {
+    max-width: 560px;
+  }
+  .exito h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: var(--space-3) 0 var(--space-4);
+  }
+  .exito p:last-of-type {
+    margin-bottom: var(--space-8);
+  }
+
+  @media (max-width: 640px) {
+    .fila,
+    .fila--tres {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FormularioNegocio from '../components/FormularioNegocio.astro';
+import { SITIO } from '../data/sitio';
+
+// El endpoint entra por entorno en el build, igual que SITE_URL.
+// Vacío = el formulario se renderiza deshabilitado con el correo de contacto,
+// en vez de fallar en silencio al enviar.
+const endpoint = process.env.N8N_REGISTRO_URL ?? '';
+---
+
+<BaseLayout
+  title={`Inscribe tu negocio · ${SITIO.nombre}`}
+  description="Postula el negocio de tu familia para que aparezca en el catálogo de la Fundación Liceo Inglés."
+  noindex
+>
+  <section class="li-container">
+    <p class="li-eyebrow">Familias FLI</p>
+    <h1>Inscribe tu negocio</h1>
+    <p class="entrada">
+      Cuéntanos de tu negocio y lo publicamos en el catálogo para que toda la
+      comunidad del Liceo Inglés pueda encontrarte. La inscripción es gratuita.
+    </p>
+
+    <FormularioNegocio endpoint={endpoint} />
+  </section>
+</BaseLayout>
+
+<script>
+  import '../scripts/registrar.ts';
+</script>
+
+<style>
+  section {
+    padding-block: var(--space-12) var(--space-20);
+  }
+  .li-eyebrow {
+    margin: 0 0 var(--space-3);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: 0 0 var(--space-4);
+  }
+  .entrada {
+    margin: 0 0 var(--space-12);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--text-body);
+    max-width: 60ch;
+  }
+</style>

@@ -35,6 +35,14 @@ html.scroll-suave { scroll-behavior: smooth; }
 
 body { overflow-wrap: break-word; }
 
+/* El atributo `hidden` tiene que ganarle a cualquier `display` de componente.
+   La regla del navegador es `[hidden] { display: none }`, que un simple
+   `display: grid` en una clase ya derrota: el elemento queda marcado como
+   oculto para los lectores de pantalla pero visible en pantalla. */
+[hidden] {
+  display: none !important;
+}
+
 /* Contenedor estándar de sección, tomado del diseño (1200px + 24px de gutter) */
 .li-container {
   max-width: var(--container-max);
