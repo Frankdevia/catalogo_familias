@@ -48,58 +48,75 @@ publica algo.
 > Las siete primeras columnas son datos internos. **Nunca salen de este Sheet.**
 > Compártelo solo con quien revisa.
 
-## 2. Carpeta en Drive
+## 2. Carpeta en Drive — ya creada
 
-Crea una carpeta para las fotos pendientes y copia su id (lo que va después de
-`/folders/` en la URL).
+**Hecho.** El nodo *Subir foto a Drive* ya apunta a ella:
 
-## 3. Token de GitHub
+<https://drive.google.com/drive/folders/1Sdgc2FH07D6jUbxDXOEAWWm6rFxnvHGO>
 
-Un token *fine-grained* con acceso **solo** a `Frankdevia/catalogo_familias` y
-permiso `Contents: Read and write`. Nada más.
+Es la copia para revisar. Una vez publicado el negocio, la foto definitiva vive
+en este repositorio y esta carpeta queda solo como respaldo de lo pendiente.
 
-En n8n crea una credencial de tipo **Header Auth**:
+## 3. Token de GitHub — pendiente
+
+Es lo único que no puede crear nadie más que tú, porque da permiso de escritura
+sobre el repositorio.
+
+1. Entra a <https://github.com/settings/personal-access-tokens/new>
+   (o: foto de perfil → *Settings* → *Developer settings* → *Personal access
+   tokens* → *Fine-grained tokens* → *Generate new token*).
+2. **Token name:** `n8n catálogo FLI`.
+3. **Expiration:** ponle fecha y **anótala en el calendario**. Cuando expire, la
+   publicación deja de funcionar y el síntoma es confuso: las solicitudes se
+   aprueban en el Sheet pero nunca aparecen en el catálogo.
+4. **Repository access:** *Only select repositories* → `catalogo_familias`.
+   No uses *All repositories*.
+5. **Permissions** → *Repository permissions* → **Contents: Read and write**.
+   Ningún permiso más: con eso basta para crear los dos archivos.
+6. *Generate token* y copia el `github_pat_...`. **GitHub solo lo muestra una
+   vez.**
+
+Luego, en n8n → *Credentials* → *Create credential* → **Header Auth**:
 
 | Campo | Valor |
 |---|---|
 | Name | `Authorization` |
-| Value | `Bearer github_pat_...` |
+| Value | `Bearer github_pat_...` (con `Bearer ` delante) |
 
-Y asígnala a los tres nodos HTTP Request del workflow de publicación.
+Y asígnala a los tres nodos HTTP Request del workflow de publicación:
+*¿Ya existe ese slug?*, *Subir foto al repo* y *Subir ficha al repo*.
 
-## 4. Reemplazar los marcadores
+## 4. Marcadores — ya reemplazados
 
-Busca `CAMBIAR` en los dos workflows. Son estos:
+**Hecho.** El dominio del catálogo es
+`https://catologonegocios.26zlav.easypanel.host` y ya está puesto en las
+cabeceras `Access-Control-Allow-Origin` de los tres nodos que responden, y en el
+enlace del correo de publicación.
 
-**FLI · catálogo — recibir solicitud**
+Va sin barra final a propósito: el navegador manda el `Origin` sin ella y la
+comparación es exacta. Si algún día el catálogo pasa a un dominio propio del
+colegio, hay que cambiarlo en esos cuatro sitios y en `SITE_URL`.
 
-| Nodo | Qué poner |
-|---|---|
-| Responder rechazo | El dominio del catálogo, en la cabecera `Access-Control-Allow-Origin` |
-| Responder familia no encontrada | El mismo dominio |
-| Responder OK | El mismo dominio |
-| Subir foto a Drive | El id de la carpeta del paso 2 |
+## 5. Los dos build args que faltan en EasyPanel
 
-**FLI · catálogo — publicar aprobados**
+Hoy el sitio está desplegado **sin ninguno de los dos**, y eso se nota:
 
-| Nodo | Qué poner |
-|---|---|
-| Avisar al acudiente | El dominio, en el enlace del correo |
+| Build arg | Valor | Qué pasa si falta |
+|---|---|---|
+| `SITE_URL` | `https://catologonegocios.26zlav.easypanel.host` | El sitemap y los `canonical` apuntan a `liceoingles.edu.co`: Google indexa direcciones que no existen y lo que se comparte por WhatsApp lleva al sitio equivocado |
+| `N8N_REGISTRO_URL` | La URL de producción del webhook | `/registrar` se construye con el formulario deshabilitado |
 
-El dominio del `Access-Control-Allow-Origin` no es un detalle: si no coincide
-con el dominio real, el navegador bloquea la lectura de la respuesta y la
-familia ve un error genérico aunque la solicitud se haya guardado bien.
-
-## 5. Conectar el sitio con el webhook
-
-Activa el workflow de recepción y copia su URL de producción, que tendrá la forma:
+La URL del webhook aparece cuando **activas** el workflow de recepción, y tiene
+esta forma:
 
 ```
-https://n8n-n8n.26zlav.easypanel.host/webhook/fli-catalogo-registro-8b31d7e2-...
+https://n8n-n8n.26zlav.easypanel.host/webhook/fli-catalogo-registro-8b31d7e2-4a05-4f19-9c26-1de8a7b34f90
 ```
 
-En EasyPanel, añádela como build arg `N8N_REGISTRO_URL` y redespliega. Sin eso
-la página `/registrar` se construye con el formulario deshabilitado.
+Ojo: la de *test* (`/webhook-test/`) solo funciona mientras tengas el editor
+abierto escuchando. La que va en EasyPanel es la de producción, `/webhook/`.
+
+Después de añadir los dos, redespliega.
 
 ## Probar antes de anunciarlo
 
