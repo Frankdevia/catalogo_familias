@@ -108,6 +108,32 @@ el campo trampa y la aprobación humana.
 Pasa si se borra y recrea el workflow de recepción. Hay que actualizar el valor
 por defecto en `src/pages/registrar.astro` y volver a desplegar.
 
+## De dónde sale la validación del código de familia
+
+El nodo *Buscar código de familia* consulta:
+
+- Documento **Base Datos Oficial 2025-2026**
+  (`11ghCkxLQn5IJRFFZ153SXoayuPb3DJUtJUe1-32s1ZE`)
+- Pestaña **BASE DATOS** (gid `955091006`)
+- Columnas **`Cód Familia`** (con tilde) y **`Homeroom`**, que es el grado que
+  acaba en la ficha como `Familia — grado 3B`
+
+Es la misma fuente que usa el workflow *Student's institutional emails creator*,
+que está activo. **No** es la hoja del workflow *Sync Estudiantes: Google Sheets
+→ MySQL*, que está inactivo y tiene otros nombres de columna: confundirlas fue
+el primer bug en producción, y el síntoma era engañoso —el formulario decía que
+el código no existía cuando en realidad la consulta fallaba—.
+
+Por eso ahora el workflow distingue los dos casos:
+
+| Situación | Qué ve la familia |
+|---|---|
+| El código no está en la base | "Ese código no aparece en nuestros registros", señalado sobre el campo |
+| La consulta al Sheet falla | "No pudimos verificar tu código en este momento", sin culpar al dato |
+
+Si algún día cambia la base de datos oficial del colegio, hay que actualizar el
+documento y la pestaña en ese nodo.
+
 ## Probar antes de anunciarlo
 
 1. Enviar el formulario con un código de familia inventado → tiene que aparecer
