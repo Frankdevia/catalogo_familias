@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { SITIO } from '../data/sitio';
-import fondo from '../assets/photos/cta-negocio.webp';
+import fondo from '../assets/photos/hero-panaderia-familiar.webp';
 ---
 
 <section class="hero">
@@ -10,7 +10,7 @@ import fondo from '../assets/photos/cta-negocio.webp';
     src={fondo}
     alt=""
     aria-hidden="true"
-    widths={[768, 1280, 1920]}
+    widths={[768, 1024, 1344]}
     sizes="100vw"
     loading="eager"
     fetchpriority="high"
@@ -49,10 +49,21 @@ import fondo from '../assets/photos/cta-negocio.webp';
   .velo {
     position: absolute;
     inset: 0;
+    /*
+     * El degradado del diseño original perdía opacidad demasiado pronto: con
+     * una foto clara detrás, el párrafo se quedaba en 4.0:1 de contraste, por
+     * debajo del 4.5:1 que exige WCAG AA.
+     *
+     * La parada usa `max(680px, 48%)` en vez de un porcentaje solo: el texto
+     * mide como mucho 640px + gutter, así que en pantallas medianas la parte
+     * opaca tiene que cubrir esos píxeles concretos, mientras que en pantallas
+     * grandes conviene que sea proporcional para no tapar la escena.
+     */
     background: linear-gradient(
       90deg,
-      rgba(35, 45, 117, 0.88) 0%,
-      rgba(35, 45, 117, 0.55) 55%,
+      rgba(35, 45, 117, 0.92) 0%,
+      rgba(35, 45, 117, 0.86) max(680px, 48%),
+      rgba(35, 45, 117, 0.45) 80%,
       rgba(35, 45, 117, 0.12) 100%
     );
   }
@@ -115,20 +126,33 @@ import fondo from '../assets/photos/cta-negocio.webp';
 
   /* En pantallas estrechas el degradado horizontal deja el texto sin
      contraste: se vuelve vertical y más opaco. */
+  /*
+   * El degradado horizontal solo funciona cuando queda sitio a la derecha del
+   * texto. Por debajo de 1024px el texto ocupa casi todo el ancho y la parada
+   * opaca se solapa con la de caída, lo que rompía el degradado y dejaba el
+   * titular en 2.9:1 de contraste. Ahí se usa uno vertical.
+   */
+  @media (max-width: 1023px) {
+    .velo {
+      background: linear-gradient(
+        180deg,
+        rgba(35, 45, 117, 0.86) 0%,
+        rgba(35, 45, 117, 0.8) 55%,
+        rgba(35, 45, 117, 0.62) 100%
+      );
+    }
+    /* Encuadra a las personas, que están al centro-derecha de la foto. */
+    .fondo {
+      object-position: 58% center;
+    }
+  }
+
   @media (max-width: 760px) {
     .hero {
       min-height: 460px;
     }
     .contenido {
-    position: relative;
       padding-block: var(--space-16);
-    }
-    .velo {
-      background: linear-gradient(
-        180deg,
-        rgba(35, 45, 117, 0.82) 0%,
-        rgba(35, 45, 117, 0.88) 100%
-      );
     }
   }
 </style>
