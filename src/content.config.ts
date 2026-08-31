@@ -1,6 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { CATEGORIAS } from './data/categorias';
+import { CATEGORIAS_CLASIFICADOS } from './data/clasificados';
 
 const negocios = defineCollection({
   loader: glob({ pattern: '**/*.json', base: './src/content/negocios' }),
@@ -27,4 +28,21 @@ const negocios = defineCollection({
     }),
 });
 
-export const collections = { negocios };
+const clasificados = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/clasificados' }),
+  schema: z.object({
+    cat: z.enum(CATEGORIAS_CLASIFICADOS),
+    desc: z.string().max(280),
+    /** Solo dígitos y espacios, sin indicativo: "311 222 3344". */
+    phone: z.string().regex(/^[\d ]+$/, 'Solo dígitos y espacios, sin +57'),
+    email: z.string().email(),
+    /**
+     * Fecha ISO (AAAA-MM-DD). Solo ordena —el más nuevo primero— y no se
+     * muestra en la tarjeta. Los anuncios no caducan: se retiran a mano
+     * poniendo `retirado` en el Sheet.
+     */
+    publicado: z.string().date(),
+  }),
+});
+
+export const collections = { negocios, clasificados };

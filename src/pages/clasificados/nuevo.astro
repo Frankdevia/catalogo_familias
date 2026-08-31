@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormularioClasificado from '../../components/FormularioClasificado.astro';
+import { SITIO } from '../../data/sitio';
+
+/*
+ * Webhook de n8n que recibe los anuncios.
+ *
+ * Va como valor por defecto y no como variable de despliegue porque las
+ * "Variables de entorno" de EasyPanel son del contenedor en ejecución, no del
+ * `docker build`: en un sitio estático nunca llegan. Ver docs/postulaciones.md.
+ *
+ * `||` y no `??`: Docker deja la variable como cadena vacía si el build arg no
+ * se pasa, y `??` no atrapa la cadena vacía.
+ */
+const POR_DEFECTO =
+  'https://n8n-n8n.26zlav.easypanel.host/webhook/fli-clasificados-9c4e21a7-5b0d-4f38-8e17-3ab6d29c1f45';
+
+const endpoint = process.env.N8N_CLASIFICADOS_URL || POR_DEFECTO;
+---
+
+<BaseLayout
+  title={`Agrega tu clasificado · ${SITIO.nombre}`}
+  description="Publica un anuncio de compra, venta u ofrecimiento entre las familias de la comunidad FLI."
+  noindex
+>
+  <section class="li-container">
+    <p class="li-eyebrow">Entre familias</p>
+    <h1>Agrega tu clasificado</h1>
+    <p class="entrada">
+      Publica lo que compras, vendes u ofreces para que lo vean las demás
+      familias del Liceo Inglés. Es gratis.
+    </p>
+
+    <FormularioClasificado endpoint={endpoint} />
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/clasificado.ts';
+</script>
+
+<style>
+  section {
+    padding-block: var(--space-12) var(--space-20);
+  }
+  .li-eyebrow {
+    margin: 0 0 var(--space-3);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: 0 0 var(--space-4);
+  }
+  .entrada {
+    margin: 0 0 var(--space-12);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--text-body);
+    max-width: 60ch;
+  }
+</style>

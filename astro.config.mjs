@@ -33,8 +33,11 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'ignore',
   integrations: [
-    // /registrar es un formulario, no contenido del catálogo: fuera del sitemap.
-    sitemap({ filter: (pagina) => !pagina.includes('/registrar') }),
+    // Los formularios no son contenido del catálogo: fuera del sitemap.
+    sitemap({
+      filter: (pagina) =>
+        !pagina.includes('/registrar') && !pagina.includes('/clasificados/nuevo'),
+    }),
   ],
   build: {
     // El servidor sirve archivos planos: /negocio/<slug>/index.html

@@ -1,0 +1,79 @@
+---
+import { CATEGORIAS_CLASIFICADOS, TODOS } from '../data/clasificados';
+import type { Clasificado } from '../data/clasificado';
+
+interface Props {
+  anuncios: Clasificado[];
+}
+
+const { anuncios } = Astro.props;
+
+const chips = [
+  { etiqueta: TODOS, cuenta: anuncios.length },
+  ...CATEGORIAS_CLASIFICADOS.map((c) => ({
+    etiqueta: c,
+    cuenta: anuncios.filter((a) => a.data.cat === c).length,
+  })),
+  // Una categoría sin anuncios no se muestra; "Todos" siempre sí.
+].filter((c) => c.etiqueta === TODOS || c.cuenta > 0);
+---
+
+<div class="filtros" role="group" aria-label="Filtrar anuncios por tipo">
+  {
+    chips.map((c, i) => (
+      <button
+        type="button"
+        class="chip"
+        data-filtro={c.etiqueta}
+        aria-pressed={i === 0 ? 'true' : 'false'}
+      >
+        {c.etiqueta} <span class="cuenta">{c.cuenta}</span>
+      </button>
+    ))
+  }
+</div>
+
+<style>
+  .filtros {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  /* Estas píldoras van sobre el fondo navy, así que invierten los colores
+     respecto a las del catálogo: claras sobre oscuro. */
+  .chip {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    padding: 9px 16px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: transparent;
+    color: var(--li-white);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition: background var(--duration-fast) var(--ease-standard);
+  }
+  .chip:hover {
+    border-color: var(--li-white);
+  }
+  /* El estado activo se marca con aria-pressed, para que lo visual y lo que
+     anuncia el lector de pantalla no puedan desincronizarse. */
+  .chip[aria-pressed='true'] {
+    background: var(--li-yellow);
+    border-color: var(--li-yellow);
+    color: var(--li-navy);
+  }
+  .cuenta {
+    opacity: 0.7;
+    font-weight: var(--weight-regular);
+  }
+  .chip[aria-pressed='true'] .cuenta {
+    opacity: 0.75;
+  }
+  .filtros :global(:focus-visible) {
+    outline-color: var(--li-yellow);
+  }
+</style>

@@ -1,69 +1,21 @@
 import type { NegocioModal } from './tipos';
-
-const TODOS = 'Todos';
+import { montarFiltro } from './filtro';
 
 /* ------------------------------------------------------------------ *
  * Filtro por categoría
  * ------------------------------------------------------------------ */
 
-const chips = Array.from(
-  document.querySelectorAll<HTMLButtonElement>('[data-filtro]'),
-);
-const tarjetas = Array.from(
-  document.querySelectorAll<HTMLElement>('[data-negocio]'),
-);
-const conteo = document.getElementById('catalogo-conteo');
-const vacio = document.getElementById('catalogo-vacio');
-
-/** Aplica el filtro sin tocar la URL. Devuelve cuántos quedaron visibles. */
-function aplicarFiltro(categoria: string): number {
-  let visibles = 0;
-  for (const tarjeta of tarjetas) {
-    const coincide = categoria === TODOS || tarjeta.dataset.categoria === categoria;
-    tarjeta.hidden = !coincide;
-    if (coincide) visibles++;
-  }
-
-  for (const chip of chips) {
-    chip.setAttribute(
-      'aria-pressed',
-      String(chip.dataset.filtro === categoria),
-    );
-  }
-
-  if (conteo) {
-    conteo.textContent =
-      visibles === 1 ? '1 negocio' : `${visibles} negocios`;
-  }
-  if (vacio) vacio.hidden = visibles > 0;
-
-  return visibles;
-}
-
-/** Refleja el filtro en la URL para que se pueda compartir o recargar. */
-function sincronizarUrl(categoria: string): void {
-  const url = new URL(window.location.href);
-  if (categoria === TODOS) {
-    url.searchParams.delete('cat');
-  } else {
-    url.searchParams.set('cat', categoria);
-  }
-  window.history.replaceState(null, '', url);
-}
-
-for (const chip of chips) {
-  chip.addEventListener('click', () => {
-    const categoria = chip.dataset.filtro ?? TODOS;
-    aplicarFiltro(categoria);
-    sincronizarUrl(categoria);
+const seccionCatalogo = document.querySelector<HTMLElement>('#catalogo');
+if (seccionCatalogo) {
+  montarFiltro({
+    raiz: seccionCatalogo,
+    atributoItem: 'data-negocio',
+    paramUrl: 'cat',
+    conteo: document.getElementById('catalogo-conteo'),
+    vacio: document.getElementById('catalogo-vacio'),
+    singular: 'negocio',
+    plural: 'negocios',
   });
-}
-
-// Estado inicial desde la URL. Una categoría desconocida cae en "Todos".
-if (chips.length > 0) {
-  const pedida = new URL(window.location.href).searchParams.get('cat');
-  const valida = pedida && chips.some((c) => c.dataset.filtro === pedida);
-  aplicarFiltro(valida ? (pedida as string) : TODOS);
 }
 
 /* ------------------------------------------------------------------ *

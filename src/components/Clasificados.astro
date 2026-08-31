@@ -1,0 +1,315 @@
+---
+import FiltrosClasificados from './FiltrosClasificados.astro';
+import { BADGE } from '../data/clasificados';
+import { telHref, type Clasificado } from '../data/clasificado';
+import { SITIO } from '../data/sitio';
+
+interface Props {
+  anuncios: Clasificado[];
+}
+
+const { anuncios } = Astro.props;
+---
+
+<section id="clasificados">
+  <div class="li-container">
+    <div class="encabezado">
+      <div>
+        <p class="eyebrow">Entre familias</p>
+        <h2>Anuncios clasificados</h2>
+        <p class="entrada">
+          Compra, vende u ofrece entre las familias de la comunidad FLI.
+        </p>
+      </div>
+      <FiltrosClasificados anuncios={anuncios} />
+    </div>
+
+    <p id="clasificados-conteo" class="li-sr-only" role="status" aria-live="polite">
+      {anuncios.length === 1 ? '1 anuncio' : `${anuncios.length} anuncios`}
+    </p>
+
+    {
+      anuncios.length > 0 && (
+        <div class="rejilla">
+          {anuncios.map((anuncio) => {
+            const { cat, desc, phone, email } = anuncio.data;
+            return (
+              <article class="tarjeta" data-anuncio data-categoria={cat}>
+                <p
+                  class="badge"
+                  style={`background:${BADGE[cat].fondo};color:${BADGE[cat].texto}`}
+                >
+                  {cat}
+                </p>
+                <p class="desc">{desc}</p>
+                <dl class="contacto">
+                  <div>
+                    <dt>Teléfono</dt>
+                    <dd>
+                      <a href={telHref(phone)}>{phone}</a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Correo</dt>
+                    <dd class="correo">
+                      <a href={`mailto:${email}`}>{email}</a>
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            );
+          })}
+        </div>
+      )
+    }
+
+    <p id="clasificados-vacio" class="vacio" hidden={anuncios.length > 0}>
+      {
+        anuncios.length === 0
+          ? 'Todavía no hay anuncios. Sé la primera familia en publicar uno.'
+          : 'No hay anuncios en esta categoría.'
+      }
+    </p>
+
+    {
+      anuncios.length > 0 && (
+        <p class="nota">
+          Anuncios de muestra — se reemplazan con los de las familias.
+        </p>
+      )
+    }
+
+    <div class="cta">
+      <div>
+        <p class="script">¿tienes algo que anunciar?</p>
+        <p class="subtexto">Publica tu clasificado gratis.</p>
+      </div>
+      <a class="boton" href={SITIO.clasificadoUrl}>Agrega tu clasificado</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { montarFiltro } from '../scripts/filtro';
+
+  const seccion = document.querySelector<HTMLElement>('#clasificados');
+  if (seccion) {
+    montarFiltro({
+      raiz: seccion,
+      atributoItem: 'data-anuncio',
+      // Parámetro propio: el catálogo usa `cat`, así los dos filtros pueden
+      // convivir en la misma URL sin pisarse.
+      paramUrl: 'tipo',
+      conteo: document.getElementById('clasificados-conteo'),
+      vacio: document.getElementById('clasificados-vacio'),
+      singular: 'anuncio',
+      plural: 'anuncios',
+    });
+  }
+</script>
+
+<style>
+  section {
+    background: var(--li-navy);
+    padding-block: var(--space-20);
+  }
+
+  .encabezado {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+  /* Sin esto el bloque del título no puede encogerse por debajo del ancho de su
+     contenido —`min-width: auto` es el valor por defecto de un hijo flex— y
+     desborda la pantalla. */
+  .encabezado > div {
+    min-width: 0;
+  }
+  .eyebrow {
+    font-family: var(--font-subhead);
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    font-weight: var(--weight-semibold);
+    color: var(--li-yellow);
+    margin: 0 0 var(--space-3);
+  }
+  h2 {
+    font-family: var(--font-display);
+    /* "CLASIFICADOS" es una palabra larga en una tipografía muy ancha: a 30px
+       fijos no cabe en una pantalla de 320px y desborda, porque una palabra
+       suelta no se puede partir. El tamaño baja con la pantalla. */
+    font-size: clamp(20px, 6.2vw, var(--text-2xl));
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--li-white);
+    margin: 0 0 var(--space-3);
+  }
+  .entrada {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--li-sky);
+    max-width: 60ch;
+  }
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  .tarjeta {
+    background: var(--surface-card);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--space-3);
+  }
+  /* El script de filtrado alterna este atributo. */
+  .tarjeta[hidden] {
+    display: none;
+  }
+
+  .badge {
+    font-family: var(--font-subhead);
+    font-size: var(--text-3xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    margin: 0;
+  }
+
+  .desc {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    flex: 1;
+  }
+
+  .contacto {
+    margin: var(--space-1) 0 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+    width: 100%;
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+  }
+  .contacto div {
+    display: flex;
+    gap: var(--space-3);
+  }
+  .contacto dt {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+  .contacto dd {
+    margin: 0;
+    min-width: 0;
+  }
+  /* Un correo largo no debe desbordar la tarjeta. */
+  .correo {
+    overflow-wrap: anywhere;
+  }
+  .contacto a {
+    color: var(--text-link);
+    text-decoration: none;
+  }
+  .contacto a:hover {
+    color: var(--text-link-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .vacio {
+    margin: var(--space-10) 0 0;
+    text-align: center;
+    font-size: var(--text-base);
+    color: var(--li-sky);
+  }
+  .nota {
+    margin: var(--space-6) 0 0;
+    font-size: var(--text-sm);
+    color: var(--li-sky);
+  }
+
+  .cta {
+    margin-top: var(--space-12);
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+  }
+  .script {
+    font-family: var(--font-script);
+    font-size: var(--text-2xl);
+    color: var(--li-yellow);
+    margin: 0;
+    line-height: var(--leading-snug);
+  }
+  .subtexto {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--li-sky);
+  }
+  .boton {
+    font-family: var(--font-subhead);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    background: var(--li-red);
+    color: var(--li-white);
+    border: 2px solid var(--li-red);
+    padding: 13px 30px;
+    border-radius: var(--radius-control);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+  }
+  .boton:hover {
+    background: var(--li-red-700);
+    border-color: var(--li-red-700);
+    color: var(--li-white);
+    text-decoration: none;
+  }
+
+  /* Sobre el fondo navy, el foco azul del design system no se vería. */
+  section :global(:focus-visible) {
+    outline-color: var(--li-yellow);
+  }
+
+  @media (max-width: 900px) {
+    .rejilla {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    section {
+      padding-block: var(--space-12);
+    }
+    .rejilla {
+      grid-template-columns: 1fr;
+    }
+    .cta {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+</style>

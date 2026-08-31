@@ -2,16 +2,20 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Catalogo from '../components/Catalogo.astro';
+import Clasificados from '../components/Clasificados.astro';
 import CtaInscribe from '../components/CtaInscribe.astro';
 import { getCollection } from 'astro:content';
 import { ordenarNegocios } from '../data/negocio';
+import { ordenarClasificados } from '../data/clasificado';
 import { SITIO } from '../data/sitio';
 
 const negocios = ordenarNegocios(await getCollection('negocios'));
+const anuncios = ordenarClasificados(await getCollection('clasificados'));
 ---
 
 <BaseLayout title={`${SITIO.nombre} · ${SITIO.nombreLargo}`}>
   <Hero />
   <Catalogo negocios={negocios} />
+  <Clasificados anuncios={anuncios} />
   <CtaInscribe />
 </BaseLayout>
