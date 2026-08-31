@@ -3,6 +3,7 @@ import { getImage } from 'astro:assets';
 import Filtros from './Filtros.astro';
 import TarjetaNegocio from './TarjetaNegocio.astro';
 import ModalNegocio from './ModalNegocio.astro';
+import { CATEGORIAS, TODOS } from '../data/categorias';
 import {
   telHref,
   webHref,
@@ -17,6 +18,15 @@ interface Props {
 }
 
 const { negocios } = Astro.props;
+
+// Una categoría sin negocios no se muestra; "Todos" siempre sí.
+const chips = [
+  { etiqueta: TODOS, cuenta: negocios.length },
+  ...CATEGORIAS.map((c) => ({
+    etiqueta: c as string,
+    cuenta: negocios.filter((n) => n.data.categoria === c).length,
+  })),
+].filter((c) => c.etiqueta === TODOS || c.cuenta > 0);
 
 // El modal se rellena en el cliente, así que las fotos se optimizan aquí
 // (2x de los 520x200 que mide la cabecera del diálogo).
@@ -64,7 +74,7 @@ const datosJson = JSON.stringify(datos).replace(/</g, '\\u003c');
           Todo lo que ofrecen las familias de la Fundación Liceo Inglés, a un clic.
         </p>
       </div>
-      <Filtros negocios={negocios} />
+      <Filtros chips={chips} etiquetaAria="Filtrar por categoría" />
     </div>
 
     <p id="catalogo-conteo" class="li-sr-only" role="status" aria-live="polite">

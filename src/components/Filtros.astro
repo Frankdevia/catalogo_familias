@@ -1,24 +1,26 @@
 ---
-import { CATEGORIAS, TODOS } from '../data/categorias';
-import type { Negocio } from '../data/negocio';
-
-interface Props {
-  negocios: Negocio[];
+/**
+ * Píldoras de filtro. Las usan el catálogo y los clasificados: las dos
+ * secciones van sobre fondo claro y se ven igual, así que comparten componente
+ * en vez de mantener dos copias del mismo CSS.
+ *
+ * Recibe los chips ya construidos porque cada sección cuenta lo suyo.
+ * El estado activo lo maneja `src/scripts/filtro.ts` con `aria-pressed`.
+ */
+interface Chip {
+  etiqueta: string;
+  cuenta: number;
 }
 
-const { negocios } = Astro.props;
+interface Props {
+  chips: Chip[];
+  etiquetaAria: string;
+}
 
-const chips = [
-  { etiqueta: TODOS, cuenta: negocios.length },
-  ...CATEGORIAS.map((c) => ({
-    etiqueta: c,
-    cuenta: negocios.filter((n) => n.data.categoria === c).length,
-  })),
-  // Una categoría sin negocios no se muestra; "Todos" siempre sí.
-].filter((c) => c.etiqueta === TODOS || c.cuenta > 0);
+const { chips, etiquetaAria } = Astro.props;
 ---
 
-<div class="filtros" role="group" aria-label="Filtrar por categoría">
+<div class="filtros" role="group" aria-label={etiquetaAria}>
   {
     chips.map((c, i) => (
       <button

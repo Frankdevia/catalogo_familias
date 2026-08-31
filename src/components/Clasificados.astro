@@ -1,6 +1,6 @@
 ---
-import FiltrosClasificados from './FiltrosClasificados.astro';
-import { BADGE } from '../data/clasificados';
+import Filtros from './Filtros.astro';
+import { BADGE, CATEGORIAS_CLASIFICADOS, TODOS } from '../data/clasificados';
 import { telHref, type Clasificado } from '../data/clasificado';
 import { SITIO } from '../data/sitio';
 
@@ -9,6 +9,15 @@ interface Props {
 }
 
 const { anuncios } = Astro.props;
+
+// Una categoría sin anuncios no se muestra; "Todos" siempre sí.
+const chips = [
+  { etiqueta: TODOS, cuenta: anuncios.length },
+  ...CATEGORIAS_CLASIFICADOS.map((c) => ({
+    etiqueta: c as string,
+    cuenta: anuncios.filter((a) => a.data.cat === c).length,
+  })),
+].filter((c) => c.etiqueta === TODOS || c.cuenta > 0);
 ---
 
 <section id="clasificados">
@@ -21,7 +30,7 @@ const { anuncios } = Astro.props;
           Compra, vende u ofrece entre las familias de la comunidad FLI.
         </p>
       </div>
-      <FiltrosClasificados anuncios={anuncios} />
+      <Filtros chips={chips} etiquetaAria="Filtrar anuncios por tipo" />
     </div>
 
     <p id="clasificados-conteo" class="li-sr-only" role="status" aria-live="polite">
@@ -71,18 +80,14 @@ const { anuncios } = Astro.props;
       }
     </p>
 
-    {
-      anuncios.length > 0 && (
-        <p class="nota">
-          Anuncios de muestra — se reemplazan con los de las familias.
-        </p>
-      )
-    }
-
     <div class="cta">
       <div>
         <p class="script">¿tienes algo que anunciar?</p>
-        <p class="subtexto">Publica tu clasificado gratis.</p>
+        <p class="subtexto">
+          Publica tu clasificado gratis.{
+            anuncios.length > 0 && ' Anuncios de muestra mientras llegan los reales.'
+          }
+        </p>
       </div>
       <a class="boton" href={SITIO.clasificadoUrl}>Agrega tu clasificado</a>
     </div>
@@ -109,8 +114,11 @@ const { anuncios } = Astro.props;
 </script>
 
 <style>
+  /* Gris claro para separar esta sección del catálogo, que va sobre blanco.
+     `--surface-muted` es #E3E3E3, a un pelo del #DCDCDE pedido, y así la
+     sección no introduce un color fuera del design system. */
   section {
-    background: var(--li-navy);
+    background: var(--surface-muted);
     padding-block: var(--space-20);
   }
 
@@ -134,7 +142,7 @@ const { anuncios } = Astro.props;
     letter-spacing: var(--tracking-eyebrow);
     text-transform: uppercase;
     font-weight: var(--weight-semibold);
-    color: var(--li-yellow);
+    color: var(--li-red);
     margin: 0 0 var(--space-3);
   }
   h2 {
@@ -145,13 +153,13 @@ const { anuncios } = Astro.props;
     font-size: clamp(20px, 6.2vw, var(--text-2xl));
     letter-spacing: var(--tracking-display);
     text-transform: uppercase;
-    color: var(--li-white);
+    color: var(--text-heading);
     margin: 0 0 var(--space-3);
   }
   .entrada {
     margin: 0;
     font-size: var(--text-base);
-    color: var(--li-sky);
+    color: var(--text-body);
     max-width: 60ch;
   }
 
@@ -169,6 +177,9 @@ const { anuncios } = Astro.props;
     flex-direction: column;
     align-items: start;
     gap: var(--space-3);
+    /* Sobre gris, la tarjeta blanca necesita algo de elevación para separarse
+       del fondo; sobre navy se distinguía sola. */
+    box-shadow: var(--shadow-sm);
   }
   /* El script de filtrado alterna este atributo. */
   .tarjeta[hidden] {
@@ -236,18 +247,13 @@ const { anuncios } = Astro.props;
     margin: var(--space-10) 0 0;
     text-align: center;
     font-size: var(--text-base);
-    color: var(--li-sky);
-  }
-  .nota {
-    margin: var(--space-6) 0 0;
-    font-size: var(--text-sm);
-    color: var(--li-sky);
+    color: var(--text-muted);
   }
 
   .cta {
     margin-top: var(--space-12);
     padding-top: 28px;
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 1px solid var(--border-strong);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -257,14 +263,14 @@ const { anuncios } = Astro.props;
   .script {
     font-family: var(--font-script);
     font-size: var(--text-2xl);
-    color: var(--li-yellow);
+    color: var(--li-red);
     margin: 0;
     line-height: var(--leading-snug);
   }
   .subtexto {
     margin: 0;
     font-size: var(--text-base);
-    color: var(--li-sky);
+    color: var(--text-body);
   }
   .boton {
     font-family: var(--font-subhead);
@@ -288,11 +294,6 @@ const { anuncios } = Astro.props;
     border-color: var(--li-red-700);
     color: var(--li-white);
     text-decoration: none;
-  }
-
-  /* Sobre el fondo navy, el foco azul del design system no se vería. */
-  section :global(:focus-visible) {
-    outline-color: var(--li-yellow);
   }
 
   @media (max-width: 900px) {
