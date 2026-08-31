@@ -70,8 +70,13 @@ eso el formulario tiene una casilla de consentimiento que lo dice con esas
 palabras, y el correo de confirmación lo recuerda.
 
 El nodo *Empaquetar para GitHub* arma el JSON campo por campo desde una lista
-blanca y **aborta la publicación** si detecta el código de familia o el nombre
-del acudiente dentro de lo que iba a subir.
+blanca —esa es la protección real— y además comprueba que no se haya colado
+ninguna **clave** interna.
+
+Aquí no se compara nada **por valor**, a propósito: el teléfono y el correo
+publicados *son* los del acudiente, así que compararlos abortaría siempre. En el
+workflow de negocios una comprobación por valor de este tipo bloqueó la
+publicación durante dos días (ver `docs/postulaciones.md`).
 
 > Los correos publicados en texto plano son recolectados por rastreadores de
 > spam. Se advirtió y se decidió publicarlos así. Si algún día llega spam a las

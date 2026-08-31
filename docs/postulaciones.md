@@ -159,6 +159,32 @@ Mientras tanto, funciona.
 > refresh tokens caducan cada 7 días y volverá a pasar. El síntoma es
 > `The credential ... needs to be reconnected` en las ejecuciones.
 
+## La comprobación de fuga: por qué no compara teléfonos
+
+El nodo *Empaquetar para GitHub* comprueba dos cosas antes de subir una ficha:
+
+1. **Estructural**: que la ficha no traiga ninguna clave interna
+   (`codigo_familia`, `acudiente_nombre`, `acudiente_telefono`…). Es
+   determinista y no puede dar falsos positivos.
+2. **Por valor, solo el correo**: una ficha de negocio no tiene campo de correo,
+   así que si el del acudiente aparece ahí es una fuga de verdad.
+
+**El teléfono no se compara por valor, y es a propósito.** La primera versión sí
+lo hacía y bloqueó la publicación durante dos días: la familia había puesto el
+mismo número como suyo y como el del negocio —lo normal en un negocio familiar—,
+así que el valor interno aparecía legítimamente en la ficha pública y la
+comprobación abortaba en cada ejecución, cada diez minutos, sin que nadie se
+enterara.
+
+Lo mismo pasaría con el nombre (un negocio puede llamarse como su dueña) y con
+el código de familia (sus dígitos pueden aparecer dentro de un teléfono o una
+dirección). **Lo que protege de verdad es la lista blanca**: la ficha se arma
+campo por campo y nunca se pasa de largo el objeto recibido.
+
+> Síntoma a vigilar: si una fila queda en `aprobado` con `publicado_en` vacío
+> más de quince minutos, el workflow está fallando. Nadie recibe un aviso — hay
+> que mirar las ejecuciones en n8n.
+
 ## Probar antes de anunciarlo
 
 1. Enviar el formulario con un código de familia inventado → tiene que aparecer
