@@ -10,7 +10,7 @@ import { SITIO } from '../data/sitio';
 const negocios = ordenarNegocios(await getCollection('negocios'));
 ---
 
-<BaseLayout title={`${SITIO.nombre} · ${SITIO.organizacion}`}>
+<BaseLayout title={`${SITIO.nombre} · ${SITIO.nombreLargo}`}>
   <Hero />
   <Catalogo negocios={negocios} />
   <CtaInscribe />

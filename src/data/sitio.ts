@@ -3,7 +3,10 @@
  * `signupUrl` y `contactEmail` eran props editables del canvas de Claude Design.
  */
 export const SITIO = {
-  nombre: 'Apoye a Nuestras Familias',
+  /** Nombre corto: es lo que sale en la pestaña del navegador. */
+  nombre: 'FLI FBC',
+  /** Nombre completo, para donde haya sitio de sobra. */
+  nombreLargo: 'Family Business Community',
   organizacion: 'Fundación Liceo Inglés',
   /** Lema que acompaña al logo en la cabecera. */
   lema: 'Still we rise!',
