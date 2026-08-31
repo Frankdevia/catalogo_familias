@@ -173,7 +173,9 @@ Detalles que importan al tocar esta parte:
   POST al webhook sin pasar por esta página.
 
 La puesta en marcha de n8n, el Sheet y el token de GitHub está en
-[`docs/postulaciones.md`](docs/postulaciones.md).
+[`docs/postulaciones.md`](docs/postulaciones.md). Los anuncios clasificados
+tienen su propio circuito, documentado en
+[`docs/clasificados.md`](docs/clasificados.md).
 
 ### Qué se publica y qué no
 
