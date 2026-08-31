@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Catalogo from '../components/Catalogo.astro';
-import ComoApoyar from '../components/ComoApoyar.astro';
 import CtaInscribe from '../components/CtaInscribe.astro';
 import { getCollection } from 'astro:content';
 import { ordenarNegocios } from '../data/negocio';
@@ -14,6 +13,5 @@ const negocios = ordenarNegocios(await getCollection('negocios'));
 <BaseLayout title={`${SITIO.nombre} · ${SITIO.organizacion}`}>
   <Hero />
   <Catalogo negocios={negocios} />
-  <ComoApoyar />
   <CtaInscribe />
 </BaseLayout>

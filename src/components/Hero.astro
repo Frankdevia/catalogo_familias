@@ -18,12 +18,17 @@ import fondo from '../assets/photos/hero-panaderia-familiar.webp';
   <div class="velo" aria-hidden="true"></div>
 
   <div class="contenido li-container">
-    <p class="eyebrow">Familias FLI · Catálogo de negocios</p>
-    <h1>Apoya los negocios de nuestras familias</h1>
+    <p class="eyebrow">FLI FBC</p>
+    <h1>Family Business Community</h1>
     <p class="entrada">
-      Detrás de cada negocio de este catálogo hay una familia de nuestra comunidad.
-      Cuando les compras, fortaleces la economía de la familia FLI.
+      La comunidad de familias del Liceo Inglés que conecta empresas, talentos y
+      oportunidades.
     </p>
+    <ul class="claims">
+      <li>Busca lo que necesitas.</li>
+      <li>Conecta con nuestras familias.</li>
+      <li>Familias como red de apoyo a la comunidad.</li>
+    </ul>
     <div class="acciones">
       <a class="li-btn" href="#catalogo">Ver el catálogo</a>
       <a class="secundario" href={SITIO.signupUrl}>Inscribe tu negocio</a>
@@ -97,9 +102,36 @@ import fondo from '../assets/photos/hero-panaderia-familiar.webp';
     font-size: var(--text-md);
     line-height: var(--leading-relaxed);
     color: var(--li-white);
-    margin: 0 0 30px;
+    margin: 0 0 var(--space-5);
     max-width: 48ch;
     text-wrap: pretty;
+  }
+
+  /* Las tres frases cortas: viñeta amarilla en vez de punto, para que se lean
+     como afirmaciones y no como un menú. */
+  .claims {
+    list-style: none;
+    margin: 0 0 30px;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 48ch;
+  }
+  .claims li {
+    position: relative;
+    padding-left: var(--space-6);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--li-white);
+  }
+  .claims li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 12px;
+    height: 2px;
+    background: var(--li-yellow);
   }
   .acciones {
     display: flex;

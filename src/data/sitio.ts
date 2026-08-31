@@ -17,36 +17,3 @@ export const SITIO = {
   /** Indicativo de país que se antepone a los teléfonos de los negocios. */
   indicativo: '+57',
 } as const;
-
-/** Las cinco formas de apoyar, en el orden del diseño. */
-export const FORMAS_DE_APOYAR = [
-  {
-    n: '01',
-    titulo: 'Recomienda',
-    cuerpo:
-      'Cuéntale a un amigo sobre un negocio del catálogo y deja reseñas positivas en Google o redes.',
-  },
-  {
-    n: '02',
-    titulo: 'Comparte',
-    cuerpo:
-      'Sigue los negocios FLI en redes, etiqueta y comparte sus publicaciones con tu red.',
-  },
-  {
-    n: '03',
-    titulo: 'Prefiere FLI',
-    cuerpo:
-      'Para regalos, eventos y servicios, busca primero en el catálogo de la comunidad.',
-  },
-  {
-    n: '04',
-    titulo: 'Conecta',
-    cuerpo:
-      'Presenta a las familias emprendedoras con clientes o aliados que puedan necesitarlas.',
-  },
-  {
-    n: '05',
-    titulo: 'Invita',
-    cuerpo: 'Invita a otras familias del colegio a inscribir su negocio en el catálogo.',
-  },
-] as const;
