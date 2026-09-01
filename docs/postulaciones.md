@@ -185,6 +185,26 @@ campo por campo y nunca se pasa de largo el objeto recibido.
 > más de quince minutos, el workflow está fallando. Nadie recibe un aviso — hay
 > que mirar las ejecuciones en n8n.
 
+## Lo que aprendimos de la primera publicación real
+
+La primera vez que el circuito publicó de verdad, subió una ficha que **rompió
+el build** y dejó a EasyPanel sin poder desplegar durante media hora. Dos causas,
+las dos ya cerradas en el nodo *Empaquetar para GitHub*:
+
+| Qué pasó | Por qué | Cómo está resuelto |
+|---|---|---|
+| `telefono` salió como número | Google Sheets devuelve las celdas numéricas como `number`, y el esquema Zod del repo espera cadena | Todo campo de texto pasa por `String()`, y el teléfono se valida contra `/^[\d ]+$/` antes de subir |
+| La foto se subió con 0 bytes y la ficha la llamaba `.jpg` | El mimeType no llegó y el código caía en `'jpg'` por defecto | Si el mimeType no se reconoce, se aborta en vez de adivinar |
+
+La lección de fondo: **el nodo que publica tiene que validar contra el mismo
+esquema que el sitio**, porque un JSON inválido no falla en n8n —falla en el
+build, media hora después, en otro sistema y sin avisar a nadie—. Ahora aborta
+la publicación con un mensaje claro en vez de dejar el repo en un estado que no
+compila.
+
+> Si el build del sitio empieza a fallar justo después de aprobar algo, mira el
+> último commit automático: casi seguro es un campo con el tipo equivocado.
+
 ## Probar antes de anunciarlo
 
 1. Enviar el formulario con un código de familia inventado → tiene que aparecer
