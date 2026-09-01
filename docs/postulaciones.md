@@ -187,23 +187,50 @@ campo por campo y nunca se pasa de largo el objeto recibido.
 
 ## Lo que aprendimos de la primera publicación real
 
-La primera vez que el circuito publicó de verdad, subió una ficha que **rompió
-el build** y dejó a EasyPanel sin poder desplegar durante media hora. Dos causas,
-las dos ya cerradas en el nodo *Empaquetar para GitHub*:
+La primera vez que el circuito publicó de verdad subió una ficha que **rompió el
+build** y dejó a EasyPanel sin poder desplegar durante media hora. Antes de eso,
+el mismo workflow llevaba **dos días fallando cada diez minutos en silencio**.
 
-| Qué pasó | Por qué | Cómo está resuelto |
-|---|---|---|
-| `telefono` salió como número | Google Sheets devuelve las celdas numéricas como `number`, y el esquema Zod del repo espera cadena | Todo campo de texto pasa por `String()`, y el teléfono se valida contra `/^[\d ]+$/` antes de subir |
-| La foto se subió con 0 bytes y la ficha la llamaba `.jpg` | El mimeType no llegó y el código caía en `'jpg'` por defecto | Si el mimeType no se reconoce, se aborta en vez de adivinar |
+### La causa de fondo, que era una sola
 
-La lección de fondo: **el nodo que publica tiene que validar contra el mismo
-esquema que el sitio**, porque un JSON inválido no falla en n8n —falla en el
-build, media hora después, en otro sistema y sin avisar a nadie—. Ahora aborta
-la publicación con un mensaje claro en vez de dejar el repo en un estado que no
-compila.
+Dentro de un nodo Code en modo *"una vez por item"*, **`$input.item.binary` no
+es de fiar**. En unas ejecuciones llegaba `undefined` y en otras traía el
+literal `"filesystem-v2"` —el marcador que usa n8n cuando guarda el binario en
+disco— en vez de los bytes. De ahí salieron los dos síntomas:
 
-> Si el build del sitio empieza a fallar justo después de aprobar algo, mira el
-> último commit automático: casi seguro es un campo con el tipo equivocado.
+| Síntoma | Por qué |
+|---|---|
+| La foto se subió con 0 bytes | `bin?.data ?? ''` → cadena vacía, que es base64 válido de cero bytes, y GitHub la aceptó |
+| La ficha la llamaba `.jpg` siendo `.webp` | `bin?.mimeType` vino vacío y la extensión cayó en su valor por defecto |
+| `content is not valid Base64` | En las ejecuciones donde `.data` sí traía el marcador literal |
+
+**Regla:** ningún nodo Code debe leer binarios. Los bytes los materializa
+*Extraer base64 de la foto* (`extractFromFile`) en `json.foto_b64`, y la
+extensión la pasa a `json` el nodo *Guardar la extensión*.
+
+### Las cuatro defensas que quedaron
+
+1. **El esquema del sitio usa `z.coerce.string()`** en los campos que vienen del
+   Sheet. Google Sheets devuelve las celdas numéricas como `number`; un teléfono
+   sin comillas fue lo que tumbó el build. Con `coerce` ya no puede pasar,
+   aunque n8n haga todo lo demás mal.
+2. **`¿La foto subió bien?`** lee `content.size` de la respuesta de GitHub y
+   aborta si es menor de 1 kB. Va **después** de subir la foto y **antes** de
+   subir la ficha: ese orden es lo que evita dejar el repo con un JSON apuntando
+   a una imagen rota.
+3. **`Empaquetar para GitHub` valida** el teléfono contra el mismo patrón que el
+   esquema, la extensión contra una lista, y que ningún campo llegue vacío.
+4. **`FLI · alerta de fallo`** manda un correo a tecnología cuando cualquiera de
+   los cinco workflows falla. Está puesto como *Error Workflow* en los cinco.
+
+### La lección que vale para lo que venga
+
+**El nodo que publica tiene que validar contra el mismo esquema que el sitio.**
+Un JSON inválido no falla en n8n: falla en el build, en otro sistema, media hora
+después y sin avisar a nadie. Cada vez que se añada un campo al catálogo hay que
+tocar los dos sitios — `src/content.config.ts` y el nodo que arma la ficha.
+
+> Si el sitio deja de actualizarse, mira primero el último commit automático.
 
 ## Probar antes de anunciarlo
 
