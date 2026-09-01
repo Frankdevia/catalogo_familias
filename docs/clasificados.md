@@ -100,3 +100,12 @@ Viven en `src/data/clasificados.ts` y son la fuente única para el esquema Zod,
 los chips y los badges. Si añades una, **añádela también** a la lista
 `CATEGORIAS` del nodo *Validar solicitud* y a la del nodo *Empaquetar para
 GitHub*, o el servidor rechazará los anuncios que la usen.
+
+## Un detalle del nodo que valida el código
+
+> **`alwaysOutputData` en el nodo que busca el código de familia.** Si el código
+> no existe, Google Sheets devuelve **cero items** —no un error—, el flujo se
+> corta ahí y nadie responde. El navegador recibe una respuesta vacía sin
+> cabecera CORS, `fetch` lanza excepción y el formulario dice *"No pudimos
+> conectarnos"* en vez del mensaje correcto. Con `alwaysOutputData` el nodo emite
+> un item vacío y el `IF` puede mandarlo a la rama de "familia no encontrada".

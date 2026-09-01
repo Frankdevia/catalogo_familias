@@ -232,6 +232,13 @@ tocar los dos sitios — `src/content.config.ts` y el nodo que arma la ficha.
 
 > Si el sitio deja de actualizarse, mira primero el último commit automático.
 
+> **`alwaysOutputData` en el nodo que busca el código de familia.** Si el código
+> no existe, Google Sheets devuelve **cero items** —no un error—, el flujo se
+> corta ahí y nadie responde. El navegador recibe una respuesta vacía sin
+> cabecera CORS, `fetch` lanza excepción y el formulario dice *"No pudimos
+> conectarnos"* en vez del mensaje correcto. Con `alwaysOutputData` el nodo emite
+> un item vacío y el `IF` puede mandarlo a la rama de "familia no encontrada".
+
 ## Probar antes de anunciarlo
 
 1. Enviar el formulario con un código de familia inventado → tiene que aparecer
