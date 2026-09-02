@@ -19,14 +19,17 @@ interface Props {
 
 const { negocios } = Astro.props;
 
-// Una categoría sin negocios no se muestra; "Todos" siempre sí.
+// Se muestran TODAS las categorías, también las que aún no tienen negocios: el
+// chip con un 0 le dice a la familia que esa categoría existe y que puede
+// inscribir el suyo ahí. Al pulsarlo sale el mensaje de "todavía no hay
+// negocios en esta categoría", así que no es un callejón sin salida.
 const chips = [
   { etiqueta: TODOS, cuenta: negocios.length },
   ...CATEGORIAS.map((c) => ({
     etiqueta: c as string,
     cuenta: negocios.filter((n) => n.data.categoria === c).length,
   })),
-].filter((c) => c.etiqueta === TODOS || c.cuenta > 0);
+];
 
 // El modal se rellena en el cliente, así que las fotos se optimizan aquí
 // (2x de los 520x200 que mide la cabecera del diálogo).
@@ -144,7 +147,10 @@ const datosJson = JSON.stringify(datos).replace(/</g, '\\u003c');
     margin: var(--space-10) 0 0;
     text-align: center;
     font-size: var(--text-base);
-    color: var(--text-muted);
+    /* Ahora que se muestran las categorías vacías, este mensaje deja de ser un
+       caso raro y se ve a diario. --text-muted sobre blanco da 3.55 y no llega
+       a AA; --li-gray-600 sube a 5.68 sin salirse del sistema. */
+    color: var(--li-gray-600);
   }
   .nota {
     margin: var(--space-6) 0 0;
