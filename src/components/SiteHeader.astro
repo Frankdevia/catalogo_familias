@@ -11,6 +11,7 @@ const seccion = (id: string) => (enPortada ? `#${id}` : `/#${id}`);
 const enlaces = [
   { href: seccion('catalogo'), texto: 'Catálogo' },
   { href: seccion('clasificados'), texto: 'Clasificados' },
+  { href: seccion('promociones'), texto: 'Promociones' },
   { href: seccion('contacto'), texto: 'Contacto' },
 ];
 ---
@@ -168,8 +169,13 @@ const enlaces = [
     nav ul {
       width: 100%;
       justify-content: space-between;
-      column-gap: var(--space-2);
-      font-size: var(--text-3xs);
+      column-gap: var(--space-1);
+      /* Con cuatro enlaces la fila mide 319px a tamaño fijo y no cabe en los
+         272px útiles de una pantalla de 320: se partía en dos y la cabecera
+         subía a tres filas. La fuente fluida y el tracking apretado —0.08em
+         sobre 41 caracteres cuestan 36px por sí solos— la devuelven a una. */
+      font-size: clamp(9px, 2.8vw, var(--text-3xs));
+      letter-spacing: 0.04em;
     }
   }
 

@@ -1,0 +1,85 @@
+---
+/**
+ * Sección reservada. Todavía no hay contenido: existe para anunciar que viene
+ * y para ocupar su sitio en el menú.
+ *
+ * Cuando llegue el contenido real, esto se parece a `Clasificados.astro`: mismo
+ * encabezado, y la rejilla sustituye al bloque de "Próximamente".
+ */
+---
+
+<section id="promociones">
+  <div class="li-container">
+    <div class="encabezado">
+      <p class="li-eyebrow">Entre familias</p>
+      <h2>Promociones</h2>
+      <p class="entrada">
+        Descuentos y beneficios de los negocios de la comunidad FLI.
+      </p>
+    </div>
+
+    <p class="proximamente">Próximamente</p>
+  </div>
+</section>
+
+<style>
+  section {
+    background: var(--surface-page);
+    padding-block: var(--space-20);
+  }
+
+  .encabezado {
+    margin-bottom: 30px;
+  }
+  .encabezado :global(.li-eyebrow) {
+    display: block;
+    margin: 0 0 var(--space-3);
+  }
+  h2 {
+    font-family: var(--font-display);
+    /* "PROMOCIONES" es una palabra larga en una tipografía muy ancha y no se
+       puede partir: a 30px fijos desborda una pantalla de 320px. */
+    font-size: clamp(20px, 6.2vw, var(--text-2xl));
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: 0 0 var(--space-3);
+  }
+  .entrada {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--text-body);
+    max-width: 60ch;
+  }
+
+  /* Se trata como un estado, no como un párrafo suelto: así la sección se lee
+     como "reservada" y no como una a medio construir. Es el mismo papel que
+     cumple el mensaje de categoría vacía en el catálogo y los clasificados. */
+  .proximamente {
+    margin: 0;
+    padding: var(--space-16) var(--space-6);
+    text-align: center;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-card);
+    background: var(--surface-subtle);
+    font-family: var(--font-subhead);
+    font-size: var(--text-md);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    /* No es --text-muted: ese gris sobre --surface-subtle da 2.83 y no llega a
+       AA. Aquí no es un detalle secundario, es todo el contenido de la sección,
+       así que tiene que leerse. --li-gray-600 es el gris oscuro del sistema. */
+    color: var(--li-gray-600);
+  }
+
+  @media (max-width: 600px) {
+    section {
+      padding-block: var(--space-12);
+    }
+    .proximamente {
+      padding: var(--space-12) var(--space-5);
+      font-size: var(--text-base);
+    }
+  }
+</style>
