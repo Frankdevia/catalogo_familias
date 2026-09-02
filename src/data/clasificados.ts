@@ -9,7 +9,21 @@
  * "Validar solicitud" del workflow de n8n, o el servidor rechazará los anuncios
  * que la usen.
  */
-export const CATEGORIAS_CLASIFICADOS = ['COMPRO', 'VENDO', 'OFREZCO'] as const;
+/**
+ * El orden es el de los chips del filtro: primero lo que se pide —COMPRO,
+ * BUSCO— y después lo que se ofrece —VENDO, OFREZCO—.
+ *
+ * COMPRO y BUSCO se parecen pero no son lo mismo: COMPRO es una compra, algo
+ * que cambia de dueño por dinero; BUSCO es todo lo demás que hace falta y no se
+ * compra —un arriendo, un cupo en una ruta, alguien que dé un refuerzo, un
+ * trabajo—. Es la contraparte de OFREZCO igual que COMPRO lo es de VENDO.
+ */
+export const CATEGORIAS_CLASIFICADOS = [
+  'COMPRO',
+  'BUSCO',
+  'VENDO',
+  'OFREZCO',
+] as const;
 
 export type CategoriaClasificado = (typeof CATEGORIAS_CLASIFICADOS)[number];
 
@@ -28,6 +42,9 @@ export const BADGE: Record<
   { fondo: string; texto: string }
 > = {
   COMPRO: { fondo: 'var(--li-navy)', texto: 'var(--li-white)' },
+  /* El amarillo es el cuarto color de marca y el único que quedaba libre. Como
+     el cielo, es un fondo claro: lleva texto navy, no blanco. */
+  BUSCO: { fondo: 'var(--li-yellow)', texto: 'var(--li-navy)' },
   VENDO: { fondo: 'var(--li-red)', texto: 'var(--li-white)' },
   OFREZCO: { fondo: 'var(--li-sky)', texto: 'var(--li-navy)' },
 };

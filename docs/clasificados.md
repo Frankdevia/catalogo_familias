@@ -60,7 +60,7 @@ Aquí la línea es distinta a la de los negocios, y conviene tenerlo claro:
 
 | Se queda en el Sheet | Se publica en el sitio |
 |---|---|
-| Código de familia | Categoría (COMPRO / VENDO / OFREZCO) |
+| Código de familia | Categoría (COMPRO / BUSCO / VENDO / OFREZCO) |
 | Grado | Texto del anuncio |
 | Nombre del acudiente | **Teléfono de contacto** |
 | | **Correo de contacto** |
