@@ -1,0 +1,44 @@
+---
+/**
+ * Flecha de "esto lleva a otro sitio".
+ *
+ * Sustituye al carácter ↗ (U+2197). Ese venía de la fuente, no del diseño: se
+ * dibujaba con el trazo fino de un glifo de texto, cada familia tipográfica lo
+ * inclina distinto, y junto a un texto en mayúsculas semibold se veía caído y
+ * más delgado que las letras.
+ *
+ * Este hereda el color (`currentColor`) y el tamaño (`1em`), así que sirve
+ * igual en la tarjeta del catálogo que en los enlaces de la ficha, y el grosor
+ * de 2 sobre una caja de 16 le da el mismo peso visual que la tipografía.
+ */
+---
+
+<svg
+  class="flecha"
+  viewBox="0 0 16 16"
+  width="1em"
+  height="1em"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path d="M4.75 11.25 11 5" />
+  <path d="M6.25 5H11v4.75" />
+</svg>
+
+<style>
+  .flecha {
+    /* El SVG es una caja cuadrada de 1em, pero un texto solo ocupa la altura de
+       caja alta —0.708em medidos en Poppins—, así que sin ajuste el icono
+       queda alto. El centro de la caja está a 0.5em sobre la línea base y el
+       del texto a 0.354em: la diferencia, redondeada, es este desplazamiento.
+       Medido, no estimado: con -0.1em el icono quedaba 0.046em por encima. */
+    vertical-align: -0.15em;
+    /* Que no se estire ni se encoja si algún día cae dentro de un flex. */
+    flex-shrink: 0;
+  }
+</style>

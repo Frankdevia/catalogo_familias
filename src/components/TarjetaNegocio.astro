@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { anchoSeguro, type Negocio } from '../data/negocio';
+import FlechaEnlace from './FlechaEnlace.astro';
 
 interface Props {
   negocio: Negocio;
@@ -33,7 +34,7 @@ const ancho = anchoSeguro(foto, 800);
     <div class="pie">
       <span class="familia">{familia}</span>
       <a class="contactar" href={href} data-abrir={negocio.id}>
-        Contactar <span aria-hidden="true">↗</span>
+        Contactar <FlechaEnlace />
         <span class="li-sr-only">a {nombre}</span>
       </a>
     </div>

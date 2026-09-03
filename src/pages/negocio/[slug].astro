@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaInscribe from '../../components/CtaInscribe.astro';
+import FlechaEnlace from '../../components/FlechaEnlace.astro';
 import { telHref, webHref, instagramHref, anchoSeguro } from '../../data/negocio';
 import { SITIO } from '../../data/sitio';
 
@@ -75,7 +76,7 @@ const jsonLd = {
             <dt>Página web</dt>
             <dd>
               <a href={webHref(d.web)} target="_blank" rel="noopener noreferrer">
-                {d.web} <span aria-hidden="true">↗</span>
+                {d.web} <FlechaEnlace />
               </a>
             </dd>
           </div>
@@ -87,7 +88,7 @@ const jsonLd = {
             <dt>Instagram</dt>
             <dd>
               <a href={instagramHref(d.instagram)} target="_blank" rel="noopener noreferrer">
-                {d.instagram} <span aria-hidden="true">↗</span>
+                {d.instagram} <FlechaEnlace />
               </a>
             </dd>
           </div>
