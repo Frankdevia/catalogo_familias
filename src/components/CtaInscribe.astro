@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { SITIO } from '../data/sitio';
-import fondo from '../assets/photos/cta-asesoria.webp';
+import fondo from '../assets/photos/cta-plano-arquitectura.webp';
 ---
 
 <section class="cta">
@@ -45,11 +45,26 @@ import fondo from '../assets/photos/cta-asesoria.webp';
   .velo {
     position: absolute;
     inset: 0;
+    /*
+     * El degradado anterior servía para una foto oscura. El plano de
+     * arquitectura es casi todo blanco, y sobre blanco esas opacidades dejaban
+     * el párrafo en 3.53:1 y el rótulo amarillo en 2.30:1 — muy por debajo del
+     * 4.5:1 de WCAG AA. A 768px llegaba a caer a 2.00:1.
+     *
+     * Misma solución que en el hero: la parada usa `max(700px, 48%)` en vez de
+     * un porcentaje solo, porque el texto mide 560px + gutter y en pantallas
+     * medianas la parte opaca tiene que cubrir esos píxeles concretos.
+     *
+     * El extremo derecho no baja de 0.38: con una foto clara detrás, abrirlo
+     * más deja un borde casi blanco justo encima del footer navy, y la costura
+     * entre los dos canta. A 0.38 el dibujo se sigue viendo.
+     */
     background: linear-gradient(
       90deg,
-      rgba(35, 45, 117, 0.9) 0%,
-      rgba(35, 45, 117, 0.5) 60%,
-      rgba(35, 45, 117, 0.1) 100%
+      rgba(35, 45, 117, 0.94) 0%,
+      rgba(35, 45, 117, 0.88) max(700px, 48%),
+      rgba(35, 45, 117, 0.55) 80%,
+      rgba(35, 45, 117, 0.38) 100%
     );
   }
   .contenido {
