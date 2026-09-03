@@ -9,7 +9,7 @@ Cómo queda conectado `/registrar` con n8n, el Google Sheet y este repositorio.
    │  POST multipart
    ▼
 FLI · catálogo — recibir solicitud        [n8n, id 0p44hKgK0cfPLu4q]
-   │  valida · busca el código de familia · sube la foto a Drive
+   │  valida · sube la foto a Drive
    ▼
 Google Sheet "Solicitudes negocios"        ← aquí revisa el colegio
    │  alguien pone estado = aprobado
@@ -30,7 +30,7 @@ se pueden hacer desde las consolas.
 <https://docs.google.com/spreadsheets/d/1fw4W8RB55_92vxzCbzTSoolqLpK7B7bIyoV5dfcktFE/edit>
 
 ```
-marca_temporal · estado · codigo_familia · grado · acudiente_nombre ·
+marca_temporal · estado · estudiantes · grado · acudiente_nombre ·
 acudiente_telefono · acudiente_correo · consentimiento · negocio_nombre ·
 categoria · descripcion · negocio_telefono · direccion · web · instagram ·
 facebook · foto_drive_url · notas_revision · slug · publicado_en
@@ -100,39 +100,40 @@ esos valores nunca llegan. Si alguna vez hace falta cambiarlos por despliegue,
 hay que pasarlos como *build args* al Dockerfile, no como variables de entorno.
 
 La URL del webhook no es un secreto: acaba en el JavaScript de `/registrar` de
-todos modos. Lo que protege el endpoint es la validación del código de familia,
-el campo trampa y la aprobación humana.
+todos modos. Lo que protege el endpoint es el campo trampa y,
+sobre todo, la aprobación humana: ya no hay ninguna comprobación automática
+de que quien escribe pertenezca al colegio.
 
 ### Si cambia la URL del webhook
 
 Pasa si se borra y recrea el workflow de recepción. Hay que actualizar el valor
 por defecto en `src/pages/registrar.astro` y volver a desplegar.
 
-## De dónde sale la validación del código de familia
+## Cómo se valida ahora la identidad
 
-El nodo *Buscar código de familia* consulta:
+**A mano, al revisar.** El formulario pide *"Nombres de tus estudiantes y su
+grado"* en un solo campo libre, que llega a la columna `estudiantes` del Sheet.
+No hay ninguna consulta automática contra la base del colegio.
 
-- Documento **Base Datos Oficial 2025-2026**
-  (`11ghCkxLQn5IJRFFZ153SXoayuPb3DJUtJUe1-32s1ZE`)
-- Pestaña **BASE DATOS** (gid `955091006`)
-- Columnas **`Cód Familia`** (con tilde) y **`Homeroom`**, que es el grado que
-  acaba en la ficha como `Familia — grado 3B`
+Quien revisa hace dos cosas antes de aprobar:
 
-Es la misma fuente que usa el workflow *Student's institutional emails creator*,
-que está activo. **No** es la hoja del workflow *Sync Estudiantes: Google Sheets
-→ MySQL*, que está inactivo y tiene otros nombres de columna: confundirlas fue
-el primer bug en producción, y el síntoma era engañoso —el formulario decía que
-el código no existía cuando en realidad la consulta fallaba—.
+1. **Comprueba que esos estudiantes existen** y que el grado cuadra.
+2. **Escribe el grado en la columna `grado`.** Llega vacía a propósito. Es el
+   único dato de toda esa sección que acaba publicado: la ficha lo muestra como
+   `Familia — grado 7A`. Si se queda vacía, el workflow de publicación **se
+   detiene solo** con un mensaje que lo dice, en vez de publicar `Familia —
+   grado ` a medias.
 
-Por eso ahora el workflow distingue los dos casos:
+**Los nombres de los estudiantes no salen nunca del Sheet.** Son datos de
+menores: la lista blanca del nodo *Empaquetar para GitHub* arma la ficha campo
+por campo, `estudiantes` está en la lista de claves prohibidas, y además se
+comprueba que la cadena completa no aparezca en el JSON público.
 
-| Situación | Qué ve la familia |
-|---|---|
-| El código no está en la base | "Ese código no aparece en nuestros registros", señalado sobre el campo |
-| La consulta al Sheet falla | "No pudimos verificar tu código en este momento", sin culpar al dato |
-
-Si algún día cambia la base de datos oficial del colegio, hay que actualizar el
-documento y la pestaña en ese nodo.
+> Esto cambió el 3 de septiembre de 2026. Antes había un nodo *Buscar código de
+> familia* que consultaba la **Base Datos Oficial** del colegio por `Cód
+> Familia` y devolvía el `Homeroom`. Se quitó junto con su `IF` y su respuesta
+> de "familia no encontrada". El precio de quitarlo es que **cualquiera puede
+> enviar el formulario**: la barrera pasó de automática a humana.
 
 ## Qué credencial usa cada nodo de Google
 
@@ -140,7 +141,6 @@ No todas usan la misma, y no es un descuido:
 
 | Nodo | Credencial | Por qué |
 |---|---|---|
-| Buscar código de familia | `ASISTENTE TECNOLOGIA` | Es la que tiene acceso a la Base de Datos Oficial del colegio |
 | Guardar solicitud | `Google Sheets account 2` | Es la cuenta con la que está compartido el Sheet de solicitudes |
 | Leer aprobados / Marcar como publicado | `Google Sheets account 2` | Mismo Sheet |
 | Subir foto a Drive | `Google Drive account` | Dueña de la carpeta de fotos |
@@ -164,10 +164,13 @@ Mientras tanto, funciona.
 El nodo *Empaquetar para GitHub* comprueba dos cosas antes de subir una ficha:
 
 1. **Estructural**: que la ficha no traiga ninguna clave interna
-   (`codigo_familia`, `acudiente_nombre`, `acudiente_telefono`…). Es
+   (`estudiantes`, `acudiente_nombre`, `acudiente_telefono`…). Es
    determinista y no puede dar falsos positivos.
-2. **Por valor, solo el correo**: una ficha de negocio no tiene campo de correo,
-   así que si el del acudiente aparece ahí es una fuga de verdad.
+2. **Por valor: el correo y los nombres de los estudiantes**. Una ficha de
+   negocio no tiene campo de correo, así que si el del acudiente aparece ahí es
+   una fuga de verdad. Con los estudiantes se compara la **cadena completa**, no
+   cada nombre suelto: un negocio puede llamarse como una hija ("Creaciones
+   Valeria") y comparar por trozos lo bloquearía para siempre.
 
 **El teléfono no se compara por valor, y es a propósito.** La primera versión sí
 lo hacía y bloqueó la publicación durante dos días: la familia había puesto el
@@ -176,9 +179,8 @@ así que el valor interno aparecía legítimamente en la ficha pública y la
 comprobación abortaba en cada ejecución, cada diez minutos, sin que nadie se
 enterara.
 
-Lo mismo pasaría con el nombre (un negocio puede llamarse como su dueña) y con
-el código de familia (sus dígitos pueden aparecer dentro de un teléfono o una
-dirección). **Lo que protege de verdad es la lista blanca**: la ficha se arma
+Lo mismo pasaría con el nombre (un negocio puede llamarse como su dueña).
+**Lo que protege de verdad es la lista blanca**: la ficha se arma
 campo por campo y nunca se pasa de largo el objeto recibido.
 
 > Síntoma a vigilar: si una fila queda en `aprobado` con `publicado_en` vacío
@@ -232,22 +234,26 @@ tocar los dos sitios — `src/content.config.ts` y el nodo que arma la ficha.
 
 > Si el sitio deja de actualizarse, mira primero el último commit automático.
 
-> **`alwaysOutputData` en el nodo que busca el código de familia.** Si el código
-> no existe, Google Sheets devuelve **cero items** —no un error—, el flujo se
-> corta ahí y nadie responde. El navegador recibe una respuesta vacía sin
-> cabecera CORS, `fetch` lanza excepción y el formulario dice *"No pudimos
-> conectarnos"* en vez del mensaje correcto. Con `alwaysOutputData` el nodo emite
-> un item vacío y el `IF` puede mandarlo a la rama de "familia no encontrada".
+> **Un nodo que devuelve cero items corta el flujo sin que nadie responda.** Le
+> pasó al nodo que buscaba el código de familia: si el código no existía, Google
+> Sheets devolvía **cero items** —no un error—, el navegador recibía una
+> respuesta vacía sin cabecera CORS, `fetch` lanzaba excepción y el formulario
+> decía *"No pudimos conectarnos"* en vez del mensaje correcto. Se arregló con
+> `alwaysOutputData`. Ese nodo ya no existe, pero la lección vale para cualquier
+> nodo de Sheets que se añada delante de un `respondToWebhook`.
 
 ## Probar antes de anunciarlo
 
-1. Enviar el formulario con un código de familia inventado → tiene que aparecer
-   el mensaje sobre el campo del código, no un error genérico.
-2. Enviar uno con un código real → fila en el Sheet, foto en Drive, correo al
-   colegio y correo de confirmación.
-3. Poner `estado = aprobado` y ejecutar el workflow de publicación a mano.
-4. **Abrir el JSON que se commiteó y confirmar que no contiene el código de
-   familia, ni el nombre, ni el teléfono, ni el correo del acudiente.** El nodo
+1. Enviar el formulario dejando vacío el campo de estudiantes → tiene que
+   aparecer el mensaje sobre ese campo, no un error genérico.
+2. Enviar uno completo → fila en el Sheet con la columna `estudiantes` llena,
+   foto en Drive, correo al colegio con los nombres a la vista y correo de
+   confirmación.
+3. Poner `estado = aprobado` **sin escribir el grado** → el workflow de
+   publicación tiene que detenerse y decir que falta el grado.
+4. Escribir el grado, volver a ejecutar, y **abrir el JSON que se commiteó para
+   confirmar que no contiene los nombres de los estudiantes, ni el nombre, ni el
+   teléfono, ni el correo del acudiente.** El nodo
    *Empaquetar para GitHub* aborta la publicación si detecta uno de esos datos
    en la ficha, pero conviene verlo con los propios ojos la primera vez.
 5. Esperar el redespliegue y ver la ficha publicada.

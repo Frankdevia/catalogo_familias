@@ -35,25 +35,26 @@ const MAX_DESC = 280;
   <fieldset>
     <legend>1. Verifica tu familia</legend>
     <p class="ayuda-bloque">
-      Solo para confirmar que perteneces a la comunidad. <strong>El código de
-      familia y tu nombre no se publican.</strong>
+      Solo para confirmar que perteneces a la comunidad. <strong>Los nombres de
+      tus estudiantes y tu nombre no se publican.</strong>
     </p>
 
     <div class="campo">
-      <label for="codigo_familia">Código de familia</label>
+      <label for="estudiantes">Nombres de tus estudiantes y su grado</label>
       <input
-        id="codigo_familia"
-        name="codigo_familia"
+        id="estudiantes"
+        name="estudiantes"
         type="text"
         required
-        maxlength={LIMITES.codigoFamilia.max}
+        maxlength={LIMITES.estudiantes.max}
         autocomplete="off"
-        aria-describedby="ayuda-codigo"
+        placeholder="Valeria Gómez 11B, Antonia Ruiz 7A"
+        aria-describedby="ayuda-estudiantes"
       />
-      <p id="ayuda-codigo" class="ayuda">
-        El mismo que usas en la plataforma del colegio.
+      <p id="ayuda-estudiantes" class="ayuda">
+        (Se usa para validar la identidad de quien llena el formulario.)
       </p>
-      <p class="error" data-error-de="codigo_familia" hidden></p>
+      <p class="error" data-error-de="estudiantes" hidden></p>
     </div>
 
     <div class="campo">

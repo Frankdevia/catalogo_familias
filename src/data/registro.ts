@@ -8,7 +8,9 @@
  */
 
 export const LIMITES = {
-  codigoFamilia: { max: 20 },
+  /** Nombres de los estudiantes y su grado, en un solo campo. Da para dos o
+   *  tres hijos: "Valeria Gómez 11B, Antonia Ruiz 7A". */
+  estudiantes: { max: 150 },
   acudienteNombre: { max: 80 },
   negocioNombre: { max: 60 },
   descripcion: { max: 200 },

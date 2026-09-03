@@ -32,25 +32,27 @@ const { endpoint } = Astro.props;
   <fieldset>
     <legend>1. Verifica tu familia</legend>
     <p class="ayuda-bloque">
-      Solo para confirmar que perteneces a la comunidad. <strong>Nada de esta
-      sección se publica</strong> en el catálogo.
+      Solo para confirmar que perteneces a la comunidad. <strong>Los nombres de
+      tus estudiantes y tus datos de contacto no se publican</strong> en el
+      catálogo.
     </p>
 
     <div class="campo">
-      <label for="codigo_familia">Código de familia</label>
+      <label for="estudiantes">Nombres de tus estudiantes y su grado</label>
       <input
-        id="codigo_familia"
-        name="codigo_familia"
+        id="estudiantes"
+        name="estudiantes"
         type="text"
         required
-        maxlength={LIMITES.codigoFamilia.max}
+        maxlength={LIMITES.estudiantes.max}
         autocomplete="off"
-        aria-describedby="ayuda-codigo"
+        placeholder="Valeria Gómez 11B, Antonia Ruiz 7A"
+        aria-describedby="ayuda-estudiantes"
       />
-      <p id="ayuda-codigo" class="ayuda">
-        El mismo que usas en la plataforma del colegio.
+      <p id="ayuda-estudiantes" class="ayuda">
+        (Se usa para validar la identidad de quien llena el formulario.)
       </p>
-      <p class="error" data-error-de="codigo_familia" hidden></p>
+      <p class="error" data-error-de="estudiantes" hidden></p>
     </div>
 
     <div class="campo">
@@ -214,7 +216,8 @@ const { endpoint } = Astro.props;
       <span>
         Autorizo a la Fundación Liceo Inglés a publicar los datos de mi negocio
         —nombre, descripción, foto, teléfono, dirección y redes— en el catálogo
-        público. Mis datos personales y el código de familia no se publican.
+        público. Mis datos personales y los nombres de mis estudiantes no se
+        publican.
       </span>
     </label>
     <p class="error" data-error-de="consentimiento" hidden></p>

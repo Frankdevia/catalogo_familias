@@ -54,7 +54,7 @@ if (form && exito) {
     };
 
     const obligatorios: Array<[string, string]> = [
-      ['codigo_familia', 'Necesitamos tu código de familia.'],
+      ['estudiantes', 'Escribe los nombres de tus estudiantes y su grado.'],
       ['acudiente_nombre', 'Escribe tu nombre.'],
       ['cat', 'Elige qué quieres publicar.'],
       ['desc', 'Escribe tu anuncio.'],
@@ -109,7 +109,7 @@ if (form && exito) {
       ).trim();
 
     const datos = new URLSearchParams();
-    datos.set('codigo_familia', valor('codigo_familia'));
+    datos.set('estudiantes', valor('estudiantes'));
     datos.set('acudiente_nombre', valor('acudiente_nombre'));
     datos.set('cat', valor('cat'));
     datos.set('desc', valor('desc'));

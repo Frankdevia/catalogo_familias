@@ -184,7 +184,7 @@ llega al repo**:
 
 | Se queda en el Google Sheet | Se publica en el catálogo |
 |---|---|
-| Código de familia | Nombre, categoría, descripción del negocio |
+| Nombres de los estudiantes y su grado | Nombre, categoría, descripción del negocio |
 | Nombre del acudiente | `familia`: `"Familia — grado 3B"`, sin apellido |
 | Teléfono y correo del acudiente | Teléfono **del negocio**, dirección, foto, redes |
 

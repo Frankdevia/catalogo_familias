@@ -11,7 +11,7 @@ no hay foto.
    │  POST form-urlencoded
    ▼
 FLI · clasificados — recibir solicitud     [n8n, id SLOJq085Tc6OQAlj]
-   │  valida · busca el código de familia
+   │  valida
    ▼
 Sheet "Solicitudes negocios" › pestaña Clasificados   ← aquí revisa el colegio
    │  alguien pone estado = aprobado
@@ -35,7 +35,7 @@ En el documento
 crea una pestaña llamada exactamente `Clasificados` con esta primera fila:
 
 ```
-marca_temporal · estado · codigo_familia · grado · acudiente_nombre ·
+marca_temporal · estado · estudiantes · grado · acudiente_nombre ·
 acudiente_correo · consentimiento · cat · desc · phone · email ·
 notas_revision · id · publicado_en
 ```
@@ -60,7 +60,7 @@ Aquí la línea es distinta a la de los negocios, y conviene tenerlo claro:
 
 | Se queda en el Sheet | Se publica en el sitio |
 |---|---|
-| Código de familia | Categoría (COMPRO / BUSCO / VENDO / OFREZCO) |
+| Nombres de los estudiantes y su grado | Categoría (COMPRO / BUSCO / VENDO / OFREZCO) |
 | Grado | Texto del anuncio |
 | Nombre del acudiente | **Teléfono de contacto** |
 | | **Correo de contacto** |
@@ -101,11 +101,22 @@ los chips y los badges. Si añades una, **añádela también** a la lista
 `CATEGORIAS` del nodo *Validar solicitud* y a la del nodo *Empaquetar para
 GitHub*, o el servidor rechazará los anuncios que la usen.
 
-## Un detalle del nodo que valida el código
+## Cómo se valida la identidad
 
-> **`alwaysOutputData` en el nodo que busca el código de familia.** Si el código
-> no existe, Google Sheets devuelve **cero items** —no un error—, el flujo se
-> corta ahí y nadie responde. El navegador recibe una respuesta vacía sin
-> cabecera CORS, `fetch` lanza excepción y el formulario dice *"No pudimos
-> conectarnos"* en vez del mensaje correcto. Con `alwaysOutputData` el nodo emite
-> un item vacío y el `IF` puede mandarlo a la rama de "familia no encontrada".
+**A mano, al revisar.** El formulario pide *"Nombres de tus estudiantes y su
+grado"* en un solo campo libre, que llega a la columna `estudiantes`. No hay
+consulta automática contra la base del colegio: quien revisa comprueba que esos
+estudiantes existan antes de poner `aprobado`.
+
+A diferencia del catálogo, aquí **no hace falta escribir el grado**: un anuncio
+clasificado no muestra la familia, así que esa columna se queda vacía.
+
+Los nombres de los estudiantes no salen nunca del Sheet: `estudiantes` está en
+la lista de claves prohibidas del nodo *Empaquetar para GitHub*.
+
+> **Lección que dejó el nodo que se quitó.** Buscaba el código de familia y, si
+> no existía, Google Sheets devolvía **cero items** —no un error—, el flujo se
+> cortaba y nadie respondía. El navegador recibía una respuesta vacía sin
+> cabecera CORS, `fetch` lanzaba excepción y el formulario decía *"No pudimos
+> conectarnos"*. Se arregló con `alwaysOutputData`. Vale para cualquier nodo de
+> Sheets que se ponga delante de un `respondToWebhook`.

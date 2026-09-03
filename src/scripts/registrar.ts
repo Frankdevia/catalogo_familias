@@ -170,7 +170,7 @@ if (form && exito) {
     };
 
     const obligatorios: Array<[string, string]> = [
-      ['codigo_familia', 'Necesitamos tu código de familia.'],
+      ['estudiantes', 'Escribe los nombres de tus estudiantes y su grado.'],
       ['acudiente_nombre', 'Escribe tu nombre.'],
       ['acudiente_telefono', 'Escribe tu teléfono.'],
       ['acudiente_correo', 'Escribe tu correo.'],
@@ -223,7 +223,7 @@ if (form && exito) {
       ((form.elements.namedItem(campo) as HTMLInputElement | HTMLSelectElement | null)?.value ?? '').trim();
 
     const datos = new FormData();
-    datos.set('codigo_familia', valor('codigo_familia'));
+    datos.set('estudiantes', valor('estudiantes'));
     datos.set('acudiente_nombre', valor('acudiente_nombre'));
     datos.set('acudiente_telefono', normalizarTelefono(valor('acudiente_telefono')));
     datos.set('acudiente_correo', valor('acudiente_correo').toLowerCase());
