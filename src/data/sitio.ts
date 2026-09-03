@@ -11,7 +11,7 @@ export const SITIO = {
   /** Lema que acompaña al logo en la cabecera. */
   lema: 'Still we rise!',
   descripcion:
-    'Catálogo de negocios de las familias de la Fundación Liceo Inglés. Cuando les compras, fortaleces la economía de la familia FLI.',
+    'Catálogo de empresas de las familias de la Fundación Liceo Inglés. Cuando les compras, fortaleces la economía de la familia FLI.',
   /** Formulario de postulación de negocios, en el propio sitio. */
   signupUrl: '/registrar',
   /** Formulario para publicar un anuncio clasificado. */

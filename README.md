@@ -1,6 +1,6 @@
 # Apoye a Nuestras Familias
 
-Catálogo de negocios de las familias de la **Fundación Liceo Inglés**.
+Catálogo de empresas de las familias de la **Fundación Liceo Inglés**.
 Sitio estático construido con [Astro](https://astro.build), a partir del diseño
 `Apoye a Nuestras Familias v4` y del design system de Liceo Inglés.
 
