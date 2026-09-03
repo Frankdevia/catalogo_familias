@@ -5,3 +5,12 @@ dist/
 *.log
 .env
 .env.production
+
+# Datos de familias: este repositorio es PÚBLICO.
+# El export del Directorio Profesional trae el correo y el celular personal de
+# 65 familias. Un `git add -A` lo publicaría.
+*.xlsx
+datos-privados/
+
+# Originales de las fotos: al repo solo entra el .webp ya optimizado.
+emprendimiento.jpg
