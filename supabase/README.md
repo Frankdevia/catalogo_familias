@@ -141,3 +141,31 @@ La configuración de autenticación —Site URL, URLs de redirección, proveedor
 Google— vive hoy en el panel de Supabase, no en este repo. Si algún día se
 quiere versionar, hay que trasladarla a `config.toml` **completa** antes de
 empujar nada.
+
+## Secretos de las funciones
+
+Ninguno se escribe en el repo. Se ponen con `supabase secrets set` **desde la
+carpeta del repo**, que es donde vive el enlace al proyecto:
+
+| Secreto | Para qué | Si falta |
+|---|---|---|
+| `GITHUB_TOKEN` | Commitear al repositorio. PAT de alcance fino, un solo permiso: *Contents: read and write* | `publicar` devuelve 500 y no publica nada |
+| `EASYPANEL_DEPLOY_URL` | Avisar al despliegue en cuanto el commit sale | El sitio depende de que GitHub avise a EasyPanel, que **ya se atascó dos veces** |
+| `SAL_HUELLA` | Sal del hash de IP del limitador | Se usa una sal por defecto y los hashes serían reversibles |
+
+> **`supabase secrets set` sobrescribe sin avisar y actúa sobre el proyecto
+> enlazado.** Si se ejecuta desde otra carpeta, o con otro proyecto
+> seleccionado, el secreto acaba en el proyecto equivocado y pisa el que
+> hubiera allí con ese nombre. Ya pasó una vez.
+
+## Por qué la función avisa al despliegue
+
+Porque la notificación de GitHub a EasyPanel **se ha atascado dos veces**. La
+última dejó el sitio nueve horas sirviendo contenido viejo mientras la base y el
+repositorio estaban al día: el fallo es silencioso, todo correcto salvo lo que
+ve la gente. Con 700 familias eso significa aprobaciones acumulándose sin que
+nadie note que el sitio no las refleja.
+
+La llamada va después de sellar y su fallo no tumba la ejecución —el commit ya
+salió y los datos ya son coherentes—, pero viaja en la respuesta para que no
+pase desapercibido.

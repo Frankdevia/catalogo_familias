@@ -214,6 +214,30 @@ Deno.serve(async (peticion) => {
     const paraBorrar = altas.map((a) => a.foto_ruta).filter((r): r is string => Boolean(r));
     if (paraBorrar.length) await db.storage.from('fotos').remove(paraBorrar);
 
+    // --- avisar al despliegue ------------------------------------------------
+    //
+    // Se llama a EasyPanel directamente en vez de confiar en que GitHub le
+    // notifique el push. Esa notificación ya se atascó dos veces en este
+    // proyecto —la última dejó el sitio nueve horas mostrando contenido viejo
+    // mientras la base y el repositorio estaban al día—, y el síntoma es
+    // silencioso: todo correcto salvo lo que ve la gente.
+    //
+    // Va DESPUÉS de sellar, y su fallo no tumba la ejecución: el commit ya
+    // salió y los datos ya son coherentes. Lo que no puede es pasar
+    // desapercibido, así que viaja en la respuesta.
+    const urlDespliegue = Deno.env.get('EASYPANEL_DEPLOY_URL');
+    let despliegue = 'sin configurar · el sitio depende de que GitHub avise';
+    if (urlDespliegue) {
+      try {
+        const r = await fetch(urlDespliegue, { method: 'POST' });
+        despliegue = r.ok ? 'lanzado' : `FALLÓ con ${r.status}`;
+        if (!r.ok) console.error('el despliegue no arrancó', r.status, await r.text());
+      } catch (e) {
+        despliegue = `FALLÓ: ${String(e)}`;
+        console.error('el despliegue no arrancó', String(e));
+      }
+    }
+
     return responder({
       ok: true,
       commit: commit.sha,
@@ -221,6 +245,7 @@ Deno.serve(async (peticion) => {
       retiradas: bajas.length,
       caducadas,
       fotos_liberadas: paraBorrar.length,
+      despliegue,
     });
   } catch (e) {
     console.error('publicar falló', String(e));
