@@ -2,12 +2,9 @@
   "nombre": "Transportes Especiales Del Otún",
   "categoria": "Servicios",
   "descripcion": "Servicio de transporte escolar, empresarial, turismo y eventos",
-  "familia": "Familia — grado K5B",
+  "familia": "Familia — grado 5B",
   "foto": "../../assets/photos/transportes-especiales-del-otun.webp",
-  "telefono": "3206689299",
-  "direccion": "AV. 30 de Agosto Calle 22 bis N 14-10., Pereira, Colombia",
+  "telefono": "310 842 0486",
   "web": "www.transespecialesdelotun.com",
-  "instagram": "@transespecialesotun",
-  "facebook": "https://www.facebook.com/transespecialesotun/?locale=es_LA",
   "orden": 100
 }
