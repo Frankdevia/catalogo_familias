@@ -52,10 +52,12 @@ const CAMPOS: Record<Cola, Campo[]> = {
     { nombre: 'acudiente_correo', etiqueta: 'Correo de contacto', tipo: 'texto', requerido: true, interno: true },
     { nombre: 'nombre', etiqueta: 'Nombre del negocio', tipo: 'texto', requerido: true, max: 60 },
     { nombre: 'categoria', etiqueta: 'Categoría', tipo: 'lista', requerido: true, opciones: CATEGORIAS },
-    { nombre: 'descripcion', etiqueta: 'Descripción', tipo: 'area', requerido: true, max: 200, ancho: true },
+    { nombre: 'descripcion', etiqueta: 'Descripción', tipo: 'area', requerido: true, max: 1200, ancho: true },
     { nombre: 'grado', etiqueta: 'Grado (sale en la ficha)', tipo: 'texto', max: 10 },
     { nombre: 'telefono', etiqueta: 'Teléfono del negocio', tipo: 'texto', requerido: true },
-    { nombre: 'direccion', etiqueta: 'Dirección', tipo: 'texto', requerido: true, max: 120 },
+    // Sin `requerido`: vaciarla es la manera de quitar la fila «Dirección» de
+    // una ficha ya publicada. El formulario guarda el vacío como null.
+    { nombre: 'direccion', etiqueta: 'Dirección (opcional)', tipo: 'texto', max: 120 },
     { nombre: 'web', etiqueta: 'Web', tipo: 'texto', max: 80 },
     { nombre: 'instagram', etiqueta: 'Instagram (con @)', tipo: 'texto', max: 40 },
     { nombre: 'facebook', etiqueta: 'Facebook', tipo: 'texto', max: 80 },
@@ -364,24 +366,93 @@ if (raiz) {
     await pintarLista();
   }
 
+  /**
+   * Borrar, incluso lo que está publicado.
+   *
+   * La base impide borrar una fila que sigue viva en el sitio, y con razón: el
+   * archivo del repositorio se quita leyendo esa misma fila, así que si
+   * desaparece antes, el negocio se queda publicado para siempre sin nada en el
+   * panel con lo que retirarlo.
+   *
+   * Eso convertía «Borrar» en un botón que solo daba un error. La regla se
+   * queda —es la que protege—, pero el trabajo lo hace el panel: retira, pide
+   * la publicación en el momento, comprueba que el archivo ya salió del
+   * repositorio y solo entonces borra. Son tres pasos y unos segundos, no un
+   * mensaje pidiéndole a quien revisa que los dé a mano y vuelva luego.
+   */
   async function borrar(id: string, boton: HTMLButtonElement) {
     const fila = datos[cola].find((f) => f.id === id);
     const titulo = fila?.nombre ?? fila?.titulo ?? fila?.descripcion?.slice(0, 40) ?? 'esta entrada';
-    if (!confirm(`¿Borrar «${titulo}» definitivamente? No se puede deshacer.`)) return;
+    const publicada = Boolean(fila?.publicado_en) && !fila?.retirado_en;
+
+    const aviso = publicada
+      ? `«${titulo}» está publicada. Se quitará del sitio y después se borrará ` +
+        `definitivamente. No se puede deshacer.`
+      : `¿Borrar «${titulo}» definitivamente? No se puede deshacer.`;
+    if (!confirm(aviso)) return;
 
     boton.disabled = true;
-    const { error } = await db.from(TABLA[cola]).delete().eq('id', id);
-    boton.disabled = false;
+    try {
+      if (publicada && !(await retirarDelSitio(id, titulo))) return;
 
-    if (error) {
-      // La base impide borrar lo que sigue vivo en el sitio: si la fila
-      // desapareciera, el cron nunca sabría que hay que quitar el archivo.
-      avisar(error.message, 'error');
-      return;
+      const { error } = await db.from(TABLA[cola]).delete().eq('id', id);
+      if (error) {
+        avisar(error.message, 'error');
+        return;
+      }
+      avisar(publicada ? `«${titulo}» salió del sitio y quedó borrada.` : 'Borrada.');
+      await cargar();
+      await pintarLista();
+    } finally {
+      boton.disabled = false;
     }
-    avisar('Borrada.');
-    await cargar();
-    await pintarLista();
+  }
+
+  /**
+   * Deja una ficha publicada lista para borrarse, y dice si lo consiguió.
+   *
+   * `retirado_en` es la señal: lo escribe la publicación cuando ya ha quitado
+   * el archivo del repositorio. Hasta que aparece, borrar sigue prohibido, así
+   * que se relee la fila en vez de dar por hecho que la llamada bastó.
+   */
+  async function retirarDelSitio(id: string, titulo: string): Promise<boolean> {
+    avisar(`Quitando «${titulo}» del sitio…`);
+
+    const { error: errorRetiro } = await db
+      .from(TABLA[cola])
+      .update({ estado: 'retirado', revisado_por: usuarioId, revisado_en: new Date().toISOString() })
+      .eq('id', id);
+    if (errorRetiro) {
+      avisar(`No se pudo retirar: ${errorRetiro.message}`, 'error');
+      return false;
+    }
+
+    const { error: errorPublicar } = await db.functions.invoke('publicar', { method: 'POST' });
+    if (errorPublicar) {
+      // Se queda retirada, que es un estado bueno: el ciclo automático la
+      // terminará de sacar y entonces se podrá borrar desde «Retirados».
+      avisar(
+        `«${titulo}» quedó retirada, pero la publicación falló (${errorPublicar.message}). ` +
+          `Sale del sitio en el próximo ciclo y ya se podrá borrar.`,
+        'error',
+      );
+      await cargar();
+      await pintarLista();
+      return false;
+    }
+
+    const { data } = await db.from(TABLA[cola]).select('retirado_en').eq('id', id).single();
+    if (!data?.retirado_en) {
+      avisar(
+        `«${titulo}» quedó retirada, pero todavía no consta fuera del repositorio. ` +
+          `Espera al próximo ciclo y bórrala desde «Retirados».`,
+        'error',
+      );
+      await cargar();
+      await pintarLista();
+      return false;
+    }
+    return true;
   }
 
   // --- acciones ------------------------------------------------------------

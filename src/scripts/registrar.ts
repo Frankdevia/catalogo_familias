@@ -126,7 +126,6 @@ if (form && exito) {
       ['categoria', 'Elige una categoría.'],
       ['descripcion', 'Cuéntanos qué ofreces.'],
       ['negocio_telefono', 'Escribe el teléfono del negocio.'],
-      ['direccion', 'Escribe la dirección o la ciudad.'],
     ];
 
     for (const [campo, mensaje] of obligatorios) {

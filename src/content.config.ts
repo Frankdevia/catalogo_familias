@@ -32,15 +32,20 @@ const negocios = defineCollection({
       telefono: z.coerce
         .string()
         .regex(/^[\d ]+$/, 'Solo dígitos y espacios, sin +57'),
-      /** Opcional: el formulario del Directorio nunca la pidió, así que para
-       *  las fichas que vienen de allí el dato sencillamente no existe. */
-      direccion: z.coerce.string().optional(),
+      /* Los opcionales usan `.nullish()` y no `.optional()`. No es lo mismo:
+         `z.coerce.string().optional()` deja pasar un null y lo convierte en la
+         CADENA "null", que es lo que acabaría impreso en la ficha. Hoy no llega
+         ninguno porque la consulta de publicación pasa por `jsonb_strip_nulls`,
+         pero un JSON escrito a mano sí podría traerlo. */
+      /** Opcional: no todos los negocios tienen local, y el formulario del
+       *  Directorio nunca la pidió. Sin ella la ficha no dibuja la fila. */
+      direccion: z.coerce.string().nullish(),
       /** Dominio sin protocolo: "cafecerritos.co". */
-      web: z.coerce.string().optional(),
+      web: z.coerce.string().nullish(),
       /** Con arroba: "@cafe.cerritos". */
-      instagram: z.string().startsWith('@').optional(),
+      instagram: z.string().startsWith('@').nullish(),
       /** Nombre de la página, no una URL. */
-      facebook: z.coerce.string().optional(),
+      facebook: z.coerce.string().nullish(),
       /** Menor = aparece antes. Empates se resuelven alfabéticamente. */
       orden: z.number().int().default(100),
     }),

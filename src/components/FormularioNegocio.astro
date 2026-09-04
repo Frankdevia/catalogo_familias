@@ -184,16 +184,17 @@ const { endpoint } = Astro.props;
       </div>
 
       <div class="campo">
-        <label for="direccion">Dirección</label>
+        <label for="direccion">Dirección <span class="opcional">(opcional)</span></label>
         <input
           id="direccion"
           name="direccion"
           type="text"
-          required
           maxlength={LIMITES.direccion.max}
           aria-describedby="ayuda-direccion"
         />
-        <p id="ayuda-direccion" class="ayuda">O la ciudad, si atiendes a domicilio.</p>
+        <p id="ayuda-direccion" class="ayuda">
+          O la ciudad. Si no tienes local, déjala en blanco: no aparecerá en tu ficha.
+        </p>
         <p class="error" data-error-de="direccion" hidden></p>
       </div>
     </div>

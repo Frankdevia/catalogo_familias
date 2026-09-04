@@ -219,7 +219,10 @@ Deno.serve(async (peticion) => {
         return no('descripcion', `Ese texto supera los ${LIMITES.descripcion.max} caracteres.`);
       }
       if (!telefonoValido(telNegocio)) return no('negocio_telefono', 'Ese teléfono parece incompleto.');
-      if (!texto(cuerpo.direccion)) return no('direccion', 'Escribe la dirección o la ciudad.');
+      // La dirección no se exige: media docena de los negocios del Directorio no
+      // tienen local —consultoría, servicios a domicilio, ventas por Instagram—
+      // y exigirla los obligaba a inventarse algo. Los que escribieron «no
+      // aplica» lo dejan dicho: la fila vacía es más honesta que ese relleno.
 
       const foto = cuerpo.foto;
       if (!(foto instanceof File) || foto.size === 0) return no('foto', 'Sube una foto de tu negocio.');
@@ -243,7 +246,9 @@ Deno.serve(async (peticion) => {
         categoria: texto(cuerpo.categoria),
         descripcion,
         telefono: telNegocio,
-        direccion: texto(cuerpo.direccion),
+        // Vacía va como null y no como cadena vacía: es lo que hace que la
+        // ficha publicada no dibuje la fila «Dirección» en absoluto.
+        direccion: texto(cuerpo.direccion) || null,
         web: normalizarWeb(texto(cuerpo.web)) || null,
         instagram: normalizarInstagram(texto(cuerpo.instagram)) || null,
         facebook: texto(cuerpo.facebook) || null,

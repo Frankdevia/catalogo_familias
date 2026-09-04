@@ -11,12 +11,15 @@ export interface NegocioModal {
   foto?: string;
   telefono: string;
   telHref: string;
-  direccion?: string;
-  web?: string;
+  /* Estos llegan del esquema de contenido, donde son `.nullish()`: una ficha
+     sin dirección trae null y no `undefined`. El modal ya los pinta solo si
+     tienen valor, así que basta con que el tipo lo diga. */
+  direccion?: string | null;
+  web?: string | null;
   webHref?: string;
-  instagram?: string;
+  instagram?: string | null;
   instagramHref?: string;
-  facebook?: string;
+  facebook?: string | null;
   /** Ruta de la ficha completa, destino sin JavaScript. */
   ficha: string;
 }
