@@ -1,6 +1,7 @@
 import { crearCliente, resolverSesion } from '../lib/supabase';
 import { CATEGORIAS } from '../data/categorias';
 import { CATEGORIAS_CLASIFICADOS } from '../data/clasificados';
+import { comprimirFoto, pesoLegible } from '../lib/foto';
 
 /**
  * Panel de revisión.
@@ -319,12 +320,26 @@ if (raiz) {
     // archivo que no existe.
     const foto = datosForm.get('foto');
     if (foto instanceof File && foto.size > 0) {
-      const ext = (foto.name.split('.').pop() ?? 'webp').toLowerCase();
+      // Se comprime igual que en el formulario público, y por la misma razón de
+      // fondo: la foto acaba commiteada en el repositorio y el historial de git
+      // no olvida. Por aquí entró un JPG de 352 KB sin tocar; una foto de
+      // celular de 5 MB se quedaría para siempre aunque se borre la ficha.
+      let subir: Blob = foto;
+      try {
+        subir = await comprimirFoto(foto);
+      } catch (e) {
+        avisar((e as Error).message, 'error');
+        return;
+      }
+      const ext = subir.type === 'image/webp' ? 'webp' : (foto.name.split('.').pop() ?? 'jpg').toLowerCase();
       const ruta = `panel/${crypto.randomUUID()}.${ext}`;
-      const { error } = await db.storage.from('fotos').upload(ruta, foto, { contentType: foto.type });
+      const { error } = await db.storage.from('fotos').upload(ruta, subir, { contentType: subir.type });
       if (error) {
         avisar(`No se pudo subir la foto: ${error.message}`, 'error');
         return;
+      }
+      if (subir.size < foto.size) {
+        avisar(`Foto optimizada: ${pesoLegible(foto.size)} → ${pesoLegible(subir.size)}.`);
       }
       fila.foto_ruta = ruta;
     }

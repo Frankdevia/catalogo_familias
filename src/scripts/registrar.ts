@@ -5,6 +5,7 @@ import {
   normalizarWeb,
   normalizarInstagram,
 } from '../data/registro';
+import { comprimirFoto, pesoLegible } from '../lib/foto';
 
 const form = document.querySelector<HTMLFormElement>('#form-negocio');
 const exito = document.querySelector<HTMLElement>('#exito');
@@ -58,59 +59,6 @@ if (form && exito) {
    * Foto: previsualizar y comprimir
    * ---------------------------------------------------------------- */
 
-  function pesoLegible(bytes: number): string {
-    return bytes < 1024 * 1024
-      ? `${Math.round(bytes / 1024)} KB`
-      : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  /**
-   * Redimensiona a `FOTO.anchoMaximo` y re-codifica. Una foto de celular de
-   * 12 MB queda en ~200 KB, que es la diferencia entre que el envío funcione
-   * con datos móviles y que se caiga por tiempo de espera.
-   *
-   * Si el navegador no sabe decodificar el formato (HEIC en Android, por
-   * ejemplo), devuelve el archivo original y deja que n8n lo convierta.
-   */
-  async function comprimir(archivo: File): Promise<Blob> {
-    let bitmap: ImageBitmap;
-    try {
-      bitmap = await createImageBitmap(archivo, { imageOrientation: 'from-image' });
-    } catch {
-      if (archivo.size > FOTO.maxBytesOriginal) {
-        throw new Error(
-          `No pudimos procesar esa imagen y pesa ${pesoLegible(archivo.size)}. ` +
-            'Intenta con una foto más liviana o en formato JPG.',
-        );
-      }
-      return archivo;
-    }
-
-    const escala = Math.min(1, FOTO.anchoMaximo / bitmap.width);
-    const ancho = Math.round(bitmap.width * escala);
-    const alto = Math.round(bitmap.height * escala);
-
-    const lienzo = document.createElement('canvas');
-    lienzo.width = ancho;
-    lienzo.height = alto;
-    const ctx = lienzo.getContext('2d');
-    if (!ctx) {
-      bitmap.close();
-      return archivo;
-    }
-    ctx.drawImage(bitmap, 0, 0, ancho, alto);
-    bitmap.close();
-
-    const codificar = (tipo: string) =>
-      new Promise<Blob | null>((res) => lienzo.toBlob(res, tipo, FOTO.calidad));
-
-    const blob = (await codificar('image/webp')) ?? (await codificar('image/jpeg'));
-    if (!blob) return archivo;
-
-    // Si comprimir no ayudó (imágenes ya pequeñas), se queda el original.
-    return blob.size < archivo.size ? blob : archivo;
-  }
-
   inputFoto.addEventListener('change', async () => {
     const archivo = inputFoto.files?.[0];
     fotoLista = null;
@@ -131,7 +79,7 @@ if (form && exito) {
     previsualizacion.hidden = false;
 
     try {
-      const comprimida = await comprimir(archivo);
+      const comprimida = await comprimirFoto(archivo);
       fotoLista = comprimida;
       imgPrevia.src = URL.createObjectURL(comprimida);
       pesoFoto.textContent =
