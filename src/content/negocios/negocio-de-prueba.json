@@ -1,0 +1,10 @@
+{
+  "nombre": "Negocio de Prueba",
+  "categoria": "Tecnología",
+  "descripcion": "Varios",
+  "familia": "Familia — grado 5B",
+  "foto": "../../assets/photos/negocio-de-prueba.webp",
+  "telefono": "3218409113",
+  "direccion": "km 5 via cerritos",
+  "orden": 100
+}
