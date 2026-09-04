@@ -1,0 +1,278 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { SITIO } from '../data/sitio';
+---
+
+<LegalLayout
+  eyebrow="Protección de datos"
+  title="Política de tratamiento de datos"
+  description="Cómo la Fundación Liceo Inglés recoge, usa y protege los datos personales de quienes publican en el directorio Family Business Community."
+  actualizado="2026-09-04"
+>
+  <p>
+    Esta política explica qué datos personales recogemos en
+    <strong>{SITIO.nombreLargo}</strong> —el directorio de empresas de las familias de la
+    {SITIO.organizacion}—, para qué los usamos, con quién los compartimos y cómo
+    puede usted controlarlos. Se rige por la Ley 1581 de 2012 y el Decreto 1074
+    de 2015 de Colombia.
+  </p>
+
+  <div class="destacado">
+    <p>
+      <strong>Lo esencial en tres frases.</strong> Los nombres de sus estudiantes
+      y sus datos de contacto como acudiente <strong>no se publican nunca</strong>:
+      solo los ve el equipo que revisa las solicitudes. Lo que sí aparece en el
+      sitio público es la información del negocio, el anuncio o la promoción que
+      usted autorizó expresamente al enviar el formulario. En cualquier momento
+      puede pedirnos ver, corregir o borrar sus datos escribiendo a
+      <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>.
+    </p>
+  </div>
+
+  <h2>1. Quién responde por sus datos</h2>
+  <p>
+    El responsable del tratamiento es la <strong>{SITIO.organizacion}</strong>.
+  </p>
+  <ul>
+    <li>Dirección: {SITIO.direccion.join(' · ')}</li>
+    <li>
+      Correo para asuntos de datos personales:
+      <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>
+    </li>
+    <li>
+      Teléfonos: {SITIO.telefonos.map((t, i) => <>{i > 0 && ' · '}<a href={`tel:${t.replace(/\s/g, '')}`}>{t}</a></>)}
+    </li>
+  </ul>
+
+  <h2>2. Qué datos recogemos</h2>
+  <p>
+    Solo recogemos datos en tres situaciones. No usamos cookies de publicidad ni
+    herramientas de seguimiento de terceros.
+  </p>
+
+  <h3>a) Cuando usted envía un formulario</h3>
+  <p>
+    Para postular un negocio al catálogo, publicar un anuncio clasificado o
+    proponer una promoción, el formulario pide:
+  </p>
+  <ul>
+    <li>
+      <strong>Nombre de sus estudiantes</strong> en el colegio. Es el dato con el
+      que verificamos que la solicitud viene de una familia de la institución.
+    </li>
+    <li><strong>Su nombre</strong> como acudiente.</li>
+    <li>
+      <strong>Su teléfono y su correo</strong>, para acusar recibo de la solicitud
+      y avisarle si se publica o se rechaza.
+    </li>
+    <li>
+      <strong>La información que se va a publicar</strong>: nombre y descripción del
+      negocio, categoría, foto, teléfono de contacto comercial, dirección, redes
+      sociales; o el texto del anuncio o de la promoción, según el formulario.
+    </li>
+    <li>
+      <strong>Su autorización expresa</strong>, marcada en la casilla de
+      consentimiento antes de enviar.
+    </li>
+  </ul>
+
+  <h3>b) Cuando alguien administra el sitio</h3>
+  <p>
+    El panel de revisión usa <strong>inicio de sesión con Google</strong>. De esa
+    cuenta recibimos únicamente el <strong>nombre y el correo electrónico</strong>
+    (permisos básicos <code>email</code> y <code>profile</code>). No pedimos ni
+    tenemos acceso a su correspondencia, sus contactos, su calendario ni sus
+    archivos. Iniciar sesión no da acceso a nada por sí solo: además hay que
+    estar en la lista de administradores autorizados por la Fundación.
+  </p>
+
+  <h3>c) Para frenar el envío automatizado</h3>
+  <p>
+    Al enviar un formulario guardamos un <strong>código derivado de su dirección
+    IP</strong>, no la dirección IP misma. Sirve para contar cuántos envíos salen
+    de un mismo punto en poco tiempo y detener a los robots de spam. No permite
+    identificar a ninguna persona ni se usa para ningún otro fin.
+  </p>
+
+  <h2>3. Qué se publica y qué no</h2>
+  <p>
+    Esta es la distinción más importante de toda la política, y se aplica de
+    forma distinta en cada sección del sitio.
+  </p>
+
+  <div class="tabla-envoltura">
+    <table>
+      <thead>
+        <tr>
+          <th>Sección</th>
+          <th>Sí se publica</th>
+          <th>Nunca se publica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Catálogo de negocios</td>
+          <td>
+            Nombre del negocio, categoría, descripción, foto, teléfono y dirección
+            comercial, redes sociales, y el grado del estudiante en la forma
+            genérica «Familia — grado 7A».
+          </td>
+          <td>
+            Nombre de los estudiantes, su nombre como acudiente, su teléfono
+            personal y su correo.
+          </td>
+        </tr>
+        <tr>
+          <td>Anuncios clasificados</td>
+          <td>
+            El texto del anuncio y <strong>el teléfono y el correo que usted
+            escribió</strong>, porque son el objeto mismo del anuncio y usted lo
+            autoriza de forma explícita en el formulario.
+          </td>
+          <td>Nombre de los estudiantes y su nombre como acudiente.</td>
+        </tr>
+        <tr>
+          <td>Promociones</td>
+          <td>
+            Negocio, título, descripción, condiciones, teléfono de contacto y
+            fechas de vigencia.
+          </td>
+          <td>
+            Nombre de los estudiantes, su nombre como acudiente y su correo.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>4. Datos de niñas, niños y adolescentes</h2>
+  <p>
+    El único dato de menores que tratamos es el <strong>nombre de sus
+    estudiantes</strong>, y lo tratamos con una sola finalidad: comprobar que
+    quien envía la solicitud pertenece a la comunidad del colegio. Ese dato
+    <strong>no se publica en ninguna circunstancia</strong>, no se comparte con
+    terceros y solo es visible para el equipo de la Fundación que revisa las
+    solicitudes.
+  </p>
+  <p>
+    En el catálogo el vínculo con el colegio se muestra únicamente en forma
+    genérica —«Familia — grado 7A»—, sin nombres. Conforme al artículo 7 de la
+    Ley 1581 de 2012, el tratamiento responde al interés superior del menor y se
+    hace bajo la autorización del acudiente, que es quien envía el formulario y
+    marca la casilla de consentimiento.
+  </p>
+
+  <h2>5. Para qué usamos sus datos</h2>
+  <ul>
+    <li>Verificar que la solicitud viene de una familia del colegio.</li>
+    <li>Revisar, aprobar o rechazar lo que se publica.</li>
+    <li>
+      Enviarle avisos por correo sobre <em>su</em> solicitud: acuse de recibo,
+      publicación o rechazo. No enviamos boletines ni publicidad.
+    </li>
+    <li>Publicar en el sitio la información que usted autorizó publicar.</li>
+    <li>Proteger el sitio frente al uso abusivo.</li>
+  </ul>
+  <p>
+    No vendemos, arrendamos ni cedemos sus datos a terceros con fines
+    comerciales, y no los usamos para perfilamiento ni para decisiones
+    automatizadas.
+  </p>
+
+  <h2>6. Con quién los compartimos</h2>
+  <p>
+    Solo con los proveedores necesarios para que el servicio funcione, que
+    actúan como encargados del tratamiento y no pueden usar los datos para fines
+    propios:
+  </p>
+  <ul>
+    <li>
+      <strong>Supabase</strong> — base de datos, autenticación y almacenamiento
+      temporal de las fotos.
+    </li>
+    <li>
+      <strong>Google</strong> — inicio de sesión de los administradores y envío
+      de los correos de aviso desde la cuenta institucional del colegio.
+    </li>
+  </ul>
+  <p>
+    Estos servicios operan servidores fuera de Colombia, por lo que el
+    tratamiento implica una transferencia internacional de datos hacia países
+    con niveles adecuados de protección o bajo cláusulas contractuales que
+    garantizan estándares equivalentes a los de la ley colombiana. Al aceptar
+    esta política usted autoriza dicha transferencia. También entregaremos datos
+    cuando lo exija una autoridad competente mediante requerimiento legal.
+  </p>
+
+  <h2>7. Cuánto tiempo los conservamos</h2>
+  <ul>
+    <li>
+      <strong>Las solicitudes</strong> se conservan mientras la publicación esté
+      vigente y después como histórico de la gestión, salvo que usted pida su
+      supresión.
+    </li>
+    <li>
+      <strong>Las fotos</strong> se borran del almacenamiento en la nube en
+      cuanto quedan incorporadas al sitio publicado.
+    </li>
+    <li>
+      <strong>Las promociones</strong> se retiran automáticamente del sitio
+      cuando vence su fecha de vigencia.
+    </li>
+    <li>
+      <strong>Los registros de envío</strong> usados contra el spam se conservan
+      por periodos cortos y no identifican a nadie.
+    </li>
+  </ul>
+
+  <h2>8. Cómo los protegemos</h2>
+  <p>
+    El sitio se sirve por conexión cifrada (HTTPS). El acceso a la base de datos
+    está restringido por políticas de seguridad a nivel de fila: una persona
+    autenticada que no esté en la lista de administradores no puede leer ni
+    escribir nada. Las fotos se guardan en un espacio privado, no accesible
+    públicamente, hasta su publicación. Ningún sistema es infalible, pero
+    aplicamos medidas técnicas y administrativas razonables y proporcionadas al
+    tipo de datos que manejamos.
+  </p>
+
+  <h2>9. Sus derechos</h2>
+  <p>Como titular de los datos, usted puede:</p>
+  <ul>
+    <li>Conocer qué datos suyos tenemos y cómo los estamos usando.</li>
+    <li>Actualizarlos o rectificarlos si están incompletos o son inexactos.</li>
+    <li>
+      Solicitar su supresión, y revocar la autorización que dio al enviar el
+      formulario. Revocarla implica retirar la publicación del sitio.
+    </li>
+    <li>
+      Presentar quejas ante la Superintendencia de Industria y Comercio, cuando
+      considere que hemos incumplido la ley. Le pedimos, eso sí, que primero nos
+      escriba a nosotros: casi siempre se resuelve en un correo.
+    </li>
+  </ul>
+  <p>
+    Para ejercer cualquiera de estos derechos, escriba a
+    <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a> indicando su
+    nombre, el dato o la publicación de que se trata y lo que solicita.
+    Responderemos las <strong>consultas dentro de los diez (10) días hábiles</strong>
+    siguientes y los <strong>reclamos dentro de los quince (15) días hábiles</strong>
+    siguientes, conforme a los artículos 14 y 15 de la Ley 1581 de 2012. Si
+    necesitamos más tiempo, se lo informaremos con las razones antes de que venza
+    el plazo.
+  </p>
+
+  <h2>10. Cambios en esta política</h2>
+  <p>
+    Si cambiamos esta política, publicaremos la nueva versión en esta misma
+    dirección y actualizaremos la fecha que aparece arriba. Cuando el cambio
+    afecte de manera sustancial la finalidad del tratamiento, se lo comunicaremos
+    y le pediremos una nueva autorización.
+  </p>
+
+  <h2>11. Contacto</h2>
+  <p>
+    {SITIO.organizacion} — {SITIO.direccion.join(' · ')}<br />
+    <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>
+  </p>
+</LegalLayout>

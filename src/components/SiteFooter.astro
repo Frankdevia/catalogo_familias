@@ -47,7 +47,11 @@ const anio = new Date().getFullYear();
 
   <div class="legal">
     <div class="li-container">
-      © {anio} {SITIO.organizacion}. Todos los derechos reservados.
+      <span>© {anio} {SITIO.organizacion}. Todos los derechos reservados.</span>
+      <nav class="enlaces-legales" aria-label="Información legal">
+        <a href="/privacidad">Política de datos</a>
+        <a href="/terminos">Términos de uso</a>
+      </nav>
     </div>
   </div>
 </footer>
@@ -110,6 +114,22 @@ const anio = new Date().getFullYear();
     padding-block: 18px;
     font-size: var(--text-xs);
     color: var(--li-sky);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    align-items: center;
+    justify-content: space-between;
+  }
+  .enlaces-legales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+  .enlaces-legales a {
+    color: var(--li-sky);
+  }
+  .enlaces-legales a:hover {
+    color: var(--li-yellow);
   }
   footer :global(:focus-visible) {
     outline-color: var(--li-yellow);

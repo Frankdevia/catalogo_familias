@@ -1,0 +1,148 @@
+---
+/**
+ * Marco de las páginas legales (privacidad y términos).
+ *
+ * Existe para que el texto de esas páginas sea solo contenido: el encabezado,
+ * la fecha de actualización y la tipografía de lectura larga viven aquí, y no
+ * duplicados en cada archivo. Los estilos del contenido van con `:global`
+ * porque el `<slot />` llega desde la página, y los estilos con ámbito de un
+ * componente no alcanzan lo que se le inyecta por slot.
+ */
+import BaseLayout from './BaseLayout.astro';
+import { SITIO } from '../data/sitio';
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  /** Fecha ISO (YYYY-MM-DD) de la última revisión del texto. */
+  actualizado: string;
+}
+
+const { title, description, eyebrow, actualizado } = Astro.props;
+
+// Mediodía a propósito: con `new Date('2026-09-04')` el navegador interpreta
+// UTC y en Colombia (UTC-5) la fecha se muestra un día antes.
+const fecha = new Date(`${actualizado}T12:00:00`).toLocaleDateString('es-CO', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout title={`${title} · ${SITIO.nombre}`} description={description}>
+  <article class="legal li-container">
+    <p class="li-eyebrow">{eyebrow}</p>
+    <h1>{title}</h1>
+    <p class="actualizado">Última actualización: {fecha}</p>
+    <slot />
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 78ch;
+    padding-block: var(--space-16) var(--space-24);
+    color: var(--text-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+  }
+  .li-eyebrow {
+    margin: 0 0 var(--space-3);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: 0 0 var(--space-3);
+  }
+  .actualizado {
+    margin: 0 0 var(--space-10);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  /* --- Contenido que llega por slot --------------------------------------- */
+
+  .legal :global(h2) {
+    font-family: var(--font-subhead);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    margin: var(--space-12) 0 var(--space-4);
+  }
+  .legal :global(h3) {
+    font-family: var(--font-subhead);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    margin: var(--space-8) 0 var(--space-3);
+  }
+  .legal :global(p),
+  .legal :global(ul),
+  .legal :global(ol) {
+    margin: 0 0 var(--space-4);
+  }
+  .legal :global(ul),
+  .legal :global(ol) {
+    padding-left: var(--space-6);
+  }
+  .legal :global(li) {
+    margin-bottom: var(--space-2);
+  }
+  .legal :global(a) {
+    color: var(--text-link);
+  }
+  .legal :global(a:hover) {
+    color: var(--text-link-hover);
+  }
+  .legal :global(strong) {
+    font-weight: var(--weight-bold);
+    color: var(--text-heading);
+  }
+
+  /* Bloque destacado para lo que la gente de verdad necesita ver: qué se
+     publica, qué no, y a quién escribir. */
+  .legal :global(.destacado) {
+    background: var(--surface-sky-soft);
+    border-left: 4px solid var(--li-sky);
+    border-radius: var(--radius-md);
+    padding: var(--space-5) var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .legal :global(.destacado > :last-child) {
+    margin-bottom: 0;
+  }
+
+  .legal :global(.tabla-envoltura) {
+    overflow-x: auto;
+    margin: 0 0 var(--space-6);
+  }
+  .legal :global(table) {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: var(--text-sm);
+  }
+  .legal :global(th),
+  .legal :global(td) {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .legal :global(th) {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    color: var(--text-heading);
+    border-bottom-color: var(--border-strong);
+  }
+
+  @media (max-width: 620px) {
+    .legal {
+      padding-block: var(--space-12) var(--space-16);
+    }
+  }
+</style>
