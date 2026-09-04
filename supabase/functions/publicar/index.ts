@@ -214,9 +214,14 @@ Deno.serve(async (peticion) => {
     const altas: Alta[] = pendientes?.altas ?? [];
     const bajas: Baja[] = pendientes?.bajas ?? [];
 
-    // Antes del corte por "sin cambios": no publicar nada es el caso MÁS
-    // frecuente, y es justo cuando conviene aprovechar la pasada para limpiar.
-    const huerfanas = await limpiarHuerfanas(db);
+    // La limpieza es mantenimiento, no la tarea, y con el cron cada minuto
+    // correría 1.440 veces al día listando Storage para no borrar nada. Se hace
+    // una vez por hora —cuando el minuto es 7, para no coincidir con el pico de
+    // en punto— o siempre que haya algo que publicar, que es cuando de verdad
+    // se generan huérfanas.
+    const hayTrabajo = Boolean(pendientes?.altas?.length || pendientes?.bajas?.length);
+    const tocaLimpiar = hayTrabajo || new Date().getMinutes() === 7;
+    const huerfanas = tocaLimpiar ? await limpiarHuerfanas(db) : 0;
 
     if (!altas.length && !bajas.length) {
       return responder({ ok: true, sin_cambios: true, caducadas, huerfanas_borradas: huerfanas });

@@ -3,7 +3,7 @@
 --
 -- Se ejecuta después de 06-foto-archivo.sql.
 --
--- Cada diez minutos llama a la función `publicar`, que es la que mira si hay
+-- Cada minuto llama a la función `publicar`, que es la que mira si hay
 -- algo pendiente. Si no lo hay devuelve `sin_cambios` y no toca el repositorio,
 -- así que una pasada en vacío no cuesta nada ni ensucia el historial.
 -- =============================================================================
@@ -26,7 +26,17 @@ select cron.unschedule('publicar-catalogo')
 
 select cron.schedule(
   'publicar-catalogo',
-  '*/10 * * * *',
+  -- Cada minuto, no cada diez.
+  --
+  -- La alternativa "publicar al aprobar" —un disparador en la tabla— es peor de
+  -- lo que parece: si el Consejo aprueba diez seguidos son diez commits y diez
+  -- reconstrucciones encoladas, que es exactamente el cuello de botella que
+  -- quitamos. Bajando el reloj se conserva la agrupación —lo que caiga en el
+  -- mismo minuto sale junto— y el techo pasa de diez minutos a sesenta segundos.
+  --
+  -- Cuesta 1.440 llamadas al día contra las 500.000 mensuales del plan; una
+  -- pasada en vacío son dos consultas y no toca el repositorio.
+  '* * * * *',
   $cron$
   select net.http_post(
     url := 'https://mjxzbjrweqkuvshcpmwv.supabase.co/functions/v1/publicar',
