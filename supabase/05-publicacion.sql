@@ -151,8 +151,15 @@ pro_altas as (
 ),
 -- Bajas: se retiró y el cron todavía no ha borrado el archivo.
 neg_bajas as (
-  select 'negocios' as cola, id, slug, foto_ruta,
-         lower(coalesce(nullif(regexp_replace(foto_ruta, '^.*\.', ''), foto_ruta), 'webp')) as foto_ext
+  -- El archivo a borrar sale de `foto_archivo`, no de deducirlo de `foto_ruta`.
+  -- `foto_ruta` es la ruta en Storage y es NULA en las fichas migradas, que
+  -- nunca pasaron por allí: al retirarlas, su foto se quedaba en el repositorio
+  -- para siempre. Pasó con las seis de la maqueta.
+  select 'negocios' as cola, id, slug,
+         coalesce(foto_archivo,
+                  slug || '.' || lower(coalesce(nullif(regexp_replace(foto_ruta, '^.*\.', ''), foto_ruta), 'webp'))
+         ) as foto_ruta,
+         null::text as foto_ext
   from solicitudes_negocios
   where estado = 'retirado' and publicado_en is not null and retirado_en is null and slug is not null
 ),
@@ -184,7 +191,7 @@ select jsonb_build_object(
       'cola', cola, 'id', id, 'slug', slug,
       'ruta', 'src/content/' || cola || '/' || slug || '.json',
       'ruta_foto', case when foto_ruta is not null
-                        then 'src/assets/photos/' || slug || '.' || foto_ext end
+                        then 'src/assets/photos/' || foto_ruta end
     ))
     from (select * from neg_bajas union all select * from cla_bajas
           union all select * from pro_bajas) t
