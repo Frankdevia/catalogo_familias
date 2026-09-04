@@ -1,6 +1,13 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
+  "include": [
+    ".astro/types.d.ts",
+    "**/*"
+  ],
   "//": "Se excluye CADA función por separado, no `supabase/functions` entero: las funciones corren en Deno —usan `Deno.*` e importan por `jsr:`, que esta configuración no conoce— pero `_shared/reglas.ts` es la fuente única que también usa el sitio y tiene que seguir tipándose. Excluir la carpeta entera lo dejaba fuera del chequeo aunque `src/data/registro.ts` lo importe: comprobado rompiéndolo a propósito. Al añadir una función nueva, añádela también aquí.",
-  "exclude": ["dist", "supabase/functions/solicitud"]
+  "exclude": [
+    "dist",
+    "supabase/functions/solicitud",
+    "supabase/functions/publicar"
+  ]
 }

@@ -427,3 +427,14 @@ enabled = true
 # el límite por huella de IP, no una clave que está a la vista.
 [functions.solicitud]
 verify_jwt = false
+
+# La función que publica al repositorio.
+#
+# `verify_jwt` se queda en true, al revés que en `solicitud`: esta no la llama
+# ninguna familia desde una página pública. La invocan `pg_cron` con la clave de
+# servicio y el botón «Publicar ahora» del panel con la sesión de quien revisa.
+# No se comprueba que sea administrador a propósito: lo único que hace es
+# publicar lo que un administrador YA aprobó, así que dispararla antes de tiempo
+# no consigue nada que no fuera a pasar en diez minutos.
+[functions.publicar]
+verify_jwt = true

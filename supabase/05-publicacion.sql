@@ -79,7 +79,10 @@ neg_altas as (
     'negocios' as cola,
     n.id,
     coalesce(n.slug, slugificar(n.nombre)) as slug,
-    n.foto_ruta,
+    -- Solo se manda la foto si SIGUE en Storage. Una vez commiteada se borra
+    -- de allí —el repo es donde vive— y se marca `foto_borrada_en`; después de
+    -- eso, editar el texto no debe volver a subir la imagen.
+    case when n.foto_borrada_en is null then n.foto_ruta end as foto_ruta,
     lower(coalesce(nullif(regexp_replace(n.foto_ruta, '^.*\.', ''), n.foto_ruta), 'webp')) as foto_ext,
     -- LISTA BLANCA. Campo por campo; nunca el objeto entero.
     jsonb_strip_nulls(jsonb_build_object(
@@ -174,7 +177,11 @@ begin
   update solicitudes_negocios
      set publicado_en = now(),
          slug = coalesce(slug, slugificar(nombre)),
-         retirado_en = null
+         retirado_en = null,
+         -- La foto ya está commiteada: el repo es donde vive. Se marca aquí y
+         -- la función la borra de Storage, que es lo que impide que el gigabyte
+         -- del plan gratuito se llene en la semana del lanzamiento.
+         foto_borrada_en = case when foto_ruta is not null then now() else foto_borrada_en end
    where id = any(ids_negocios);
 
   update solicitudes_clasificados
