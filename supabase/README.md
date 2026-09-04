@@ -3,6 +3,32 @@
 El backend del catálogo: dónde viven las solicitudes antes de publicarse y quién
 puede tocarlas.
 
+## El proyecto
+
+| | |
+|---|---|
+| Nombre | `community` |
+| Ref | `mjxzbjrweqkuvshcpmwv` |
+| URL | `https://mjxzbjrweqkuvshcpmwv.supabase.co` |
+| Región | `us-east-1` |
+
+**Clave pública:** `sb_publishable_Q3LLVvY_rKgZxyuC5SMAsw_6nfs5O0k`. Va en el
+JavaScript del sitio y es pública por diseño; no es un secreto y no hay que
+esconderla. La clave secreta (`sb_secret_…`) **no se escribe nunca en el repo**:
+vive en las variables de la Edge Function.
+
+> El proyecto usa el formato nuevo de claves —`sb_publishable_` y `sb_secret_`—
+> en vez de `anon` y `service_role`. Las heredadas siguen existiendo y son las
+> que Supabase inyecta en las Edge Functions como `SUPABASE_ANON_KEY` y
+> `SUPABASE_SERVICE_ROLE_KEY`, así que la función funciona con ambas.
+
+El proyecto está enlazado (`supabase link`), así que se puede consultar desde la
+línea de comandos sin contraseña, por la API de gestión:
+
+```bash
+supabase db query --linked "select count(*) from solicitudes_negocios"
+```
+
 ## Qué hace cada archivo
 
 | Archivo | Qué hace |
@@ -11,7 +37,23 @@ puede tocarlas.
 | `02-rls.sql` | Permisos (`grant`) y políticas (RLS). Es donde se decide quién ve qué |
 | `03-migracion.sql` | Carga las fichas y anuncios ya publicados, para que el panel los vea desde el primer día |
 
-Se ejecutan **en ese orden**, una sola vez, desde el *SQL Editor* del proyecto.
+Se ejecutan **en ese orden**, una sola vez. **Ya están ejecutados** en
+`community` (4 de septiembre de 2026), con este resultado comprobado:
+
+- Las cinco tablas con RLS activo.
+- `anon` con **cero** permisos: leer, insertar y listar administradores con la
+  clave pública devuelven `401 permission denied` en los tres casos.
+- 7 negocios y 10 clasificados migrados, todos `aprobado`.
+- Bucket `fotos` creado y privado.
+- El `check` del grado probado en los dos sentidos: aprobar sin grado falla
+  (`23514`), dejarlo `pendiente` sin grado se acepta.
+
+Para volver a ejecutarlos —en otro proyecto, o tras un borrado— sirve tanto el
+*SQL Editor* como:
+
+```bash
+supabase db query --linked -f supabase/01-esquema.sql
+```
 
 ## Cómo está pensado
 
