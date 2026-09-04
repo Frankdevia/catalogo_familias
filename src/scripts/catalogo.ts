@@ -68,9 +68,19 @@ if (modal && datosCrudos) {
     const n = negocios[slug];
     if (!n || !modal) return;
 
+    // Sin foto se oculta el hueco en vez de dejar una imagen rota. En el modal
+    // no cabe el respaldo con la inicial que usan la tarjeta y la ficha: aquí
+    // la imagen es la cabecera del diálogo y quitarla no descuadra nada.
     if (foto) {
-      foto.src = n.foto;
-      foto.alt = `Foto de ${n.nombre}`;
+      const hayFoto = Boolean(n.foto);
+      foto.hidden = !hayFoto;
+      if (hayFoto) {
+        foto.src = n.foto!;
+        foto.alt = `Foto de ${n.nombre}`;
+      } else {
+        foto.removeAttribute('src');
+        foto.alt = '';
+      }
     }
     if (categoria) categoria.textContent = n.categoria;
     if (familia) familia.textContent = n.familia;
@@ -80,7 +90,7 @@ if (modal && datosCrudos) {
     if (datos) {
       datos.replaceChildren(
         fila('Teléfono', n.telefono, n.telHref),
-        fila('Dirección', n.direccion),
+        ...(n.direccion ? [fila('Dirección', n.direccion)] : []),
         ...(n.web ? [fila('Página web', n.web, n.webHref)] : []),
         ...(n.instagram ? [fila('Instagram', n.instagram, n.instagramHref)] : []),
         ...(n.facebook ? [fila('Facebook', n.facebook)] : []),

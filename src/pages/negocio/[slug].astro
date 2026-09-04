@@ -20,7 +20,9 @@ const { negocio } = Astro.props;
 const d = negocio.data;
 
 // La ficha muestra la foto a 2:1; se pide como mucho el ancho original.
-const ancho = anchoSeguro(d.foto, 1040);
+const ancho = d.foto ? anchoSeguro(d.foto, 1040) : 0;
+/** Respaldo cuando no hay foto, igual que en la tarjeta del catálogo. */
+const inicial = d.nombre.trim().charAt(0).toUpperCase();
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -28,7 +30,11 @@ const jsonLd = {
   name: d.nombre,
   description: d.descripcion,
   telephone: `${SITIO.indicativo}${d.telefono.replace(/\s/g, '')}`,
-  address: { '@type': 'PostalAddress', streetAddress: d.direccion, addressCountry: 'CO' },
+  // Sin dirección no se emite el bloque: un PostalAddress con streetAddress
+  // vacío es peor que no declararlo, porque Google lo lee como dato erróneo.
+  ...(d.direccion
+    ? { address: { '@type': 'PostalAddress', streetAddress: d.direccion, addressCountry: 'CO' } }
+    : {}),
   ...(d.web ? { url: webHref(d.web) } : {}),
   ...(d.instagram ? { sameAs: [instagramHref(d.instagram)] } : {}),
 };
@@ -43,13 +49,19 @@ const jsonLd = {
     </nav>
 
     <div class="cabecera">
-      <Image
-        class="foto"
-        src={d.foto}
-        alt={`Foto de ${d.nombre}`}
-        width={ancho}
-        height={Math.round(ancho / 2)}
-      />
+      {
+        d.foto ? (
+          <Image
+            class="foto"
+            src={d.foto}
+            alt={`Foto de ${d.nombre}`}
+            width={ancho}
+            height={Math.round(ancho / 2)}
+          />
+        ) : (
+          <p class="foto sin-foto" aria-hidden="true">{inicial}</p>
+        )
+      }
 
       <div class="intro">
         <p class="li-eyebrow">{d.categoria}</p>
@@ -66,10 +78,14 @@ const jsonLd = {
         <dt>Teléfono</dt>
         <dd><a href={telHref(d.telefono)}>{d.telefono}</a></dd>
       </div>
-      <div>
-        <dt>Dirección</dt>
-        <dd>{d.direccion}</dd>
-      </div>
+      {
+        d.direccion && (
+          <div>
+            <dt>Dirección</dt>
+            <dd>{d.direccion}</dd>
+          </div>
+        )
+      }
       {
         d.web && (
           <div>
@@ -132,6 +148,21 @@ const jsonLd = {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: var(--space-10);
     align-items: start;
+  }
+  /* Mismo hueco y mismo recorte que la foto, para que la cabecera no cambie
+     de forma según la ficha tenga imagen o no. */
+  .sin-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    aspect-ratio: 2 / 1;
+    background: var(--surface-navy);
+    color: var(--li-white);
+    font-family: var(--font-display);
+    font-size: var(--text-5xl);
+    letter-spacing: var(--tracking-display);
+    user-select: none;
   }
   .foto {
     width: 100%;

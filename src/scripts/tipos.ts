@@ -6,11 +6,12 @@ export interface NegocioModal {
   categoria: string;
   familia: string;
   descripcion: string;
-  /** URL de la imagen ya optimizada por astro:assets. */
-  foto: string;
+  /** URL de la imagen ya optimizada por astro:assets. Falta cuando la ficha
+   *  se inscribió sin foto: el modal enseña la inicial, como la tarjeta. */
+  foto?: string;
   telefono: string;
   telHref: string;
-  direccion: string;
+  direccion?: string;
   web?: string;
   webHref?: string;
   instagram?: string;

@@ -23,13 +23,17 @@ const negocios = defineCollection({
       descripcion: z.coerce.string(),
       /** Grado del estudiante, tal como se muestra en la tarjeta: "Familia — grado 3B". */
       familia: z.coerce.string(),
-      /** Ruta relativa a este JSON, p. ej. "../../assets/photos/biz-cafe.webp". */
-      foto: image(),
+      /** Ruta relativa a este JSON, p. ej. "../../assets/photos/biz-cafe.webp".
+       *  Opcional: muchas familias se inscriben sin foto, y exigirla obligaba a
+       *  inventarse una o a no publicarlas. La tarjeta dibuja un respaldo. */
+      foto: image().optional(),
       /** Solo dígitos y espacios, sin indicativo: "310 456 7890". El +57 lo pone la UI. */
       telefono: z.coerce
         .string()
         .regex(/^[\d ]+$/, 'Solo dígitos y espacios, sin +57'),
-      direccion: z.coerce.string(),
+      /** Opcional: el formulario del Directorio nunca la pidió, así que para
+       *  las fichas que vienen de allí el dato sencillamente no existe. */
+      direccion: z.coerce.string().optional(),
       /** Dominio sin protocolo: "cafecerritos.co". */
       web: z.coerce.string().optional(),
       /** Con arroba: "@cafe.cerritos". */

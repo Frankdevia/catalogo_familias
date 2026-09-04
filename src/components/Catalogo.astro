@@ -36,20 +36,26 @@ const chips = [
 const datos: NegocioModal[] = await Promise.all(
   negocios.map(async (n) => {
     // 2x de los 520x200 del diálogo, sin pasarse del original (ratio 2.6:1).
-    const ancho = anchoSeguro(n.data.foto, 1040);
-    const foto = await getImage({
-      src: n.data.foto,
-      width: ancho,
-      height: Math.round(ancho / 2.6),
-      format: 'webp',
-    });
+    // Solo se optimiza si la ficha trae foto: muchas se inscriben sin ella.
+    let foto: string | undefined;
+    if (n.data.foto) {
+      const ancho = anchoSeguro(n.data.foto, 1040);
+      foto = (
+        await getImage({
+          src: n.data.foto,
+          width: ancho,
+          height: Math.round(ancho / 2.6),
+          format: 'webp',
+        })
+      ).src;
+    }
     return {
       slug: n.id,
       nombre: n.data.nombre,
       categoria: n.data.categoria,
       familia: n.data.familia,
       descripcion: n.data.descripcion,
-      foto: foto.src,
+      foto,
       telefono: n.data.telefono,
       telHref: telHref(n.data.telefono),
       direccion: n.data.direccion,

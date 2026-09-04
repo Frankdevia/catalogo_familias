@@ -12,18 +12,34 @@ const { nombre, categoria, descripcion, familia, foto } = negocio.data;
 const href = `/negocio/${negocio.id}/`;
 
 // 2x del recuadro de 400x170 de la tarjeta (ratio 2.35:1).
-const ancho = anchoSeguro(foto, 800);
+const ancho = foto ? anchoSeguro(foto, 800) : 0;
+
+/*
+ * Respaldo cuando la ficha no trae foto.
+ *
+ * Muchas familias se inscriben sin una, y exigirla obligaba a inventarse algo o
+ * a dejarlas fuera. La inicial sobre el navy del sistema ocupa el mismo hueco y
+ * el mismo 2.35:1, así que la rejilla no se descuadra al mezclar tarjetas con
+ * foto y sin ella, que es lo que de verdad se nota.
+ */
+const inicial = nombre.trim().charAt(0).toUpperCase();
 ---
 
 <article class="tarjeta" data-negocio data-categoria={categoria}>
   <a class="foto" href={href} data-abrir={negocio.id}>
-    <Image
-      src={foto}
-      alt={`Foto de ${nombre}`}
-      width={ancho}
-      height={Math.round(ancho / 2.35)}
-      loading="lazy"
-    />
+    {
+      foto ? (
+        <Image
+          src={foto}
+          alt={`Foto de ${nombre}`}
+          width={ancho}
+          height={Math.round(ancho / 2.35)}
+          loading="lazy"
+        />
+      ) : (
+        <span class="sin-foto" aria-hidden="true">{inicial}</span>
+      )
+    }
   </a>
 
   <div class="cuerpo">
@@ -42,6 +58,21 @@ const ancho = anchoSeguro(foto, 800);
 </article>
 
 <style>
+  /* El respaldo ocupa exactamente el hueco de la foto: mismo ratio y mismo
+     recorte, para que una rejilla con unas y otras no se vea rota. */
+  .sin-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 2.35 / 1;
+    background: var(--surface-navy);
+    color: var(--li-white);
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    letter-spacing: var(--tracking-display);
+    user-select: none;
+  }
+
   .tarjeta {
     background: var(--surface-card);
     border: 1px solid var(--border-subtle);
