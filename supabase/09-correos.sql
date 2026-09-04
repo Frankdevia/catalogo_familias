@@ -75,6 +75,29 @@ with pendientes as (
     from solicitudes_promociones p
    where p.estado = 'aprobado' and p.publicado_en is not null
 
+  -- Aviso al colegio: uno por solicitud, en cuanto llega.
+  --
+  -- Este SÍ lleva los datos internos —nombres de los estudiantes y contacto del
+  -- acudiente—, porque es con lo que se valida la identidad y va a una cuenta
+  -- del colegio, no a una familia. Es el único correo del circuito que los
+  -- contiene, y por eso el destinatario es una constante y no un campo: así no
+  -- puede acabar en otra dirección por un dato mal escrito en el formulario.
+  union all
+  select 'negocios', n.id, 'aviso_colegio', 'techsupport@liceoingles.edu.co',
+         n.acudiente_nombre, n.nombre,
+         n.estudiantes || ' · ' || n.acudiente_telefono || ' · ' || n.acudiente_correo
+    from solicitudes_negocios n where n.estado = 'pendiente'
+  union all
+  select 'clasificados', c.id, 'aviso_colegio', 'techsupport@liceoingles.edu.co',
+         c.acudiente_nombre, left(c.descripcion, 60),
+         c.estudiantes || ' · ' || c.telefono || ' · ' || c.correo
+    from solicitudes_clasificados c where c.estado = 'pendiente'
+  union all
+  select 'promociones', p.id, 'aviso_colegio', 'techsupport@liceoingles.edu.co',
+         p.acudiente_nombre, p.titulo,
+         p.estudiantes || ' · ' || p.telefono || ' · ' || p.acudiente_correo
+    from solicitudes_promociones p where p.estado = 'pendiente'
+
   -- No se publica, y se dice por qué si quien revisó dejó una nota.
   union all
   select 'negocios', n.id, 'rechazado', n.acudiente_correo, n.acudiente_nombre, n.nombre, n.notas_revision
@@ -92,11 +115,21 @@ select coalesce(jsonb_agg(jsonb_build_object(
   'tipo', tipo,
   'para', para,
   'asunto', case tipo
-    when 'recibido'  then 'Recibimos tu solicitud'
-    when 'publicado' then 'Ya está publicado en la comunidad FLI'
+    when 'recibido'      then 'Recibimos tu solicitud'
+    when 'publicado'     then 'Ya está publicado en la comunidad FLI'
+    when 'aviso_colegio' then 'Nueva solicitud en ' || cola || ': ' || asunto_de
     else 'Sobre tu solicitud al catálogo FLI'
   end,
   'cuerpo', case tipo
+    when 'aviso_colegio' then
+      '<p>Llegó una solicitud nueva a <b>' || cola || '</b>.</p>' ||
+      '<ul>' ||
+      '<li><b>Qué:</b> ' || asunto_de || '</li>' ||
+      '<li><b>Quién la envía:</b> ' || quien || '</li>' ||
+      '<li><b>Para validar (estudiantes · contacto):</b> ' || nota || '</li>' ||
+      '</ul>' ||
+      '<p>Revísala en <a href="https://comunidad.liceoingles.edu.co/admin/">el panel</a>. ' ||
+      'Recuerda escribir el grado antes de aprobar un negocio: sin él la base no deja publicarlo.</p>'
     when 'recibido' then
       '<p>Hola ' || quien || ',</p>' ||
       '<p>Recibimos <b>' || asunto_de || '</b> para publicarlo en la comunidad de familias del Liceo Inglés.</p>' ||
@@ -156,9 +189,9 @@ revoke execute on function marcar_correo(text, uuid, text) from anon, authentica
 -- decirles que algo que llevan semanas viendo publicado «ya está publicado».
 
 insert into correos_enviados (cola, fila_id, tipo)
-select 'negocios', id, t.tipo from solicitudes_negocios, (values ('recibido'),('publicado'),('rechazado')) as t(tipo)
+select 'negocios', id, t.tipo from solicitudes_negocios, (values ('recibido'),('publicado'),('rechazado'),('aviso_colegio')) as t(tipo)
 on conflict do nothing;
 
 insert into correos_enviados (cola, fila_id, tipo)
-select 'clasificados', id, t.tipo from solicitudes_clasificados, (values ('recibido'),('publicado'),('rechazado')) as t(tipo)
+select 'clasificados', id, t.tipo from solicitudes_clasificados, (values ('recibido'),('publicado'),('rechazado'),('aviso_colegio')) as t(tipo)
 on conflict do nothing;
