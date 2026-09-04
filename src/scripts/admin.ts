@@ -483,6 +483,45 @@ if (raiz) {
     }
   });
 
+  /**
+   * Adelanta la publicación en vez de esperar al cron de diez minutos.
+   *
+   * Llama a la MISMA función que el cron, con la sesión de quien revisa. No
+   * hace nada distinto ni salta ninguna comprobación: solo adelanta el reloj.
+   * Si no hay nada pendiente, lo dice y no toca el repositorio.
+   */
+  $('[data-accion="publicar-ya"]')?.addEventListener('click', async (e) => {
+    const boton = e.currentTarget as HTMLButtonElement;
+    boton.disabled = true;
+    avisar('Publicando…');
+    const { data, error } = await db.functions.invoke('publicar', { method: 'POST' });
+    boton.disabled = false;
+
+    if (error) {
+      avisar(`No se pudo publicar: ${error.message}`, 'error');
+      return;
+    }
+    if (data?.sin_cambios) {
+      avisar('No había nada pendiente: el sitio ya está al día.');
+      return;
+    }
+    const partes = [
+      data?.publicadas ? `${data.publicadas} publicada(s)` : '',
+      data?.retiradas ? `${data.retiradas} retirada(s)` : '',
+      data?.caducadas ? `${data.caducadas} promoción(es) vencida(s)` : '',
+    ].filter(Boolean).join(' · ');
+    // El despliegue se avisa aparte porque puede fallar sin que la publicación
+    // haya fallado: el commit ya salió y los datos ya son coherentes.
+    const aviso =
+      data?.despliegue === 'lanzado'
+        ? 'El sitio se está reconstruyendo; tarda un par de minutos.'
+        : `Ojo: el despliegue no arrancó (${data?.despliegue}). El commit sí salió.`;
+    avisar(`${partes}. ${aviso}`, data?.despliegue === 'lanzado' ? 'info' : 'error');
+
+    await cargar();
+    await pintarLista();
+  });
+
   $('[data-accion="nueva"]')?.addEventListener('click', () => {
     avisar('');
     pintarFormulario(null);

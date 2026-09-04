@@ -91,6 +91,9 @@ const supabaseClave =
       </div>
 
       <div class="barra-acciones">
+        <button type="button" class="secundario" data-accion="publicar-ya">
+          Publicar ahora
+        </button>
         <button type="button" class="li-btn" data-accion="nueva">Crear una entrada</button>
       </div>
 
@@ -251,7 +254,13 @@ const supabaseClave =
   .barra-acciones {
     display: flex;
     justify-content: flex-end;
+    gap: var(--space-3);
+    align-items: center;
     margin-bottom: var(--space-5);
+  }
+  .barra-acciones button:disabled {
+    opacity: 0.5;
+    cursor: wait;
   }
 
   /* --- formulario de crear y editar --------------------------------------- */
