@@ -90,8 +90,15 @@ neg_altas as (
       'categoria',   n.categoria,
       'descripcion', n.descripcion,
       'familia',     'Familia — grado ' || n.grado,
-      'foto',        '../../assets/photos/' || coalesce(n.slug, slugificar(n.nombre)) || '.' ||
-                     lower(coalesce(nullif(regexp_replace(n.foto_ruta, '^.*\.', ''), n.foto_ruta), 'webp')),
+      -- El archivo NO se deduce del slug: las fichas que vinieron del diseño
+      -- original se llaman `biz-cafe.webp` y compañía. Deducirlo hacía que
+      -- republicar una de ellas apuntara a un archivo inexistente y tumbara el
+      -- build del sitio ENTERO, no solo esa ficha.
+      'foto',        '../../assets/photos/' || coalesce(
+                       n.foto_archivo,
+                       coalesce(n.slug, slugificar(n.nombre)) || '.' ||
+                       lower(coalesce(nullif(regexp_replace(n.foto_ruta, '^.*\.', ''), n.foto_ruta), 'webp'))
+                     ),
       'telefono',    n.telefono,
       'direccion',   n.direccion,
       'web',         n.web,
@@ -181,7 +188,14 @@ begin
          -- La foto ya está commiteada: el repo es donde vive. Se marca aquí y
          -- la función la borra de Storage, que es lo que impide que el gigabyte
          -- del plan gratuito se llene en la semana del lanzamiento.
-         foto_borrada_en = case when foto_ruta is not null then now() else foto_borrada_en end
+         foto_borrada_en = case when foto_ruta is not null then now() else foto_borrada_en end,
+         -- Queda registrado con qué nombre entró al repositorio, para no tener
+         -- que deducirlo nunca más.
+         foto_archivo = case
+           when foto_ruta is not null
+           then coalesce(slug, slugificar(nombre)) || '.' ||
+                lower(coalesce(nullif(regexp_replace(foto_ruta, '^.*\.', ''), foto_ruta), 'webp'))
+           else foto_archivo end
    where id = any(ids_negocios);
 
   update solicitudes_clasificados
