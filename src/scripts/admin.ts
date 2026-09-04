@@ -306,7 +306,9 @@ if (raiz) {
 
     for (const c of CAMPOS[cola]) {
       if (c.tipo === 'archivo') continue;
-      const v = String(datosForm.get(c.nombre) ?? '').trim();
+      // Se colapsan los espacios internos, no solo los extremos: un doble
+      // espacio en el nombre acaba en el slug de la ficha publicada.
+      const v = String(datosForm.get(c.nombre) ?? '').replace(/\s+/g, ' ').trim();
       // Los opcionales vacíos van como null y no como cadena vacía: el esquema
       // distingue "sin dato" de "cadena vacía", y varios `check` rechazan la
       // segunda.

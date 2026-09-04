@@ -51,7 +51,10 @@ const responder = (cuerpo: unknown, estado = 200) =>
 const no = (campo: string | null, mensaje: string) =>
   responder({ ok: false, campo, mensaje }, 422);
 
-const texto = (v: unknown) => String(v ?? '').trim();
+// Recorta los extremos Y colapsa los espacios internos. Lo segundo importa
+// más de lo que parece: "IT  Services" con doble espacio se coló hasta el slug
+// y el título de la ficha publicada, y ahí ya no se arregla sin romper la URL.
+const texto = (v: unknown) => String(v ?? '').replace(/\s+/g, ' ').trim();
 
 /**
  * Huella de la IP, no la IP. Sirve para contar, no para identificar a nadie, y

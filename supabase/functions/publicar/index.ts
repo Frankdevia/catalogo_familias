@@ -121,6 +121,49 @@ async function limpiarHuerfanas(db: ReturnType<typeof createClient>): Promise<nu
   return borradas;
 }
 
+
+/**
+ * Comprueba una ficha ANTES de commitearla.
+ *
+ * Existe por lo que pasó el 4 de septiembre: una ficha apuntó a una foto
+ * inexistente y el build del sitio ENTERO se cayó. No falló esa ficha: dejó de
+ * desplegarse todo, incluidas las diez que estaban bien, y no se supo hasta que
+ * alguien miró el rojo en EasyPanel cuatro despliegues después.
+ *
+ * Aquí se repite lo que `src/content.config.ts` exige, porque el que valida de
+ * verdad es Astro y lo hace demasiado tarde: en el build, en otro sistema,
+ * minutos después y sin avisar a nadie. Es una copia, sí; el precio de que
+ * Postgres y Zod no compartan esquema. Si se añade un campo obligatorio al
+ * catálogo, hay que tocar los dos sitios.
+ */
+function problemasDe(cola: string, c: Record<string, unknown>): string[] {
+  const malos: string[] = [];
+  const txt = (k: string) => (typeof c[k] === 'string' ? (c[k] as string) : '');
+  const exigir = (k: string) => {
+    if (!txt(k).trim()) malos.push(`falta ${k}`);
+  };
+
+  if (cola === 'negocios') {
+    for (const k of ['nombre', 'categoria', 'descripcion', 'familia', 'foto', 'telefono', 'direccion']) exigir(k);
+    // El grado llega dentro de `familia`; si faltaba, queda "Familia — grado ".
+    if (txt('familia').trim().endsWith('grado')) malos.push('la ficha no tiene grado');
+    if (!/^[0-9 ]+$/.test(txt('telefono'))) malos.push(`teléfono inválido: ${txt('telefono')}`);
+    if (txt('instagram') && !txt('instagram').startsWith('@')) malos.push('instagram sin arroba');
+  } else if (cola === 'clasificados') {
+    for (const k of ['cat', 'desc', 'phone', 'email', 'publicado']) exigir(k);
+    if (!/^[0-9 ]+$/.test(txt('phone'))) malos.push(`teléfono inválido: ${txt('phone')}`);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(txt('email'))) malos.push('correo inválido');
+  } else {
+    for (const k of ['negocio', 'titulo', 'desc', 'telefono', 'desde', 'hasta']) exigir(k);
+    if (!/^[0-9 ]+$/.test(txt('telefono'))) malos.push(`teléfono inválido: ${txt('telefono')}`);
+    if (txt('hasta') < txt('desde')) malos.push('la vigencia termina antes de empezar');
+  }
+  for (const k of ['desde', 'hasta', 'publicado']) {
+    if (txt(k) && !/^\d{4}-\d{2}-\d{2}$/.test(txt(k))) malos.push(`fecha inválida en ${k}`);
+  }
+  return malos;
+}
+
 async function github(camino: string, opciones: RequestInit = {}) {
   const r = await fetch(`${API}${camino}`, {
     ...opciones,
@@ -188,7 +231,45 @@ Deno.serve(async (peticion) => {
     // binarias y necesitan un blob en base64 creado aparte.
     const arbol: Array<Record<string, unknown>> = [];
 
-    for (const a of altas) {
+    // El árbol actual del repositorio, para poder comprobar que las fotos a las
+    // que apuntan las fichas EXISTEN. Es la comprobación que faltaba el día que
+    // una ficha apuntó a un archivo inexistente y tumbó el build entero:
+    // Postgres no puede saber qué hay en el repositorio, pero GitHub sí.
+    const arbolActual = await github(`/git/trees/${commitBase.tree.sha}?recursive=1`);
+    const enElRepo = new Set<string>((arbolActual.tree ?? []).map((n: { path: string }) => n.path));
+
+    // Se aparta lo que no compilaría en vez de tumbar la publicación entera:
+    // una ficha mala no debe impedir que salgan las nueve buenas. Las apartadas
+    // se quedan pendientes y salen en la respuesta con el motivo.
+    const rechazadas: Array<{ slug: string; motivos: string[] }> = [];
+    const buenas = altas.filter((a) => {
+      const motivos = problemasDe(a.cola, a.contenido);
+
+      // La foto tiene que existir: o se sube en este mismo commit, o ya está en
+      // el repositorio. Si no, Astro no compila y se cae el sitio COMPLETO, no
+      // solo esta ficha.
+      const foto = typeof a.contenido.foto === 'string' ? a.contenido.foto : '';
+      if (foto) {
+        const ruta = 'src/assets/photos/' + foto.split('/').pop();
+        const seSubeAhora = Boolean(a.foto_ruta && a.ruta_foto);
+        if (!seSubeAhora && !enElRepo.has(ruta)) {
+          motivos.push(`la foto ${ruta} no existe en el repositorio`);
+        }
+      }
+
+      if (motivos.length) rechazadas.push({ slug: a.slug, motivos });
+      return motivos.length === 0;
+    });
+
+    // Si TODO lo pendiente resulta inválido no hay nada que commitear: sin esto
+    // se crearía un commit vacío y una reconstrucción inútil en cada pasada,
+    // para siempre, mientras el dato malo siga ahí.
+    if (!buenas.length && !bajas.length) {
+      console.error('nada publicable', JSON.stringify(rechazadas));
+      return responder({ ok: true, sin_cambios: true, caducadas, huerfanas_borradas: huerfanas, rechazadas });
+    }
+
+    for (const a of buenas) {
       arbol.push({
         path: a.ruta,
         mode: '100644',
@@ -223,7 +304,7 @@ Deno.serve(async (peticion) => {
     });
 
     const resumen = [
-      altas.length ? `publica ${altas.length}` : '',
+      buenas.length ? `publica ${buenas.length}` : '',
       bajas.length ? `retira ${bajas.length}` : '',
     ].filter(Boolean).join(' y ');
 
@@ -249,9 +330,9 @@ Deno.serve(async (peticion) => {
       lista.filter((x) => x.cola === cola).map((x) => x.id);
 
     await db.rpc('sellar_publicados', {
-      ids_negocios: ids(altas, 'negocios'),
-      ids_clasificados: ids(altas, 'clasificados'),
-      ids_promociones: ids(altas, 'promociones'),
+      ids_negocios: ids(buenas, 'negocios'),
+      ids_clasificados: ids(buenas, 'clasificados'),
+      ids_promociones: ids(buenas, 'promociones'),
     });
     await db.rpc('sellar_retirados', {
       ids_negocios: ids(bajas, 'negocios'),
@@ -261,7 +342,7 @@ Deno.serve(async (peticion) => {
 
     // Las fotos ya viven en el repositorio: fuera de Storage. Sin esto, 700
     // fotos de hasta 1,5 MB llenan el gigabyte del plan gratuito.
-    const paraBorrar = altas.map((a) => a.foto_ruta).filter((r): r is string => Boolean(r));
+    const paraBorrar = buenas.map((a) => a.foto_ruta).filter((r): r is string => Boolean(r));
     if (paraBorrar.length) await db.storage.from('fotos').remove(paraBorrar);
 
     // --- avisar al despliegue ------------------------------------------------
@@ -291,7 +372,8 @@ Deno.serve(async (peticion) => {
     return responder({
       ok: true,
       commit: commit.sha,
-      publicadas: altas.length,
+      publicadas: buenas.length,
+      rechazadas,
       retiradas: bajas.length,
       caducadas,
       fotos_liberadas: paraBorrar.length,
