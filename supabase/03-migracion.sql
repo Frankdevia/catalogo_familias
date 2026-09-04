@@ -57,49 +57,55 @@ insert into solicitudes_negocios (
    'Tejidos Andina', 'Moda', 'Ropa tejida a mano: ruanas, bufandas y accesorios en lana natural.', '7A', '315 234 5678', 'Cll 8 # 23-45, Dosquebradas', 'tejidosandina.co', '@tejidos.andina', 'Tejidos Andina', 2,
    'tejidos-andina');
 
+-- `actualizado_en` se fija igual que `publicado_en` a propósito. Su valor por
+-- defecto es `now()`, que es POSTERIOR a la fecha del anuncio, y el cron
+-- entiende `actualizado_en > publicado_en` como "editado después de publicar":
+-- sin esto, los diez anuncios migrados se republicarían solos en la primera
+-- pasada. (Se pone en el INSERT porque el trigger que mantiene esa columna solo
+-- salta en UPDATE; corregirlo después obliga a desactivarlo.)
 insert into solicitudes_clasificados (
-  estado, publicado_en, notas_revision,
+  estado, publicado_en, actualizado_en, notas_revision,
   estudiantes, acudiente_nombre, consentimiento,
   cat, descripcion, telefono, correo,
   slug
 ) values
-  ('aprobado', '2026-09-02'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-09-02'::timestamptz, '2026-09-02'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'BUSCO', 'Busco apartamento en arriendo cerca al colegio, de dos o tres habitaciones, para entrar en enero. Familia de cuatro personas, sin mascotas.', '313 447 6620', 'ejemplo.siete@correo.com',
    'busco-arriendo-cerca-al-colegio'),
-  ('aprobado', '2026-09-01'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-09-01'::timestamptz, '2026-09-01'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'BUSCO', 'Busco cupo en una ruta compartida hacia Cerritos para mi hija de bachillerato, de lunes a viernes. Puedo aportar la parte que corresponda de la gasolina.', '316 803 1174', 'ejemplo.ocho@correo.com',
    'busco-cupo-en-ruta-cerritos'),
-  ('aprobado', '2026-08-30'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-30'::timestamptz, '2026-08-30'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'BUSCO', 'Busco quien dé refuerzo de lectura a un niño de segundo grado, dos tardes por semana en casa o en biblioteca. Preferible con experiencia en primaria.', '314 259 9038', 'ejemplo.nueve@correo.com',
    'busco-refuerzo-de-lectura'),
-  ('aprobado', '2026-08-29'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-29'::timestamptz, '2026-08-29'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'BUSCO', 'Busco trabajo de medio tiempo en contabilidad o administración. Diez años de experiencia, disponibilidad en la mañana. Envío hoja de vida por correo.', '317 610 4482', 'ejemplo.diez@correo.com',
    'busco-trabajo-medio-tiempo'),
-  ('aprobado', '2026-08-27'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-27'::timestamptz, '2026-08-27'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'COMPRO', 'Busco escritorio de estudio en buen estado, mínimo 1.20 m de ancho, para el cuarto de mi hija.', '310 555 8899', 'ejemplo.dos@correo.com',
    'compro-escritorio'),
-  ('aprobado', '2026-08-22'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-22'::timestamptz, '2026-08-22'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'COMPRO', 'Compro libros de séptimo grado de segunda mano, en especial los de ciencias e inglés.', '318 220 5567', 'ejemplo.seis@correo.com',
    'compro-libros-septimo'),
-  ('aprobado', '2026-08-26'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-26'::timestamptz, '2026-08-26'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'OFREZCO', 'Clases particulares de matemáticas para bachillerato. Presencial en Pereira o virtual.', '312 776 4410', 'ejemplo.tres@correo.com',
    'ofrezco-clases-matematicas'),
-  ('aprobado', '2026-08-24'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-24'::timestamptz, '2026-08-24'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'OFREZCO', 'Cupo en ruta compartida desde Cerritos al colegio, salida 6:20 a. m. Conductora conocida de la comunidad.', '300 441 7788', 'ejemplo.cinco@correo.com',
    'ofrezco-transporte-cerritos'),
-  ('aprobado', '2026-08-28'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-28'::timestamptz, '2026-08-28'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'VENDO', 'Bicicleta MTB rin 29, marco talla M, poco uso. Incluye casco y candado.', '311 222 3344', 'ejemplo.uno@correo.com',
    'vendo-bicicleta-mtb'),
-  ('aprobado', '2026-08-25'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
+  ('aprobado', '2026-08-25'::timestamptz, '2026-08-25'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'VENDO', 'Uniformes del colegio talla 10, sudadera y diario, en muy buen estado. Se venden por separado.', '315 908 2233', 'ejemplo.cuatro@correo.com',
    'vendo-uniformes-talla-10');
