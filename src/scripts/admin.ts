@@ -1,4 +1,6 @@
 import { crearCliente, resolverSesion } from '../lib/supabase';
+import { CATEGORIAS } from '../data/categorias';
+import { CATEGORIAS_CLASIFICADOS } from '../data/clasificados';
 
 /**
  * Panel de revisión.
@@ -17,6 +19,65 @@ const TABLA: Record<Cola, string> = {
   negocios: 'solicitudes_negocios',
   clasificados: 'solicitudes_clasificados',
   promociones: 'solicitudes_promociones',
+};
+
+interface Campo {
+  nombre: string;
+  etiqueta: string;
+  tipo: 'texto' | 'area' | 'lista' | 'fecha' | 'archivo';
+  requerido?: boolean;
+  /** No sale nunca al sitio público. Se marca en el formulario. */
+  interno?: boolean;
+  ancho?: boolean;
+  opciones?: readonly string[];
+  max?: number;
+}
+
+/**
+ * Qué campos tiene cada cola. La misma lista sirve para crear y para editar, y
+ * se corresponde con las columnas de `supabase/01-esquema.sql`: los límites de
+ * aquí son los mismos `check` que impone la base, repetidos como comodidad para
+ * quien escribe, no como defensa.
+ */
+const COMUNES: Campo[] = [
+  { nombre: 'estudiantes', etiqueta: 'Estudiantes y grado', tipo: 'texto', requerido: true, interno: true, max: 150, ancho: true },
+  { nombre: 'acudiente_nombre', etiqueta: 'Quién lo envía', tipo: 'texto', requerido: true, interno: true, max: 80 },
+];
+
+const CAMPOS: Record<Cola, Campo[]> = {
+  negocios: [
+    ...COMUNES,
+    { nombre: 'acudiente_telefono', etiqueta: 'Teléfono de contacto', tipo: 'texto', requerido: true, interno: true },
+    { nombre: 'acudiente_correo', etiqueta: 'Correo de contacto', tipo: 'texto', requerido: true, interno: true },
+    { nombre: 'nombre', etiqueta: 'Nombre del negocio', tipo: 'texto', requerido: true, max: 60 },
+    { nombre: 'categoria', etiqueta: 'Categoría', tipo: 'lista', requerido: true, opciones: CATEGORIAS },
+    { nombre: 'descripcion', etiqueta: 'Descripción', tipo: 'area', requerido: true, max: 200, ancho: true },
+    { nombre: 'grado', etiqueta: 'Grado (sale en la ficha)', tipo: 'texto', max: 10 },
+    { nombre: 'telefono', etiqueta: 'Teléfono del negocio', tipo: 'texto', requerido: true },
+    { nombre: 'direccion', etiqueta: 'Dirección', tipo: 'texto', requerido: true, max: 120 },
+    { nombre: 'web', etiqueta: 'Web', tipo: 'texto', max: 80 },
+    { nombre: 'instagram', etiqueta: 'Instagram (con @)', tipo: 'texto', max: 40 },
+    { nombre: 'facebook', etiqueta: 'Facebook', tipo: 'texto', max: 80 },
+    { nombre: 'foto', etiqueta: 'Foto', tipo: 'archivo', ancho: true },
+  ],
+  clasificados: [
+    ...COMUNES,
+    { nombre: 'cat', etiqueta: 'Tipo', tipo: 'lista', requerido: true, opciones: CATEGORIAS_CLASIFICADOS },
+    { nombre: 'descripcion', etiqueta: 'Anuncio', tipo: 'area', requerido: true, max: 280, ancho: true },
+    { nombre: 'telefono', etiqueta: 'Teléfono (se publica)', tipo: 'texto', requerido: true },
+    { nombre: 'correo', etiqueta: 'Correo (se publica)', tipo: 'texto', requerido: true },
+  ],
+  promociones: [
+    ...COMUNES,
+    { nombre: 'acudiente_correo', etiqueta: 'Correo de contacto', tipo: 'texto', requerido: true, interno: true },
+    { nombre: 'negocio', etiqueta: 'Negocio', tipo: 'texto', requerido: true, max: 60 },
+    { nombre: 'titulo', etiqueta: 'Título', tipo: 'texto', requerido: true, max: 80 },
+    { nombre: 'descripcion', etiqueta: 'En qué consiste', tipo: 'area', requerido: true, max: 280, ancho: true },
+    { nombre: 'condiciones', etiqueta: 'Condiciones', tipo: 'area', max: 200, ancho: true },
+    { nombre: 'telefono', etiqueta: 'Teléfono', tipo: 'texto', requerido: true },
+    { nombre: 'vigente_desde', etiqueta: 'Válida desde', tipo: 'fecha', requerido: true },
+    { nombre: 'vigente_hasta', etiqueta: 'Válida hasta', tipo: 'fecha', requerido: true },
+  ],
 };
 
 const raiz = document.getElementById('panel');
@@ -145,6 +206,13 @@ if (raiz) {
     return `<button type="button" data-accion="republicar" data-id="${id}">Volver a publicar</button>`;
   }
 
+  /** Editar y borrar están en todas, sea cual sea el estado. */
+  function accionesComunes(f: Fila): string {
+    const id = escapar(f.id);
+    return `<button type="button" data-accion="editar" data-id="${id}">Editar</button>
+      <button type="button" data-accion="borrar" data-id="${id}">Borrar</button>`;
+  }
+
   async function pintarLista() {
     const lista = $('[data-lista]');
     if (!lista) return;
@@ -178,11 +246,125 @@ if (raiz) {
             <h2>${escapar(titulo)}</h2>
             <p class="desc">${escapar(f.descripcion ?? '')}</p>
             <dl>${campos}</dl>
-            <div class="acciones">${accionesDe(f)}</div>
+            <div class="acciones">${accionesDe(f)}${accionesComunes(f)}</div>
           </div>
         </article>`;
       })
       .join('');
+  }
+
+  // --- crear y editar ------------------------------------------------------
+
+  /** Qué fila se está editando. Vacío = se está creando una nueva. */
+  let editando: Fila | null = null;
+
+  function pintarFormulario(f: Fila | null) {
+    const form = $<HTMLFormElement>('[data-formulario]');
+    if (!form) return;
+    editando = f;
+
+    const valor = (c: Campo) => escapar(f?.[c.nombre] ?? '');
+    const campos = CAMPOS[cola]
+      .map((c) => {
+        const marca = c.interno ? ' <span class="interno">no se publica</span>' : '';
+        const req = c.requerido ? ' required' : '';
+        const max = c.max ? ` maxlength="${c.max}"` : '';
+        let control: string;
+        if (c.tipo === 'area') {
+          control = `<textarea name="${c.nombre}"${req}${max}>${valor(c)}</textarea>`;
+        } else if (c.tipo === 'lista') {
+          const ops = (c.opciones ?? [])
+            .map((o) => `<option value="${escapar(o)}"${f?.[c.nombre] === o ? ' selected' : ''}>${escapar(o)}</option>`)
+            .join('');
+          control = `<select name="${c.nombre}"${req}><option value="">Elige…</option>${ops}</select>`;
+        } else if (c.tipo === 'archivo') {
+          // Al editar, la foto existente se conserva si no se elige otra.
+          control = `<input type="file" name="${c.nombre}" accept="image/jpeg,image/png,image/webp">`;
+        } else {
+          const tipo = c.tipo === 'fecha' ? 'date' : 'text';
+          control = `<input type="${tipo}" name="${c.nombre}" value="${valor(c)}"${req}${max}>`;
+        }
+        return `<div class="campo${c.ancho ? ' ancho' : ''}">
+          <label for="${c.nombre}">${escapar(c.etiqueta)}${marca}</label>${control}
+        </div>`;
+      })
+      .join('');
+
+    form.innerHTML = `<h2>${f ? 'Editar' : 'Crear'} en ${escapar(cola)}</h2>${campos}
+      <div class="pie">
+        <button type="submit" class="li-btn">${f ? 'Guardar cambios' : 'Crear'}</button>
+        <button type="button" data-accion="cancelar">Cancelar</button>
+      </div>`;
+    form.hidden = false;
+    form.scrollIntoView({ block: 'nearest' });
+  }
+
+  async function guardar(form: HTMLFormElement) {
+    const datosForm = new FormData(form);
+    const fila: Fila = {};
+
+    for (const c of CAMPOS[cola]) {
+      if (c.tipo === 'archivo') continue;
+      const v = String(datosForm.get(c.nombre) ?? '').trim();
+      // Los opcionales vacíos van como null y no como cadena vacía: el esquema
+      // distingue "sin dato" de "cadena vacía", y varios `check` rechazan la
+      // segunda.
+      fila[c.nombre] = v === '' ? null : v;
+    }
+    fila.revisado_por = usuarioId;
+    fila.revisado_en = new Date().toISOString();
+
+    // La foto se sube ANTES de escribir la fila, por lo mismo que en la Edge
+    // Function: si falla la subida, mejor no dejar una ficha apuntando a un
+    // archivo que no existe.
+    const foto = datosForm.get('foto');
+    if (foto instanceof File && foto.size > 0) {
+      const ext = (foto.name.split('.').pop() ?? 'webp').toLowerCase();
+      const ruta = `panel/${crypto.randomUUID()}.${ext}`;
+      const { error } = await db.storage.from('fotos').upload(ruta, foto, { contentType: foto.type });
+      if (error) {
+        avisar(`No se pudo subir la foto: ${error.message}`, 'error');
+        return;
+      }
+      fila.foto_ruta = ruta;
+    }
+
+    const { error } = editando
+      ? await db.from(TABLA[cola]).update(fila).eq('id', editando.id)
+      : await db.from(TABLA[cola]).insert(fila);
+
+    if (error) {
+      avisar(`No se pudo guardar: ${error.message}`, 'error');
+      return;
+    }
+
+    form.hidden = true;
+    editando = null;
+    avisar(
+      'Guardado. Si está aprobada, el cambio se publica en el próximo ciclo: editar una ficha publicada la vuelve a publicar.',
+    );
+    await cargar();
+    await pintarLista();
+  }
+
+  async function borrar(id: string, boton: HTMLButtonElement) {
+    const fila = datos[cola].find((f) => f.id === id);
+    const titulo = fila?.nombre ?? fila?.titulo ?? fila?.descripcion?.slice(0, 40) ?? 'esta entrada';
+    if (!confirm(`¿Borrar «${titulo}» definitivamente? No se puede deshacer.`)) return;
+
+    boton.disabled = true;
+    const { error } = await db.from(TABLA[cola]).delete().eq('id', id);
+    boton.disabled = false;
+
+    if (error) {
+      // La base impide borrar lo que sigue vivo en el sitio: si la fila
+      // desapareciera, el cron nunca sabría que hay que quitar el archivo.
+      avisar(error.message, 'error');
+      return;
+    }
+    avisar('Borrada.');
+    await cargar();
+    await pintarLista();
   }
 
   // --- acciones ------------------------------------------------------------
@@ -246,6 +428,11 @@ if (raiz) {
   for (const boton of raiz.querySelectorAll<HTMLButtonElement>('[data-cola]')) {
     boton.addEventListener('click', async () => {
       cola = boton.dataset.cola as Cola;
+      // El formulario abierto es de OTRA tabla: dejarlo visible invitaría a
+      // guardar campos que no existen en la cola nueva.
+      const form = $<HTMLFormElement>('[data-formulario]');
+      if (form) form.hidden = true;
+      editando = null;
       for (const b of raiz.querySelectorAll('[data-cola]')) {
         b.setAttribute('aria-pressed', String(b === boton));
       }
@@ -269,7 +456,34 @@ if (raiz) {
   // los eventos a cada botón obligaría a reatarlos cada vez.
   $('[data-lista]')?.addEventListener('click', (e) => {
     const boton = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-accion][data-id]');
-    if (boton) void actuar(boton.dataset.accion!, boton.dataset.id!, boton);
+    if (!boton) return;
+    const accion = boton.dataset.accion!;
+    const id = boton.dataset.id!;
+    if (accion === 'editar') {
+      pintarFormulario(datos[cola].find((f) => f.id === id) ?? null);
+    } else if (accion === 'borrar') {
+      void borrar(id, boton);
+    } else {
+      void actuar(accion, id, boton);
+    }
+  });
+
+  $('[data-accion="nueva"]')?.addEventListener('click', () => {
+    avisar('');
+    pintarFormulario(null);
+  });
+
+  $<HTMLFormElement>('[data-formulario]')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    void guardar(e.currentTarget as HTMLFormElement);
+  });
+
+  $('[data-formulario]')?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).dataset.accion === 'cancelar') {
+      const form = $<HTMLFormElement>('[data-formulario]');
+      if (form) form.hidden = true;
+      editando = null;
+    }
   });
 
   // --- arranque ------------------------------------------------------------
