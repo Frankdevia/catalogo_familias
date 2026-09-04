@@ -1,13 +1,13 @@
 {
-  "web": "estudioluz.co",
-  "foto": "../../assets/photos/estudio-fotografia-luz.webp",
-  "orden": 6,
   "nombre": "Estudio Fotografía Luz---",
-  "familia": "Familia — grado 8A",
-  "facebook": "Estudio Fotografía Luz",
-  "telefono": "301 234 9876",
   "categoria": "Salud y bienestar",
+  "descripcion": "Fotografía de eventos, retratos familiares y fotoproducto para negocios.",
+  "familia": "Familia — grado 8A",
+  "foto": "../../assets/photos/estudio-fotografia-luz.webp",
+  "telefono": "301 234 9876",
   "direccion": "Cra 7 # 19-20, Pereira",
+  "web": "estudioluz.co",
   "instagram": "@estudio.foto.luz",
-  "descripcion": "Fotografía de eventos, retratos familiares y fotoproducto para negocios."
+  "facebook": "Estudio Fotografía Luz",
+  "orden": 6
 }
