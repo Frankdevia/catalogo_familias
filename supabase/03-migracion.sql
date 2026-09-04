@@ -10,15 +10,17 @@
 --
 -- LOS DATOS PRIVADOS NO SE PUEDEN RECUPERAR. El JSON publicado no contiene
 -- —a propósito— los nombres de los estudiantes ni el contacto del acudiente:
--- esos se quedaron en el Google Sheet. Aquí van rellenos con un marcador
--- explícito. Si alguna de estas fichas se edita después, quien revise verá el
--- marcador y sabrá que esa solicitud es anterior al panel.
+-- esos se quedaron en el Google Sheet. Aquí van con un marcador explícito, no
+-- con datos inventados que parezcan reales. Si alguna de estas fichas se edita
+-- después, quien revise verá el marcador y sabrá que es anterior al panel.
 --
 -- El `grado` sale de descomponer "Familia — grado 7A", que es como se guardó.
+--
+-- NO INCLUYE las fichas de prueba («Test», «PRUEBA - borrar esta fila») ni el
+-- anuncio de la bicicleta: se borraron del repo porque llevaban datos
+-- personales reales publicados. Sus filas siguen en el Sheet marcadas como
+-- publicadas, y ahí se quedan: el Sheet pasa a ser archivo histórico.
 -- =============================================================================
-
--- Marcador de los campos que no existían cuando se publicaron estas fichas.
--- Es una cadena reconocible a simple vista, no un dato inventado que parezca real.
 
 insert into solicitudes_negocios (
   estado, publicado_en, notas_revision,
@@ -48,20 +50,12 @@ insert into solicitudes_negocios (
    'fisio-activa'),
   ('aprobado', now(), 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', '0000000', 'sin-correo@migracion.local', true,
-   'PRUEBA - borrar esta fila', 'Moda', 'Solicitud de prueba generada para verificar el circuito. No es un negocio real.', '5B', '300 000 0000', 'Direccion de prueba, Pereira', null, null, null, 100,
-   'prueba-borrar-esta-fila'),
-  ('aprobado', now(), 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
-   '(anterior al panel)', '(anterior al panel)', '0000000', 'sin-correo@migracion.local', true,
    'Repostería La Abuela', 'Gastronomía', 'Tortas, postres y desayunos sorpresa por encargo. Domicilios en Pereira y Dosquebradas.', '3B', '310 456 7890', 'Cra 15 # 12-34, Pereira', 'reposterialaabuela.co', '@reposteria.laabuela', 'Repostería La Abuela', 1,
    'reposteria-la-abuela'),
   ('aprobado', now(), 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', '0000000', 'sin-correo@migracion.local', true,
    'Tejidos Andina', 'Moda', 'Ropa tejida a mano: ruanas, bufandas y accesorios en lana natural.', '7A', '315 234 5678', 'Cll 8 # 23-45, Dosquebradas', 'tejidosandina.co', '@tejidos.andina', 'Tejidos Andina', 2,
-   'tejidos-andina'),
-  ('aprobado', now(), 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
-   '(anterior al panel)', '(anterior al panel)', '0000000', 'sin-correo@migracion.local', true,
-   'Test', 'Gastronomía', 'test', '5B', '3218409113', 'Vereda La fria Finca la Aurora', null, null, null, 100,
-   'test');
+   'tejidos-andina');
 
 insert into solicitudes_clasificados (
   estado, publicado_en, notas_revision,
@@ -105,10 +99,6 @@ insert into solicitudes_clasificados (
    '(anterior al panel)', '(anterior al panel)', true,
    'VENDO', 'Bicicleta MTB rin 29, marco talla M, poco uso. Incluye casco y candado.', '311 222 3344', 'ejemplo.uno@correo.com',
    'vendo-bicicleta-mtb'),
-  ('aprobado', '2026-09-01'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
-   '(anterior al panel)', '(anterior al panel)', true,
-   'VENDO', 'Bicicleta en perfecto estado RIN 22', '3235452211', 'francisdevia@gmail.com',
-   'vendo-mtiopu0r'),
   ('aprobado', '2026-08-25'::timestamptz, 'Migrado del catálogo anterior; los datos del acudiente se quedaron en el Google Sheet.',
    '(anterior al panel)', '(anterior al panel)', true,
    'VENDO', 'Uniformes del colegio talla 10, sudadera y diario, en muy buen estado. Se venden por separado.', '315 908 2233', 'ejemplo.cuatro@correo.com',
@@ -117,4 +107,4 @@ insert into solicitudes_clasificados (
 -- Comprobación
 --   select estado, count(*) from solicitudes_negocios group by estado;
 --   select estado, count(*) from solicitudes_clasificados group by estado;
--- Deben salir 9 negocios y 11 clasificados, todos en 'aprobado'.
+-- Deben salir 7 negocios y 10 clasificados, todos en 'aprobado'.
