@@ -94,11 +94,17 @@ neg_altas as (
       -- original se llaman `biz-cafe.webp` y compañía. Deducirlo hacía que
       -- republicar una de ellas apuntara a un archivo inexistente y tumbara el
       -- build del sitio ENTERO, no solo esa ficha.
-      'foto',        '../../assets/photos/' || coalesce(
-                       n.foto_archivo,
-                       coalesce(n.slug, slugificar(n.nombre)) || '.' ||
-                       lower(coalesce(nullif(regexp_replace(n.foto_ruta, '^.*\.', ''), n.foto_ruta), 'webp'))
-                     ),
+      -- Solo si hay foto. Concatenar nunca da null, y por eso los negocios sin
+      -- foto salían apuntando a un archivo inexistente y no se publicaban
+      -- nunca (ver 13-negocio-sin-foto.sql).
+      'foto',        case
+                       when n.foto_archivo is not null or n.foto_ruta is not null
+                       then '../../assets/photos/' || coalesce(
+                              n.foto_archivo,
+                              coalesce(n.slug, slugificar(n.nombre)) || '.' ||
+                              lower(coalesce(nullif(regexp_replace(n.foto_ruta, '^.*\.', ''), n.foto_ruta), 'webp'))
+                            )
+                     end,
       'telefono',    n.telefono,
       'direccion',   n.direccion,
       'web',         n.web,

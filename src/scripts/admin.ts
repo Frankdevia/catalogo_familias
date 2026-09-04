@@ -574,8 +574,26 @@ if (raiz) {
       avisar(`No se pudo publicar: ${error.message}`, 'error');
       return;
     }
+    // Lo apartado se cuenta SIEMPRE, haya habido commit o no. Una ficha con un
+    // dato que no compila se queda aprobada y sin publicar, y sin decirlo aquí
+    // el panel la enseña como publicada mientras el sitio no la tiene: nadie
+    // mira los registros de la función.
+    const apartadas: string = (data?.rechazadas ?? [])
+      .map((r: { slug: string; motivos: string[] }) => `«${r.slug}»: ${r.motivos.join('; ')}`)
+      .join(' · ');
+
+    if (data?.fallos?.length) {
+      avisar(`La publicación salió pero algo quedó a medias: ${data.fallos.join(' · ')}`, 'error');
+      return;
+    }
+
     if (data?.sin_cambios) {
-      avisar('No había nada pendiente: el sitio ya está al día.');
+      avisar(
+        apartadas
+          ? `Nada nuevo que publicar. Hay ${data.rechazadas.length} sin publicar por un dato — ${apartadas}`
+          : 'No había nada pendiente: el sitio ya está al día.',
+        apartadas ? 'error' : 'info',
+      );
       return;
     }
     const partes = [
@@ -589,7 +607,11 @@ if (raiz) {
       data?.despliegue === 'lanzado'
         ? 'El sitio se está reconstruyendo; tarda un par de minutos.'
         : `Ojo: el despliegue no arrancó (${data?.despliegue}). El commit sí salió.`;
-    avisar(`${partes}. ${aviso}`, data?.despliegue === 'lanzado' ? 'info' : 'error');
+    const problema = apartadas ? ` Quedan ${data.rechazadas.length} sin publicar — ${apartadas}` : '';
+    avisar(
+      `${partes}. ${aviso}${problema}`,
+      data?.despliegue === 'lanzado' && !problema ? 'info' : 'error',
+    );
 
     await cargar();
     await pintarLista();

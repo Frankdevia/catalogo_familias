@@ -144,7 +144,15 @@ function problemasDe(cola: string, c: Record<string, unknown>): string[] {
   };
 
   if (cola === 'negocios') {
-    for (const k of ['nombre', 'categoria', 'descripcion', 'familia', 'foto', 'telefono', 'direccion']) exigir(k);
+    // `direccion` NO está: no todos los negocios tienen local, y el esquema del
+    // sitio la declara opcional. La consulta de publicación pasa por
+    // `jsonb_strip_nulls`, así que cuando falta, la clave sencillamente no
+    // llega y la ficha no dibuja la fila.
+    // Ni `direccion` ni `foto`: las dos son opcionales en el esquema del sitio.
+    // Sin local no hay fila «Dirección»; sin foto, la tarjeta y la ficha
+    // dibujan la inicial. La consulta pasa por `jsonb_strip_nulls`, así que lo
+    // que falta sencillamente no llega.
+    for (const k of ['nombre', 'categoria', 'descripcion', 'familia', 'telefono']) exigir(k);
     // El grado llega dentro de `familia`; si faltaba, queda "Familia — grado ".
     if (txt('familia').trim().endsWith('grado')) malos.push('la ficha no tiene grado');
     if (!/^[0-9 ]+$/.test(txt('telefono'))) malos.push(`teléfono inválido: ${txt('telefono')}`);
@@ -247,8 +255,48 @@ Deno.serve(async (peticion) => {
     // una ficha mala no debe impedir que salgan las nueve buenas. Las apartadas
     // se quedan pendientes y salen en la respuesta con el motivo.
     const rechazadas: Array<{ slug: string; motivos: string[] }> = [];
+
+    // De quién es cada slug de negocio que ya existe. Solo esta cola lo necesita:
+    // los slugs de clasificados y promociones llevan dentro un trozo del id, así
+    // que no pueden chocar. Los de negocios salen del nombre, y dos familias
+    // pueden registrar el mismo negocio.
+    const duenoDelSlug = new Map<string, string>();
+    {
+      const slugs = altas.filter((a) => a.cola === 'negocios').map((a) => a.slug);
+      if (slugs.length) {
+        const { data } = await db
+          .from('solicitudes_negocios')
+          .select('id, slug')
+          .in('slug', slugs);
+        for (const f of data ?? []) if (f.slug) duenoDelSlug.set(f.slug as string, f.id as string);
+      }
+    }
+
+    // Dos fichas con el mismo nombre dan el mismo slug, y el slug es único en la
+    // base. Si las dos pasan, la segunda revienta `sellar_publicados` con una
+    // violación de unicidad y —como el sello va DESPUÉS del commit— el
+    // resultado es un commit que sale y un sello que no: en la pasada siguiente
+    // vuelve a estar todo pendiente. Eso encadenó decenas de commits idénticos
+    // y otras tantas reconstrucciones antes de que nadie lo notara, porque la
+    // respuesta seguía diciendo «ok».
+    const rutasVistas = new Set<string>();
+
     const buenas = altas.filter((a) => {
       const motivos = problemasDe(a.cola, a.contenido);
+
+      if (rutasVistas.has(a.ruta)) {
+        motivos.push(`otra ficha aprobada escribe el mismo archivo (${a.ruta}): hay dos con el mismo nombre`);
+      } else {
+        rutasVistas.add(a.ruta);
+      }
+
+      // Y el choque también puede ser contra algo que YA está publicado: esa
+      // ficha no está en esta cola, pero su slug sí está ocupado, y sellar
+      // reventaría igual.
+      const dueno = duenoDelSlug.get(a.slug);
+      if (dueno && dueno !== a.id) {
+        motivos.push(`el nombre «${a.slug}» ya lo usa otra ficha: son dos registros del mismo negocio`);
+      }
 
       // La foto tiene que existir: o se sube en este mismo commit, o ya está en
       // el repositorio. Si no, Astro no compila y se cae el sitio COMPLETO, no
@@ -274,17 +322,31 @@ Deno.serve(async (peticion) => {
       return responder({ ok: true, sin_cambios: true, caducadas, huerfanas_borradas: huerfanas, rechazadas });
     }
 
+    // Lo que de verdad entra en el commit. No es `buenas`: una ficha puede
+    // caerse aquí, al ir a por su foto.
+    const publicadas: typeof buenas = [];
+
     for (const a of buenas) {
-      arbol.push({
-        path: a.ruta,
-        mode: '100644',
-        type: 'blob',
-        content: serializar(a.cola, a.contenido),
-      });
+      // Las entradas de esta ficha se preparan aparte y solo se añaden al árbol
+      // si TODA la ficha sale bien. Si no, el commit llevaría el JSON sin su
+      // foto y el build se caería por la imagen que falta.
+      const entradas: Array<Record<string, unknown>> = [
+        { path: a.ruta, mode: '100644', type: 'blob', content: serializar(a.cola, a.contenido) },
+      ];
 
       if (a.foto_ruta && a.ruta_foto) {
         const { data: archivo, error: errorFoto } = await db.storage.from('fotos').download(a.foto_ruta);
-        if (errorFoto || !archivo) throw new Error(`No se pudo bajar la foto ${a.foto_ruta}: ${errorFoto?.message}`);
+        if (errorFoto || !archivo) {
+          // Storage ya no tiene esa foto. Antes esto lanzaba, y una sola ficha
+          // así dejaba el sitio entero sin publicar: ni las fichas buenas ni
+          // las retiradas salían, en cada pasada del cron, para siempre. Se
+          // aparta como cualquier otro dato malo y las demás siguen.
+          rechazadas.push({
+            slug: a.slug,
+            motivos: [`su foto ya no está en Storage (${a.foto_ruta}): ${errorFoto?.message ?? 'no se pudo bajar'}`],
+          });
+          continue;
+        }
         const bytes = new Uint8Array(await archivo.arrayBuffer());
         let binario = '';
         for (const b of bytes) binario += String.fromCharCode(b);
@@ -292,8 +354,18 @@ Deno.serve(async (peticion) => {
           method: 'POST',
           body: JSON.stringify({ content: btoa(binario), encoding: 'base64' }),
         });
-        arbol.push({ path: a.ruta_foto, mode: '100644', type: 'blob', sha: blob.sha });
+        entradas.push({ path: a.ruta_foto, mode: '100644', type: 'blob', sha: blob.sha });
       }
+
+      arbol.push(...entradas);
+      publicadas.push(a);
+    }
+
+    // Se vuelve a mirar: puede que las únicas altas fueran las que acaban de
+    // caerse, y entonces no hay commit que hacer.
+    if (!publicadas.length && !bajas.length) {
+      console.error('nada publicable', JSON.stringify(rechazadas));
+      return responder({ ok: true, sin_cambios: true, caducadas, huerfanas_borradas: huerfanas, rechazadas });
     }
 
     // Una entrada con `sha: null` es como se borra un archivo en un árbol.
@@ -309,7 +381,7 @@ Deno.serve(async (peticion) => {
     });
 
     const resumen = [
-      buenas.length ? `publica ${buenas.length}` : '',
+      publicadas.length ? `publica ${publicadas.length}` : '',
       bajas.length ? `retira ${bajas.length}` : '',
     ].filter(Boolean).join(' y ');
 
@@ -334,20 +406,38 @@ Deno.serve(async (peticion) => {
     const ids = (lista: Array<{ cola: string; id: string }>, cola: string) =>
       lista.filter((x) => x.cola === cola).map((x) => x.id);
 
-    await db.rpc('sellar_publicados', {
-      ids_negocios: ids(buenas, 'negocios'),
-      ids_clasificados: ids(buenas, 'clasificados'),
-      ids_promociones: ids(buenas, 'promociones'),
+    // El error del sello NO se puede tragar. supabase-js devuelve `{ error }` en
+    // vez de lanzar, así que sin mirarlo la respuesta decía «ok» mientras nada
+    // quedaba marcado como publicado y el cron repetía el mismo commit cada
+    // minuto. Es el fallo más caro posible: silencioso y en bucle.
+    const fallos: string[] = [];
+    const { error: errorSello } = await db.rpc('sellar_publicados', {
+      ids_negocios: ids(publicadas, 'negocios'),
+      ids_clasificados: ids(publicadas, 'clasificados'),
+      ids_promociones: ids(publicadas, 'promociones'),
     });
-    await db.rpc('sellar_retirados', {
+    if (errorSello) {
+      console.error('el sello de publicados falló', errorSello.message);
+      fallos.push(`no se pudo sellar lo publicado: ${errorSello.message}`);
+    }
+
+    const { error: errorRetiro } = await db.rpc('sellar_retirados', {
       ids_negocios: ids(bajas, 'negocios'),
       ids_clasificados: ids(bajas, 'clasificados'),
       ids_promociones: ids(bajas, 'promociones'),
     });
+    if (errorRetiro) {
+      console.error('el sello de retirados falló', errorRetiro.message);
+      fallos.push(`no se pudo sellar lo retirado: ${errorRetiro.message}`);
+    }
 
     // Las fotos ya viven en el repositorio: fuera de Storage. Sin esto, 700
     // fotos de hasta 1,5 MB llenan el gigabyte del plan gratuito.
-    const paraBorrar = buenas.map((a) => a.foto_ruta).filter((r): r is string => Boolean(r));
+    // Solo si el sello salió bien: si no, la fila sigue creyendo que su foto
+    // está en Storage y borrarla la dejaría sin nada que subir en el reintento.
+    const paraBorrar = errorSello
+      ? []
+      : publicadas.map((a) => a.foto_ruta).filter((r): r is string => Boolean(r));
     if (paraBorrar.length) await db.storage.from('fotos').remove(paraBorrar);
 
     // --- avisar al despliegue ------------------------------------------------
@@ -377,8 +467,9 @@ Deno.serve(async (peticion) => {
     return responder({
       ok: true,
       commit: commit.sha,
-      publicadas: buenas.length,
+      publicadas: publicadas.length,
       rechazadas,
+      ...(fallos.length ? { fallos } : {}),
       retiradas: bajas.length,
       caducadas,
       fotos_liberadas: paraBorrar.length,
