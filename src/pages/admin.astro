@@ -71,9 +71,28 @@ const supabaseClave =
           <button type="button" class="secundario" data-accion="salir">Salir</button>
         </div>
       </header>
-      <p class="entrada" data-marcador>
-        La sesión funciona. Las tres colas se conectan en el siguiente paso.
-      </p>
+      <nav class="pestanas" aria-label="Colas de revisión">
+        <button type="button" data-cola="negocios" aria-pressed="true">
+          Catálogo <span class="cuenta" data-cuenta="negocios">·</span>
+        </button>
+        <button type="button" data-cola="clasificados" aria-pressed="false">
+          Clasificados <span class="cuenta" data-cuenta="clasificados">·</span>
+        </button>
+        <button type="button" data-cola="promociones" aria-pressed="false">
+          Promociones <span class="cuenta" data-cuenta="promociones">·</span>
+        </button>
+      </nav>
+
+      <div class="filtros" role="group" aria-label="Filtrar por estado">
+        <button type="button" data-estado="pendiente" aria-pressed="true">Pendientes</button>
+        <button type="button" data-estado="aprobado" aria-pressed="false">Publicados</button>
+        <button type="button" data-estado="retirado" aria-pressed="false">Retirados</button>
+        <button type="button" data-estado="rechazado" aria-pressed="false">Rechazados</button>
+      </div>
+
+      <p class="aviso" data-aviso hidden role="status" aria-live="polite"></p>
+
+      <div data-lista class="lista"></div>
     </section>
   </main>
 </BaseLayout>
@@ -154,6 +173,202 @@ const supabaseClave =
     margin-top: var(--space-4);
     color: var(--li-red);
     font-size: var(--text-sm);
+  }
+
+  /* --- colas y filtros --------------------------------------------------- */
+  .pestanas,
+  .filtros {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .pestanas {
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-6);
+    gap: var(--space-6);
+  }
+  .pestanas button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0 0 var(--space-3);
+    font-family: var(--font-subhead);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--li-gray-600);
+    cursor: pointer;
+  }
+  .pestanas button[aria-pressed='true'] {
+    color: var(--text-heading);
+    border-bottom-color: var(--li-red);
+  }
+  .pestanas .cuenta {
+    font-weight: var(--weight-regular);
+    opacity: 0.7;
+  }
+  .filtros {
+    margin-bottom: var(--space-6);
+  }
+  .filtros button {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--li-gray-200);
+    background: var(--li-white);
+    color: var(--li-navy);
+    cursor: pointer;
+  }
+  .filtros button[aria-pressed='true'] {
+    background: var(--li-navy);
+    border-color: var(--li-navy);
+    color: var(--li-white);
+  }
+
+  .aviso {
+    margin: 0 0 var(--space-6);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-card);
+    background: var(--surface-subtle);
+    border-left: 3px solid var(--li-navy);
+    font-size: var(--text-sm);
+    color: var(--text-body);
+  }
+  .aviso[data-tono='error'] {
+    border-left-color: var(--li-red);
+    color: var(--li-red);
+  }
+
+  /* --- tarjetas de revisión ---------------------------------------------- */
+  .lista {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .lista :global(.vacio) {
+    padding: var(--space-12);
+    text-align: center;
+    color: var(--li-gray-600);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-card);
+  }
+  .lista :global(.ficha) {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-6);
+    padding: var(--space-5);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-md);
+  }
+  .lista :global(.ficha.sin-foto) {
+    grid-template-columns: 1fr;
+  }
+  .lista :global(.ficha img) {
+    width: 100%;
+    aspect-ratio: 2.35 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+    background: var(--surface-subtle);
+  }
+  .lista :global(.ficha h2) {
+    font-family: var(--font-subhead);
+    font-size: var(--text-md);
+    color: var(--text-heading);
+    margin: 0 0 var(--space-2);
+  }
+  .lista :global(.etiqueta) {
+    display: inline-block;
+    font-family: var(--font-subhead);
+    font-size: var(--text-3xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--li-navy);
+    color: var(--li-white);
+    margin-bottom: var(--space-3);
+  }
+  .lista :global(.desc) {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-body);
+  }
+  .lista :global(dl) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-1) var(--space-4);
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-sm);
+  }
+  .lista :global(dt) {
+    font-weight: var(--weight-semibold);
+    color: var(--li-gray-600);
+  }
+  .lista :global(dd) {
+    margin: 0;
+    color: var(--text-body);
+  }
+  /* Lo que nunca se publica se marca en la propia tarjeta, para que quien
+     revisa vea de un vistazo qué es interno y qué va a salir al sitio. */
+  .lista :global(dt.interno)::after {
+    content: ' · no se publica';
+    font-weight: var(--weight-regular);
+    font-size: var(--text-3xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    color: var(--li-red);
+  }
+  .lista :global(.acciones) {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .lista :global(.acciones input) {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    width: 8ch;
+  }
+  .lista :global(.acciones button) {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border-strong);
+    background: var(--li-white);
+    color: var(--text-heading);
+    cursor: pointer;
+  }
+  .lista :global(.acciones button[data-accion='aprobar']) {
+    background: var(--li-navy);
+    border-color: var(--li-navy);
+    color: var(--li-white);
+  }
+  .lista :global(.acciones button[data-accion='retirar']),
+  .lista :global(.acciones button[data-accion='rechazar']) {
+    color: var(--li-red);
+    border-color: var(--li-red-300);
+  }
+  .lista :global(.acciones button:disabled) {
+    opacity: 0.5;
+    cursor: wait;
+  }
+
+  @media (max-width: 700px) {
+    .lista :global(.ficha) {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 600px) {
