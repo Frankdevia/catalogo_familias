@@ -31,8 +31,15 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-/** Cuántos envíos se aceptan de la misma huella en la ventana. */
-const LIMITE = { envios: 5, minutos: 10 };
+/**
+ * Cuántos envíos se aceptan de la misma huella en la ventana.
+ *
+ * Treinta y no cinco porque **un colegio entero sale por la misma IP**: si el
+ * lanzamiento se anuncia en una reunión y veinte familias llenan el formulario
+ * desde el wifi del Liceo, un límite bajo les niega el envío por algo que no
+ * han hecho. Treinta sigue parando a un script.
+ */
+const LIMITE = { envios: 30, minutos: 10 };
 
 const responder = (cuerpo: unknown, estado = 200) =>
   new Response(JSON.stringify(cuerpo), {
@@ -95,16 +102,21 @@ Deno.serve(async (peticion) => {
   }
 
   // --- límite por huella ---------------------------------------------------
+  // Contar aquí y anotar después NO servía: con veinte peticiones a la vez, las
+  // veinte leen el contador antes de que ninguna haya escrito, y pasaron 18 de
+  // 20 cuando el límite eran 5. Es justo el caso que importa, porque un script
+  // que inunde lo hará en paralelo. La base lo hace ahora en una sola operación,
+  // con un cerrojo por huella.
   const ip = peticion.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'desconocida';
   const h = await huella(ip);
-  const desde = new Date(Date.now() - LIMITE.minutos * 60_000).toISOString();
-  const { count } = await db
-    .from('intentos_envio')
-    .select('id', { count: 'exact', head: true })
-    .eq('huella', h)
-    .gte('creado_en', desde);
+  const { data: permitido } = await db.rpc('permitir_envio', {
+    p_huella: h,
+    p_cola: cola,
+    p_limite: LIMITE.envios,
+    p_minutos: LIMITE.minutos,
+  });
 
-  if ((count ?? 0) >= LIMITE.envios) {
+  if (permitido === false) {
     return responder(
       { ok: false, campo: null, mensaje: 'Recibimos varias solicitudes tuyas hace un momento. Espera unos minutos e inténtalo de nuevo.' },
       429,
@@ -241,10 +253,6 @@ Deno.serve(async (peticion) => {
         throw error;
       }
     }
-
-    // Se anota DESPUÉS de que todo haya salido bien: un envío rechazado por
-    // validación no debe gastarle el cupo a quien está corrigiendo un campo.
-    await db.from('intentos_envio').insert({ huella: h, cola });
 
     return responder({ ok: true });
   } catch (e) {

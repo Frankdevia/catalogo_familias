@@ -4,19 +4,24 @@ import FormularioClasificado from '../../components/FormularioClasificado.astro'
 import { SITIO } from '../../data/sitio';
 
 /*
- * Webhook de n8n que recibe los anuncios.
+ * Endpoint que recibe las solicitudes: la Edge Function `solicitud` de Supabase.
+ *
+ * Los tres formularios mandan al MISMO sitio y se distinguen por el campo
+ * `cola`. Antes cada uno tenía su webhook de n8n; ahora la validación, el
+ * límite por IP y la escritura viven en un solo lugar, con las mismas reglas
+ * que usa el navegador —importadas del mismo archivo, no copiadas—.
  *
  * Va como valor por defecto y no como variable de despliegue porque las
  * "Variables de entorno" de EasyPanel son del contenedor en ejecución, no del
- * `docker build`: en un sitio estático nunca llegan. Ver docs/postulaciones.md.
+ * `docker build`: en un sitio estático nunca llegan.
  *
  * `||` y no `??`: Docker deja la variable como cadena vacía si el build arg no
  * se pasa, y `??` no atrapa la cadena vacía.
  */
 const POR_DEFECTO =
-  'https://n8n-n8n.26zlav.easypanel.host/webhook/fli-clasificados-9c4e21a7-5b0d-4f38-8e17-3ab6d29c1f45';
+  'https://mjxzbjrweqkuvshcpmwv.supabase.co/functions/v1/solicitud';
 
-const endpoint = process.env.N8N_CLASIFICADOS_URL || POR_DEFECTO;
+const endpoint = process.env.SOLICITUD_URL || POR_DEFECTO;
 ---
 
 <BaseLayout

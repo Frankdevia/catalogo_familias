@@ -171,6 +171,8 @@ if (form && exito) {
       ((form.elements.namedItem(campo) as HTMLInputElement | HTMLSelectElement | null)?.value ?? '').trim();
 
     const datos = new FormData();
+    // Le dice a la Edge Function a qué cola va: los tres formularios comparten endpoint.
+    datos.set('cola', 'negocios');
     datos.set('estudiantes', valor('estudiantes'));
     datos.set('acudiente_nombre', valor('acudiente_nombre'));
     datos.set('acudiente_telefono', normalizarTelefono(valor('acudiente_telefono')));

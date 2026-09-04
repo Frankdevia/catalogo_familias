@@ -109,6 +109,8 @@ if (form && exito) {
       ).trim();
 
     const datos = new URLSearchParams();
+    // Le dice a la Edge Function a qué cola va: los tres formularios comparten endpoint.
+    datos.set('cola', 'clasificados');
     datos.set('estudiantes', valor('estudiantes'));
     datos.set('acudiente_nombre', valor('acudiente_nombre'));
     datos.set('cat', valor('cat'));

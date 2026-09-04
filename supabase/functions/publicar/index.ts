@@ -77,6 +77,50 @@ function serializar(cola: string, contenido: Record<string, unknown>): string {
   return JSON.stringify(ordenado, null, 2) + '\n';
 }
 
+
+/**
+ * Borra las fotos de Storage que ya no referencia ninguna fila.
+ *
+ * Una foto sube ANTES de que exista su fila, y la fila puede acabar rechazada o
+ * borrada. Cuando eso pasa el archivo se queda para siempre: nadie lo
+ * referencia y nadie lo borra. Con 700 familias y un gigabyte de cuota, eso se
+ * llena solo.
+ *
+ * Se respeta una hora de margen para no pisar una subida en vuelo: entre que la
+ * foto entra y la fila se escribe pasan milisegundos, pero un envío que falle a
+ * medias podría dejarla suelta unos segundos.
+ */
+async function limpiarHuerfanas(db: ReturnType<typeof createClient>): Promise<number> {
+  let borradas = 0;
+  try {
+    const vivas = new Set<string>();
+    const { data } = await db
+      .from('solicitudes_negocios')
+      .select('foto_ruta')
+      .not('foto_ruta', 'is', null);
+    for (const f of data ?? []) if (f.foto_ruta) vivas.add(f.foto_ruta as string);
+
+    const limite = Date.now() - 60 * 60 * 1000;
+    for (const carpeta of ['pendientes', 'panel']) {
+      const { data: archivos } = await db.storage.from('fotos').list(carpeta, { limit: 1000 });
+      const sobran = (archivos ?? [])
+        .filter((a) => {
+          const creado = new Date(a.created_at ?? 0).getTime();
+          return !vivas.has(`${carpeta}/${a.name}`) && creado < limite;
+        })
+        .map((a) => `${carpeta}/${a.name}`);
+      if (sobran.length) {
+        await db.storage.from('fotos').remove(sobran);
+        borradas += sobran.length;
+      }
+    }
+  } catch (e) {
+    // Limpiar es mantenimiento, no la tarea: si falla, la publicación sigue.
+    console.error('no se pudieron limpiar fotos huérfanas', String(e));
+  }
+  return borradas;
+}
+
 async function github(camino: string, opciones: RequestInit = {}) {
   const r = await fetch(`${API}${camino}`, {
     ...opciones,
@@ -127,8 +171,12 @@ Deno.serve(async (peticion) => {
     const altas: Alta[] = pendientes?.altas ?? [];
     const bajas: Baja[] = pendientes?.bajas ?? [];
 
+    // Antes del corte por "sin cambios": no publicar nada es el caso MÁS
+    // frecuente, y es justo cuando conviene aprovechar la pasada para limpiar.
+    const huerfanas = await limpiarHuerfanas(db);
+
     if (!altas.length && !bajas.length) {
-      return responder({ ok: true, sin_cambios: true, caducadas });
+      return responder({ ok: true, sin_cambios: true, caducadas, huerfanas_borradas: huerfanas });
     }
 
     // --- de dónde partimos ---------------------------------------------------
@@ -245,6 +293,7 @@ Deno.serve(async (peticion) => {
       retiradas: bajas.length,
       caducadas,
       fotos_liberadas: paraBorrar.length,
+      huerfanas_borradas: huerfanas,
       despliegue,
     });
   } catch (e) {

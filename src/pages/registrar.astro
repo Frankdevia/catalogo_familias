@@ -4,23 +4,24 @@ import FormularioNegocio from '../components/FormularioNegocio.astro';
 import { SITIO } from '../data/sitio';
 
 /*
- * Webhook de n8n que recibe las postulaciones.
+ * Endpoint que recibe las solicitudes: la Edge Function `solicitud` de Supabase.
+ *
+ * Los tres formularios mandan al MISMO sitio y se distinguen por el campo
+ * `cola`. Antes cada uno tenía su webhook de n8n; ahora la validación, el
+ * límite por IP y la escritura viven en un solo lugar, con las mismas reglas
+ * que usa el navegador —importadas del mismo archivo, no copiadas—.
  *
  * Va como valor por defecto y no como variable de despliegue porque las
  * "Variables de entorno" de EasyPanel son del contenedor en ejecución, no del
- * `docker build`: en un sitio estático, que se hornea al construir, nunca
- * llegan. No es un secreto — acaba en el JavaScript de esta misma página.
- * Lo que protege el endpoint es el campo trampa y la aprobación humana: desde
- * que se quitó la validación por código de familia no hay ninguna comprobación
- * automática de que quien escribe pertenezca al colegio.
+ * `docker build`: en un sitio estático nunca llegan.
  *
  * `||` y no `??`: Docker deja la variable como cadena vacía si el build arg no
  * se pasa, y `??` no atrapa la cadena vacía.
  */
 const POR_DEFECTO =
-  'https://n8n-n8n.26zlav.easypanel.host/webhook/fli-catalogo-registro-8b31d7e2-4a05-4f19-9c26-1de8a7b34f90';
+  'https://mjxzbjrweqkuvshcpmwv.supabase.co/functions/v1/solicitud';
 
-const endpoint = process.env.N8N_REGISTRO_URL || POR_DEFECTO;
+const endpoint = process.env.SOLICITUD_URL || POR_DEFECTO;
 ---
 
 <BaseLayout
