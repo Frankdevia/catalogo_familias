@@ -412,3 +412,18 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# La función que recibe los formularios públicos.
+#
+# `verify_jwt = false` porque el endpoint tiene que poder llamarlo cualquier
+# familia sin haber iniciado sesión. Exigir la clave publicable no aportaría
+# seguridad —viaja en el JavaScript de la página, es pública por diseño—, pero
+# sí obligaría a mandar una cabecera `Authorization`, y una cabecera propia
+# convierte la petición en "no simple": el navegador añade un preflight OPTIONS
+# antes de cada envío. Con picos de 20 familias enviando a la vez, eso es el
+# doble de viajes de ida y vuelta justo en el peor momento.
+#
+# Lo que protege este endpoint es la validación del servidor, el campo trampa y
+# el límite por huella de IP, no una clave que está a la vista.
+[functions.solicitud]
+verify_jwt = false
