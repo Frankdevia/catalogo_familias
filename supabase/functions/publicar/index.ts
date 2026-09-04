@@ -42,6 +42,41 @@ interface Baja {
   ruta_foto: string | null;
 }
 
+/**
+ * Orden en que se escriben las claves de cada ficha.
+ *
+ * Postgres devuelve `jsonb` con las claves reordenadas —por longitud y luego
+ * alfabéticamente—, así que sin esto el archivo sale como `web, foto, orden,
+ * nombre…`. Da igual para Astro, que lee JSON, pero no para quien revisa: en
+ * este repositorio los diffs son donde se comprueba que no se filtró nada, y un
+ * orden aleatorio convierte cada cambio de un campo en un diff de once líneas.
+ */
+const ORDEN: Record<string, string[]> = {
+  negocios: [
+    'nombre', 'categoria', 'descripcion', 'familia', 'foto',
+    'telefono', 'direccion', 'web', 'instagram', 'facebook', 'orden',
+  ],
+  clasificados: ['cat', 'desc', 'phone', 'email', 'publicado'],
+  promociones: [
+    'negocio', 'titulo', 'desc', 'condiciones', 'telefono', 'desde', 'hasta',
+  ],
+};
+
+/** El contenido exacto del archivo: claves en orden, dos espacios, salto final. */
+function serializar(cola: string, contenido: Record<string, unknown>): string {
+  const orden = ORDEN[cola] ?? [];
+  const ordenado: Record<string, unknown> = {};
+  for (const clave of orden) {
+    if (contenido[clave] !== undefined) ordenado[clave] = contenido[clave];
+  }
+  // Si algún día se añade un campo al esquema y se olvida aquí, va al final en
+  // vez de desaparecer del archivo.
+  for (const [clave, valor] of Object.entries(contenido)) {
+    if (!(clave in ordenado)) ordenado[clave] = valor;
+  }
+  return JSON.stringify(ordenado, null, 2) + '\n';
+}
+
 async function github(camino: string, opciones: RequestInit = {}) {
   const r = await fetch(`${API}${camino}`, {
     ...opciones,
@@ -110,7 +145,7 @@ Deno.serve(async (peticion) => {
         path: a.ruta,
         mode: '100644',
         type: 'blob',
-        content: JSON.stringify(a.contenido, null, 2) + '\n',
+        content: serializar(a.cola, a.contenido),
       });
 
       if (a.foto_ruta && a.ruta_foto) {
