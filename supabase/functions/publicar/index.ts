@@ -251,10 +251,12 @@ Deno.serve(async (peticion) => {
     await db.rpc('sellar_publicados', {
       ids_negocios: ids(altas, 'negocios'),
       ids_clasificados: ids(altas, 'clasificados'),
+      ids_promociones: ids(altas, 'promociones'),
     });
     await db.rpc('sellar_retirados', {
       ids_negocios: ids(bajas, 'negocios'),
       ids_clasificados: ids(bajas, 'clasificados'),
+      ids_promociones: ids(bajas, 'promociones'),
     });
 
     // Las fotos ya viven en el repositorio: fuera de Storage. Sin esto, 700

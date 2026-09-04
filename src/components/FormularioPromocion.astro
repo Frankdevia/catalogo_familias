@@ -1,0 +1,371 @@
+---
+import { SITIO } from '../data/sitio';
+import { LIMITES, PATRON_TELEFONO, CAMPO_TRAMPA } from '../data/registro';
+
+interface Props {
+  /** URL de la Edge Function. Vacía = el formulario se muestra deshabilitado. */
+  endpoint: string;
+}
+
+const { endpoint } = Astro.props;
+
+/** Igual de largo que un anuncio clasificado: una promoción se explica en poco. */
+const MAX_DESC = 280;
+
+/*
+ * Fechas por defecto: de hoy a dentro de un mes.
+ *
+ * Se calculan en la zona del colegio y no en la del servidor. Y se ponen ya
+ * rellenas porque una promoción sin fecha final no existe: es el campo que hace
+ * que la sección se limpie sola, y dejarlo vacío invita a olvidarlo.
+ */
+const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA', {
+  timeZone: 'America/Bogota',
+});
+---
+
+<form id="form-promocion" data-endpoint={endpoint} novalidate>
+  {
+    !endpoint && (
+      <p class="aviso aviso--error">
+        El formulario todavía no está conectado. Escríbenos a{' '}
+        <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>.
+      </p>
+    )
+  }
+
+  <noscript>
+    <p class="aviso aviso--error">
+      Este formulario necesita JavaScript. Si no puedes activarlo, mándanos tu
+      promoción a{' '}
+      <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>.
+    </p>
+  </noscript>
+
+  <fieldset>
+    <legend>1. Verifica tu familia</legend>
+    <p class="ayuda-bloque">
+      Solo para confirmar que perteneces a la comunidad. <strong>Los nombres de
+      tus estudiantes y tu nombre no se publican.</strong>
+    </p>
+
+    <div class="campo">
+      <label for="estudiantes">Nombres de tus estudiantes y su grado</label>
+      <input
+        id="estudiantes"
+        name="estudiantes"
+        type="text"
+        required
+        maxlength={LIMITES.estudiantes.max}
+        autocomplete="off"
+        placeholder="Valeria Gómez 11B, Antonia Ruiz 7A"
+        aria-describedby="ayuda-estudiantes"
+      />
+      <p id="ayuda-estudiantes" class="ayuda">
+        (Se usa para validar la identidad de quien llena el formulario.)
+      </p>
+      <p class="error" data-error-de="estudiantes" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="acudiente_nombre">Nombre del padre, madre o acudiente</label>
+      <input
+        id="acudiente_nombre"
+        name="acudiente_nombre"
+        type="text"
+        required
+        maxlength={LIMITES.acudienteNombre.max}
+        autocomplete="name"
+      />
+      <p class="error" data-error-de="acudiente_nombre" hidden></p>
+    </div>
+     <div class="campo">
+      <label for="acudiente_correo">Tu correo</label>
+      <input
+        id="acudiente_correo"
+        name="acudiente_correo"
+        type="email"
+        required
+        autocomplete="email"
+        aria-describedby="ayuda-correo-promo"
+      />
+      <p id="ayuda-correo-promo" class="ayuda">Te avisamos ahí cuando se publique.</p>
+      <p class="error" data-error-de="acudiente_correo" hidden></p>
+    </div>
+
+ </fieldset>
+
+  <fieldset>
+    <legend>2. Tu promoción</legend>
+    <p class="ayuda-bloque">Esto es lo que verá la comunidad.</p>
+
+    <div class="campo">
+      <label for="negocio">¿De qué negocio es?</label>
+      <input id="negocio" name="negocio" type="text" required maxlength="60" />
+      <p class="ayuda">Tal como quieres que aparezca. No hace falta que esté en el catálogo.</p>
+      <p class="error" data-error-de="negocio" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="titulo">La promoción, en una línea</label>
+      <input
+        id="titulo"
+        name="titulo"
+        type="text"
+        required
+        maxlength="80"
+        placeholder="20% de descuento en la libra de café"
+      />
+      <p class="error" data-error-de="titulo" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">¿En qué consiste?</label>
+      <textarea
+        id="descripcion"
+        name="descripcion"
+        required
+        rows="3"
+        maxlength={MAX_DESC}
+        aria-describedby="contador-descripcion"
+      ></textarea>
+      <p id="contador-descripcion" class="ayuda contador" aria-live="polite">
+        0 de {MAX_DESC} caracteres
+      </p>
+      <p class="error" data-error-de="descripcion" hidden></p>
+    </div>
+
+    <div class="campo">
+      <label for="condiciones">Condiciones <span class="opcional">(opcional)</span></label>
+      <textarea id="condiciones" name="condiciones" rows="2" maxlength="200"></textarea>
+      <p class="ayuda">Presentando el carné, no acumulable, mínimo de compra…</p>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="vigente_desde">Válida desde</label>
+        <input id="vigente_desde" name="vigente_desde" type="date" required value={hoy} />
+        <p class="error" data-error-de="vigente_desde" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="vigente_hasta">Válida hasta</label>
+        <input id="vigente_hasta" name="vigente_hasta" type="date" required value={enUnMes} />
+        <p class="ayuda">Pasada esta fecha se retira sola del sitio.</p>
+        <p class="error" data-error-de="vigente_hasta" hidden></p>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="telefono">Teléfono para aprovecharla</label>
+      <input
+        id="telefono"
+        name="telefono"
+        type="tel"
+        required
+        pattern={PATRON_TELEFONO}
+        inputmode="tel"
+        aria-describedby="ayuda-telefono"
+      />
+      <p id="ayuda-telefono" class="ayuda">Este sí se publica.</p>
+      <p class="error" data-error-de="telefono" hidden></p>
+    </div>
+  </fieldset>
+
+  <div class="campo campo--consentimiento">
+    <label class="consentimiento">
+      <input id="consentimiento" name="consentimiento" type="checkbox" required />
+      <span>
+        Autorizo a la Fundación Liceo Inglés a publicar esta promoción —negocio,
+        título, descripción, condiciones y teléfono— en el sitio público. Los
+        nombres de mis estudiantes y mi nombre no se publican.
+      </span>
+    </label>
+    <p class="error" data-error-de="consentimiento" hidden></p>
+  </div>
+
+  <input type="text" name={CAMPO_TRAMPA} tabindex="-1" autocomplete="off" aria-hidden="true" class="trampa" />
+
+  <div class="envio">
+    <button type="submit" class="li-btn" disabled={!endpoint}>Enviar promoción</button>
+    <p class="aviso aviso--error" data-error-general hidden></p>
+  </div>
+</form>
+
+<style>
+  form {
+    display: grid;
+    gap: var(--space-10);
+    max-width: 720px;
+  }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-5);
+  }
+  legend {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    padding: 0;
+    margin-bottom: var(--space-2);
+  }
+  .ayuda-bloque {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    background: var(--surface-subtle);
+    border-left: 3px solid var(--li-yellow);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xs);
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  .campo {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  label {
+    font-family: var(--font-subhead);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-sm);
+    color: var(--text-heading);
+  }
+
+  input[type='text'],
+  input[type='tel'],
+  input[type='email'],
+  select,
+  textarea {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-body);
+    background: var(--surface-card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    padding: 11px 14px;
+    width: 100%;
+    transition: border-color var(--duration-fast) var(--ease-standard);
+  }
+  textarea {
+    resize: vertical;
+    line-height: var(--leading-normal);
+  }
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--li-navy);
+  }
+  [aria-invalid='true'] {
+    border-color: var(--li-red);
+  }
+
+  .ayuda {
+    margin: 0;
+    font-size: var(--text-xs);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+  .contador {
+    justify-self: end;
+  }
+  .error {
+    margin: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--li-red);
+  }
+
+  .campo--consentimiento {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: var(--space-6);
+  }
+  .consentimiento {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+    font-weight: var(--weight-regular);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    cursor: pointer;
+  }
+  .consentimiento input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--li-red);
+  }
+
+  /* Fuera de la vista pero no `display:none`: algunos bots ignoran lo que
+     está oculto de esa forma. */
+  .trampa {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .acciones {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .acciones button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .aviso {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+    color: var(--text-body);
+  }
+  .aviso--error {
+    background: var(--surface-brand-soft);
+    color: var(--li-red-700);
+    border: 1px solid var(--li-red-300);
+  }
+
+  .exito {
+    max-width: 560px;
+  }
+  .exito h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: var(--space-3) 0 var(--space-4);
+  }
+  .exito p:last-of-type {
+    margin-bottom: var(--space-8);
+  }
+
+  @media (max-width: 640px) {
+    .fila {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

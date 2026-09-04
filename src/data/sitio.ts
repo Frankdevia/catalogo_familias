@@ -16,6 +16,8 @@ export const SITIO = {
   signupUrl: '/registrar',
   /** Formulario para publicar un anuncio clasificado. */
   clasificadoUrl: '/clasificados/nuevo',
+  /** Formulario para publicar una promoción. */
+  promocionUrl: '/promociones/nueva',
   contactEmail: 'tecnologia@liceoingles.edu.co',
   direccion: ['Km 5 Vía Cerritos, Entrada 17', 'Pereira, Risaralda · Colombia'],
   telefonos: ['+57 606 349 7750', '+57 300 912 1109'],

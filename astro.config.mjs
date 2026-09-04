@@ -38,6 +38,7 @@ export default defineConfig({
       filter: (pagina) =>
         !pagina.includes('/registrar') &&
         !pagina.includes('/clasificados/nuevo') &&
+        !pagina.includes('/promociones/nueva') &&
         // El panel no es contenido y además va con noindex.
         !pagina.includes('/admin'),
     }),

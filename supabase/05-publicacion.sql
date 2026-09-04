@@ -129,6 +129,26 @@ cla_altas as (
   where c.estado = 'aprobado'
     and (c.publicado_en is null or c.actualizado_en > c.publicado_en)
 ),
+pro_altas as (
+  select
+    'promociones' as cola,
+    p.id,
+    coalesce(p.slug, slugificar(p.titulo) || '-' || left(replace(p.id::text, '-', ''), 6)) as slug,
+    null::text as foto_ruta,
+    null::text as foto_ext,
+    jsonb_strip_nulls(jsonb_build_object(
+      'negocio',     p.negocio,
+      'titulo',      p.titulo,
+      'desc',        p.descripcion,
+      'condiciones', p.condiciones,
+      'telefono',    p.telefono,
+      'desde',       to_char(p.vigente_desde, 'YYYY-MM-DD'),
+      'hasta',       to_char(p.vigente_hasta, 'YYYY-MM-DD')
+    )) as contenido
+  from solicitudes_promociones p
+  where p.estado = 'aprobado'
+    and (p.publicado_en is null or p.actualizado_en > p.publicado_en)
+),
 -- Bajas: se retiró y el cron todavía no ha borrado el archivo.
 neg_bajas as (
   select 'negocios' as cola, id, slug, foto_ruta,
@@ -139,6 +159,11 @@ neg_bajas as (
 cla_bajas as (
   select 'clasificados' as cola, id, slug, null::text as foto_ruta, null::text as foto_ext
   from solicitudes_clasificados
+  where estado = 'retirado' and publicado_en is not null and retirado_en is null and slug is not null
+),
+pro_bajas as (
+  select 'promociones' as cola, id, slug, null::text as foto_ruta, null::text as foto_ext
+  from solicitudes_promociones
   where estado = 'retirado' and publicado_en is not null and retirado_en is null and slug is not null
 )
 select jsonb_build_object(
@@ -151,7 +176,8 @@ select jsonb_build_object(
       'ruta_foto', case when foto_ruta is not null
                         then 'src/assets/photos/' || slug || '.' || foto_ext end
     ))
-    from (select * from neg_altas union all select * from cla_altas) t
+    from (select * from neg_altas union all select * from cla_altas
+          union all select * from pro_altas) t
   ), '[]'::jsonb),
   'bajas', coalesce((
     select jsonb_agg(jsonb_build_object(
@@ -160,7 +186,8 @@ select jsonb_build_object(
       'ruta_foto', case when foto_ruta is not null
                         then 'src/assets/photos/' || slug || '.' || foto_ext end
     ))
-    from (select * from neg_bajas union all select * from cla_bajas) t
+    from (select * from neg_bajas union all select * from cla_bajas
+          union all select * from pro_bajas) t
   ), '[]'::jsonb)
 );
 $$;
@@ -174,7 +201,7 @@ $$;
 -- veces —que es inocuo, el contenido es el mismo— a dar por publicado algo que
 -- no llegó.
 
-create or replace function sellar_publicados(ids_negocios uuid[], ids_clasificados uuid[])
+create or replace function sellar_publicados(ids_negocios uuid[], ids_clasificados uuid[], ids_promociones uuid[] default '{}')
 returns void
 language plpgsql
 security definer
@@ -203,10 +230,16 @@ begin
          slug = coalesce(slug, lower(cat::text) || '-' || left(replace(id::text, '-', ''), 8)),
          retirado_en = null
    where id = any(ids_clasificados);
+
+  update solicitudes_promociones
+     set publicado_en = now(),
+         slug = coalesce(slug, slugificar(titulo) || '-' || left(replace(id::text, '-', ''), 6)),
+         retirado_en = null
+   where id = any(ids_promociones);
 end;
 $$;
 
-create or replace function sellar_retirados(ids_negocios uuid[], ids_clasificados uuid[])
+create or replace function sellar_retirados(ids_negocios uuid[], ids_clasificados uuid[], ids_promociones uuid[] default '{}')
 returns void
 language plpgsql
 security definer
@@ -217,6 +250,7 @@ begin
   -- borrar la fila: el archivo ya no está en el repositorio.
   update solicitudes_negocios     set retirado_en = now() where id = any(ids_negocios);
   update solicitudes_clasificados set retirado_en = now() where id = any(ids_clasificados);
+  update solicitudes_promociones  set retirado_en = now() where id = any(ids_promociones);
 end;
 $$;
 
@@ -246,6 +280,6 @@ $$;
 
 -- Solo el rol de servicio ejecuta esto: es el cron, no el navegador.
 revoke execute on function pendientes_de_publicar() from anon, authenticated;
-revoke execute on function sellar_publicados(uuid[], uuid[]) from anon, authenticated;
-revoke execute on function sellar_retirados(uuid[], uuid[]) from anon, authenticated;
+revoke execute on function sellar_publicados(uuid[], uuid[], uuid[]) from anon, authenticated;
+revoke execute on function sellar_retirados(uuid[], uuid[], uuid[]) from anon, authenticated;
 revoke execute on function caducar_promociones() from anon, authenticated;

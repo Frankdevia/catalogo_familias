@@ -60,4 +60,24 @@ const clasificados = defineCollection({
   }),
 });
 
-export const collections = { negocios, clasificados };
+const promociones = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/promociones' }),
+  schema: z.object({
+    /** Texto libre, no una referencia al catálogo: una familia puede ofrecer
+     *  una promoción de un negocio que todavía no está publicado. */
+    negocio: z.coerce.string(),
+    titulo: z.coerce.string().max(80),
+    desc: z.coerce.string().max(280),
+    condiciones: z.coerce.string().max(200).optional(),
+    /** Solo dígitos y espacios, sin indicativo. El +57 lo pone la UI. */
+    telefono: z.coerce
+      .string()
+      .regex(/^[\d ]+$/, 'Solo dígitos y espacios, sin +57'),
+    /** Fechas ISO. `hasta` es lo que hace que la promoción caduque sola: el
+     *  cron la retira, y el sitio no la muestra aunque siga el archivo. */
+    desde: z.string().date(),
+    hasta: z.string().date(),
+  }),
+});
+
+export const collections = { negocios, clasificados, promociones };

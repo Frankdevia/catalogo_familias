@@ -8,16 +8,18 @@ import CtaInscribe from '../components/CtaInscribe.astro';
 import { getCollection } from 'astro:content';
 import { ordenarNegocios } from '../data/negocio';
 import { ordenarClasificados } from '../data/clasificado';
+import type { Promocion } from '../data/promocion';
 import { SITIO } from '../data/sitio';
 
 const negocios = ordenarNegocios(await getCollection('negocios'));
 const anuncios = ordenarClasificados(await getCollection('clasificados'));
+const promociones: Promocion[] = await getCollection('promociones');
 ---
 
 <BaseLayout title={`${SITIO.nombre} · ${SITIO.nombreLargo}`}>
   <Hero />
   <Catalogo negocios={negocios} />
   <Clasificados anuncios={anuncios} />
-  <Promociones />
+  <Promociones promociones={promociones} />
   <CtaInscribe />
 </BaseLayout>
