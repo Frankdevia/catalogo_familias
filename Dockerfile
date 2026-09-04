@@ -17,6 +17,13 @@ ARG BASE_PATH
 # página /registrar se construye con el formulario deshabilitado y el correo
 # de contacto a la vista, en vez de fallar al enviar.
 ARG N8N_REGISTRO_URL
+# Credenciales de Supabase para el panel. La clave publicable es pública por
+# diseño —acaba en el JavaScript de la página—; lo que impide que sirva para
+# algo es que el rol anónimo no tiene permisos sobre ninguna tabla.
+ARG SUPABASE_URL
+ARG SUPABASE_ANON_KEY
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 ENV SITE_URL=$SITE_URL
 ENV BASE_PATH=$BASE_PATH
 ENV N8N_REGISTRO_URL=$N8N_REGISTRO_URL

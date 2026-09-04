@@ -1,0 +1,164 @@
+---
+/**
+ * Panel de revisión.
+ *
+ * La página es estática y no trae ni un dato: es un armazón vacío. Todo lo
+ * carga el navegador después de iniciar sesión, y quien decide qué se puede
+ * leer es la base con sus políticas RLS, no este archivo. Aunque alguien abra
+ * esta URL, sin sesión y sin estar en `administradores` no recibe una sola fila.
+ *
+ * Las credenciales de Supabase se hornean al construir y viajan en un atributo
+ * `data-`, igual que el endpoint en `/registrar`: las "Variables de entorno" de
+ * EasyPanel son del contenedor en ejecución, no del `docker build`, y en un
+ * sitio estático nunca llegarían. La clave publicable es pública por diseño.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITIO } from '../data/sitio';
+
+const supabaseUrl =
+  process.env.SUPABASE_URL || 'https://mjxzbjrweqkuvshcpmwv.supabase.co';
+const supabaseClave =
+  process.env.SUPABASE_ANON_KEY || 'sb_publishable_Q3LLVvY_rKgZxyuC5SMAsw_6nfs5O0k';
+---
+
+<BaseLayout title={`Panel · ${SITIO.nombre}`} noindex>
+  <main
+    id="panel"
+    class="li-container"
+    data-supabase-url={supabaseUrl}
+    data-supabase-clave={supabaseClave}
+  >
+    <!-- Mientras el script comprueba la sesión. Evita el parpadeo de enseñar
+         la pantalla de entrar a quien ya está dentro. -->
+    <section data-vista="cargando" class="centrado">
+      <p class="cargando">Comprobando tu sesión…</p>
+    </section>
+
+    <section data-vista="entrar" class="centrado" hidden>
+      <p class="li-eyebrow">Panel de revisión</p>
+      <h1>Solicitudes de la comunidad</h1>
+      <p class="entrada">
+        Entra con tu cuenta del Liceo para revisar, publicar y retirar lo que
+        envían las familias.
+      </p>
+      <button type="button" class="li-btn" data-accion="entrar">
+        Entrar con Google
+      </button>
+      <p class="error" data-error hidden></p>
+    </section>
+
+    <section data-vista="sin-permiso" class="centrado" hidden>
+      <p class="li-eyebrow">Sin acceso</p>
+      <h1>Esta cuenta no puede revisar</h1>
+      <p class="entrada">
+        Entraste como <strong data-correo></strong>, pero esa cuenta no está
+        autorizada para el panel. Si crees que debería estarlo, escríbenos a
+        <a href={`mailto:${SITIO.contactEmail}`}>{SITIO.contactEmail}</a>.
+      </p>
+      <button type="button" class="secundario" data-accion="salir">
+        Salir y probar con otra cuenta
+      </button>
+    </section>
+
+    <section data-vista="panel" hidden>
+      <header class="cabecera">
+        <div>
+          <p class="li-eyebrow">Panel de revisión</p>
+          <h1>Solicitudes</h1>
+        </div>
+        <div class="quien">
+          <span data-nombre></span>
+          <button type="button" class="secundario" data-accion="salir">Salir</button>
+        </div>
+      </header>
+      <p class="entrada" data-marcador>
+        La sesión funciona. Las tres colas se conectan en el siguiente paso.
+      </p>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  import '../scripts/admin.ts';
+</script>
+
+<style>
+  #panel {
+    padding-block: var(--space-16);
+    min-height: 60vh;
+  }
+  .centrado {
+    max-width: 46ch;
+    margin-inline: auto;
+    text-align: center;
+    padding-block: var(--space-16);
+  }
+  .centrado :global(.li-eyebrow) {
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    color: var(--text-heading);
+    margin: 0 0 var(--space-4);
+  }
+  .entrada {
+    margin: 0 0 var(--space-8);
+    font-size: var(--text-base);
+    color: var(--text-body);
+  }
+  .cargando {
+    color: var(--li-gray-600);
+    font-size: var(--text-base);
+  }
+  .cabecera {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .cabecera h1 {
+    margin: 0;
+  }
+  .quien {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-body);
+  }
+  .secundario {
+    font-family: var(--font-subhead);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    padding: 9px 16px;
+    color: var(--text-heading);
+    cursor: pointer;
+  }
+  .secundario:hover {
+    border-color: var(--li-navy);
+  }
+  .error {
+    margin-top: var(--space-4);
+    color: var(--li-red);
+    font-size: var(--text-sm);
+  }
+
+  @media (max-width: 600px) {
+    #panel {
+      padding-block: var(--space-10);
+    }
+  }
+</style>

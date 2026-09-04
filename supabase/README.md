@@ -129,3 +129,15 @@ select grantee, table_name, privilege_type
  where table_schema = 'public' and grantee = 'anon';
 -- cero filas
 ```
+
+## Una trampa: `supabase config push`
+
+**No lo ejecutes sin revisar antes `config.toml`.** Ese comando empuja el
+archivo **entero** al proyecto enlazado, y el nuestro es la plantilla por
+defecto del CLI, donde `[auth.external.google]` viene **desactivado**. Correrlo
+tal cual apagaría el proveedor de Google que se configuró a mano en el panel.
+
+La configuración de autenticación —Site URL, URLs de redirección, proveedor
+Google— vive hoy en el panel de Supabase, no en este repo. Si algún día se
+quiere versionar, hay que trasladarla a `config.toml` **completa** antes de
+empujar nada.

@@ -36,7 +36,10 @@ export default defineConfig({
     // Los formularios no son contenido del catálogo: fuera del sitemap.
     sitemap({
       filter: (pagina) =>
-        !pagina.includes('/registrar') && !pagina.includes('/clasificados/nuevo'),
+        !pagina.includes('/registrar') &&
+        !pagina.includes('/clasificados/nuevo') &&
+        // El panel no es contenido y además va con noindex.
+        !pagina.includes('/admin'),
     }),
   ],
   build: {
