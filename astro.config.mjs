@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 // El dominio real donde vive el catálogo hoy. Es el valor por defecto para
 // que un despliegue sin SITE_URL siga generando sitemap y canonical correctos;
 // la variable de entorno sigue mandando si algún día hay dominio propio.
-const POR_DEFECTO = 'https://catologonegocios.26zlav.easypanel.host';
+const POR_DEFECTO = 'https://comunidad.liceoingles.edu.co';
 
 /*
  * Ojo con `||` en vez de `??`: en el Dockerfile, `ENV SITE_URL=$SITE_URL` sin

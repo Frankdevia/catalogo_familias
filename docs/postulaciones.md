@@ -75,7 +75,7 @@ Dos cosas que conviene recordar sobre ese token:
 ## 4. Marcadores — ya reemplazados
 
 **Hecho.** El dominio del catálogo es
-`https://catologonegocios.26zlav.easypanel.host` y ya está puesto en las
+`https://comunidad.liceoingles.edu.co` y ya está puesto en las
 cabeceras `Access-Control-Allow-Origin` de los tres nodos que responden, y en el
 enlace del correo de publicación.
 

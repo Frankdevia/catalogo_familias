@@ -23,7 +23,7 @@ import {
 // El sitio es el único origen que puede llamar. No es una defensa —un POST con
 // curl no manda Origin— pero evita que otra página use este endpoint desde el
 // navegador de un visitante.
-const ORIGEN = Deno.env.get('SITIO_ORIGEN') ?? 'https://catologonegocios.26zlav.easypanel.host';
+const ORIGEN = Deno.env.get('SITIO_ORIGEN') ?? 'https://comunidad.liceoingles.edu.co';
 
 const CORS = {
   'Access-Control-Allow-Origin': ORIGEN,
