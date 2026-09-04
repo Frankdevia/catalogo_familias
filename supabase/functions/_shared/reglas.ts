@@ -34,7 +34,15 @@ export const LIMITES = {
   estudiantes: { max: 150 },
   acudienteNombre: { max: 80 },
   negocioNombre: { max: 60 },
-  descripcion: { max: 200 },
+  /* 1.200 y no 200: el límite viejo estaba pensado para que una tarjeta del
+     catálogo no se descuadrara, y se le aplicó también a la ficha, donde sobra
+     sitio. Al importar el Directorio, seis de doce descripciones quedaron
+     cortadas y una pasó de 1.153 caracteres a 200 —texto que había escrito la
+     familia sobre su propio negocio—.
+     La tarjeta ahora recorta por LÍNEAS, así que el largo ya no la descuadra.
+     1.200 porque es lo que mide la más larga que existe: un campo sin techo
+     invita a pegar un folleto entero. */
+  descripcion: { max: 1200 },
   direccion: { max: 120 },
   web: { max: 80 },
   instagram: { max: 40 },

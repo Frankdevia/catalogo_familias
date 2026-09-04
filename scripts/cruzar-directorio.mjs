@@ -106,8 +106,15 @@ function enlaces(bruto) {
   return { revisar_enlace: s };
 }
 
-/** Recorta por final de frase hasta el máximo. No reescribe ni resume. */
-function recortar(texto, max = 200) {
+/**
+ * Recorta por final de frase hasta el máximo. No reescribe ni resume.
+ *
+ * El máximo era 200 y dejó cortadas 6 de las 12 primeras fichas —una perdió
+ * casi mil caracteres escritos por la propia familia—. Ahora es el mismo 1.200
+ * que acepta el formulario: la tarjeta del catálogo recorta por líneas, así que
+ * el largo del texto ya no descuadra nada.
+ */
+function recortar(texto, max = 1200) {
   const t = String(texto ?? '').replace(/\s+/g, ' ').trim();
   if (t.length <= max) return { desc: t, recortada: false };
   const corte = t.slice(0, max + 1);

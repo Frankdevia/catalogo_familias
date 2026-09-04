@@ -24,6 +24,19 @@ const ancho = d.foto ? anchoSeguro(d.foto, 1040) : 0;
 /** Respaldo cuando no hay foto, igual que en la tarjeta del catálogo. */
 const inicial = d.nombre.trim().charAt(0).toUpperCase();
 
+/*
+ * La etiqueta que ven Google y las redes, no la que ve quien entra.
+ *
+ * Con el límite en 1.200 caracteres, usar la descripción entera dejaba un
+ * `description` absurdo; Google corta sobre los 160 de todos modos. El corte es
+ * por final de palabra para no partir una a la mitad en el resultado.
+ */
+const META_MAX = 155;
+const meta =
+  d.descripcion.length <= META_MAX
+    ? d.descripcion
+    : d.descripcion.slice(0, d.descripcion.lastIndexOf(' ', META_MAX)).trim() + '…';
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
@@ -40,7 +53,7 @@ const jsonLd = {
 };
 ---
 
-<BaseLayout title={`${d.nombre} · ${SITIO.nombre}`} description={d.descripcion}>
+<BaseLayout title={`${d.nombre} · ${SITIO.nombre}`} description={meta}>
   <article class="ficha li-container">
     <nav class="miga" aria-label="Ruta">
       <a href="/">Catálogo</a>
@@ -190,10 +203,14 @@ const jsonLd = {
     font-size: var(--text-sm);
     color: var(--text-muted);
   }
+  /* Aquí se muestra entera: es el sitio para el que se subió el límite.
+     `pre-line` respeta los saltos de párrafo que trae el texto del Directorio,
+     que si no se aplastan en un bloque único. */
   .descripcion {
     margin: 0 0 var(--space-6);
     font-size: var(--text-base);
     line-height: var(--leading-relaxed);
+    white-space: pre-line;
   }
 
   .titulo-datos {

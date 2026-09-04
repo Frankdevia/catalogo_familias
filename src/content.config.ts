@@ -20,7 +20,8 @@ const negocios = defineCollection({
     z.object({
       nombre: z.coerce.string(),
       categoria: z.enum(CATEGORIAS),
-      descripcion: z.coerce.string(),
+      /** Hasta 1.200. La tarjeta recorta por líneas; la ficha lo muestra entero. */
+      descripcion: z.coerce.string().max(1200),
       /** Grado del estudiante, tal como se muestra en la tarjeta: "Familia — grado 3B". */
       familia: z.coerce.string(),
       /** Ruta relativa a este JSON, p. ej. "../../assets/photos/biz-cafe.webp".

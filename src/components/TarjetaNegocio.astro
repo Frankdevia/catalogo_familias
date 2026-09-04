@@ -127,12 +127,27 @@ const inicial = nombre.trim().charAt(0).toUpperCase();
     line-height: var(--leading-snug);
     margin: 0;
   }
+  /* La descripción admite hasta 1.200 caracteres porque la ficha tiene sitio
+     para ellos; la tarjeta no. Se recorta por LÍNEAS y no por caracteres: así
+     todas las tarjetas de una fila miden lo mismo, y el corte se lee como «hay
+     más al entrar» en vez de como un texto partido a mitad de palabra.
+
+     El `max-height` no sobra: `line-clamp` no degrada solo. Si un navegador lo
+     ignorara, sin él la tarjeta crecería y estiraría la fila entera; con él el
+     peor caso es un texto cortado sin los puntos suspensivos. Son 3 líneas del
+     mismo `line-height` que declara la regla. */
   .descripcion {
     margin: 0;
     font-size: var(--text-sm);
     line-height: var(--leading-normal);
     color: var(--text-body);
     flex: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    max-height: calc(var(--text-sm) * var(--leading-normal) * 3);
   }
   .pie {
     display: flex;

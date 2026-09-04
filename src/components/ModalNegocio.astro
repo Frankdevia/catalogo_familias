@@ -100,11 +100,14 @@
     letter-spacing: 0;
     margin: 0 0 var(--space-2);
   }
+  /* Sin recortar, como en la ficha: el diálogo ya desplaza cuando hace falta
+     (`max-height` + `overflow-y` arriba). `pre-line` conserva los párrafos. */
   .descripcion {
     margin: 0 0 var(--space-5);
     font-size: var(--text-sm);
     line-height: var(--leading-relaxed);
     color: var(--text-body);
+    white-space: pre-line;
   }
 
   .datos {

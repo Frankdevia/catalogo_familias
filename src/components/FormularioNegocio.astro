@@ -132,10 +132,14 @@ const { endpoint } = Astro.props;
         id="descripcion"
         name="descripcion"
         required
-        rows="3"
+        rows="6"
         maxlength={LIMITES.descripcion.max}
-        aria-describedby="contador-descripcion"
+        aria-describedby="ayuda-descripcion contador-descripcion"
       ></textarea>
+      <p id="ayuda-descripcion" class="ayuda">
+        Cuéntalo con calma: en tu ficha se ve completo. Las primeras líneas son
+        las que aparecen en el catálogo.
+      </p>
       <p id="contador-descripcion" class="ayuda contador" aria-live="polite">
         0 de {LIMITES.descripcion.max} caracteres
       </p>
