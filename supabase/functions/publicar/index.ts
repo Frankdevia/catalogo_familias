@@ -93,12 +93,19 @@ function serializar(cola: string, contenido: Record<string, unknown>): string {
 async function limpiarHuerfanas(db: ReturnType<typeof createClient>): Promise<number> {
   let borradas = 0;
   try {
+    // «Viva» es la foto que todavía hace falta en Storage. Una fila con
+    // `foto_borrada_en` ya tiene su foto commiteada en el repositorio —el repo
+    // es donde vive— así que su copia en Storage sobra, aunque la fila siga
+    // apuntando a ella. Sin esta distinción quedaban ahí para siempre: no eran
+    // huérfanas, y el borrado de después de publicar fallaba en silencio.
     const vivas = new Set<string>();
     const { data } = await db
       .from('solicitudes_negocios')
-      .select('foto_ruta')
+      .select('foto_ruta, foto_borrada_en')
       .not('foto_ruta', 'is', null);
-    for (const f of data ?? []) if (f.foto_ruta) vivas.add(f.foto_ruta as string);
+    for (const f of data ?? []) {
+      if (f.foto_ruta && !f.foto_borrada_en) vivas.add(f.foto_ruta as string);
+    }
 
     const limite = Date.now() - 60 * 60 * 1000;
     for (const carpeta of ['pendientes', 'panel']) {
@@ -110,8 +117,9 @@ async function limpiarHuerfanas(db: ReturnType<typeof createClient>): Promise<nu
         })
         .map((a) => `${carpeta}/${a.name}`);
       if (sobran.length) {
-        await db.storage.from('fotos').remove(sobran);
-        borradas += sobran.length;
+        const { error } = await db.storage.from('fotos').remove(sobran);
+        if (error) console.error('no se pudieron borrar fotos sobrantes', carpeta, error.message);
+        else borradas += sobran.length;
       }
     }
   } catch (e) {
@@ -438,7 +446,18 @@ Deno.serve(async (peticion) => {
     const paraBorrar = errorSello
       ? []
       : publicadas.map((a) => a.foto_ruta).filter((r): r is string => Boolean(r));
-    if (paraBorrar.length) await db.storage.from('fotos').remove(paraBorrar);
+    if (paraBorrar.length) {
+      // Igual que el sello: `remove` devuelve `{ error }` en vez de lanzar, y
+      // sin mirarlo cinco fotos ya commiteadas se quedaron ocupando Storage sin
+      // que nada lo dijera. Son 1,5 MB por familia y el plan gratuito tiene un
+      // gigabyte. No tumba la publicación —el commit ya salió y es correcto—
+      // pero tiene que verse.
+      const { error } = await db.storage.from('fotos').remove(paraBorrar);
+      if (error) {
+        console.error('no se pudieron liberar las fotos de Storage', error.message);
+        fallos.push(`las fotos siguen en Storage: ${error.message}`);
+      }
+    }
 
     // --- avisar al despliegue ------------------------------------------------
     //
