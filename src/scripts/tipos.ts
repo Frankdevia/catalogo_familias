@@ -9,6 +9,11 @@ export interface NegocioModal {
   /** URL de la imagen ya optimizada por astro:assets. Falta cuando la ficha
    *  se inscribió sin foto: el modal enseña la inicial, como la tarjeta. */
   foto?: string;
+  /** `contener` para logos: se muestran enteros sobre `fondo` en vez de
+   *  recortarse. Lo decide `src/lib/encuadre.ts` al compilar, mirando los
+   *  bordes de la imagen; aquí solo viaja la conclusión. */
+  encaje?: 'cubrir' | 'contener';
+  fondo?: string;
   telefono: string;
   telHref: string;
   /* Estos llegan del esquema de contenido, donde son `.nullish()`: una ficha

@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import { anchoSeguro, type Negocio } from '../data/negocio';
+import { type Negocio } from '../data/negocio';
+import { encuadreDe, anchoUtil } from '../lib/encuadre';
 import FlechaEnlace from './FlechaEnlace.astro';
 
 interface Props {
@@ -11,8 +12,14 @@ const { negocio } = Astro.props;
 const { nombre, categoria, descripcion, familia, foto } = negocio.data;
 const href = `/negocio/${negocio.id}/`;
 
-// 2x del recuadro de 400x170 de la tarjeta (ratio 2.35:1).
-const ancho = foto ? anchoSeguro(foto, 800) : 0;
+// El recuadro mide 400x170 (2.35:1) y se pide al doble para pantallas densas.
+//
+// Un logo cuadrado o un volante vertical ahí dentro perdían más de la mitad,
+// así que `encuadreDe` decide si esta foto se recorta o se muestra entera sobre
+// el color de su propio borde. Contenida, el ancho útil sale del ALTO del
+// recuadro y no del ancho: pedir 800px para enseñar 120 era descargar de más.
+const encuadre = foto ? await encuadreDe(foto) : null;
+const ancho = foto && encuadre ? anchoUtil(foto, encuadre, 800, 340) : 0;
 
 /*
  * Respaldo cuando la ficha no trae foto.
@@ -26,14 +33,20 @@ const inicial = nombre.trim().charAt(0).toUpperCase();
 ---
 
 <article class="tarjeta" data-negocio data-categoria={categoria}>
-  <a class="foto" href={href} data-abrir={negocio.id}>
+  <a
+    class="foto"
+    href={href}
+    data-abrir={negocio.id}
+    data-encaje={encuadre?.encaje}
+    style={encuadre?.fondo ? `--fondo-foto: ${encuadre.fondo}` : undefined}
+  >
     {
       foto ? (
         <Image
           src={foto}
           alt={`Foto de ${nombre}`}
           width={ancho}
-          height={Math.round(ancho / 2.35)}
+          height={Math.round(ancho / (foto.width / foto.height))}
           loading="lazy"
         />
       ) : (
@@ -100,6 +113,15 @@ const inicial = nombre.trim().charAt(0).toUpperCase();
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+  /* Entera, sobre el color de su propio borde. La banda no se ve porque es el
+     mismo color que ya tiene el logo alrededor; con un gris neutro se notaría
+     el marco, sobre todo en los de fondo morado o negro. */
+  .foto[data-encaje='contener'] {
+    background: var(--fondo-foto, var(--surface-subtle));
+  }
+  .foto[data-encaje='contener'] :global(img) {
+    object-fit: contain;
   }
 
   .cuerpo {

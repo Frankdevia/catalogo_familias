@@ -77,6 +77,15 @@ if (modal && datosCrudos) {
       if (hayFoto) {
         foto.src = n.foto!;
         foto.alt = `Foto de ${n.nombre}`;
+        // Un logo se muestra entero sobre el color de su borde en vez de
+        // recortarse. Lo decidió `src/lib/encuadre.ts` al compilar; aquí solo
+        // se aplica, y sobre el contenedor porque el diálogo se reutiliza para
+        // todas las fichas: si no se limpia, la siguiente hereda el fondo.
+        const cabecera = foto.parentElement;
+        if (cabecera) {
+          cabecera.dataset.encaje = n.encaje ?? 'cubrir';
+          cabecera.style.setProperty('--fondo-foto', n.fondo ?? '');
+        }
       } else {
         foto.removeAttribute('src');
         foto.alt = '';

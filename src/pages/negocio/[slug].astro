@@ -5,7 +5,8 @@ import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaInscribe from '../../components/CtaInscribe.astro';
 import FlechaEnlace from '../../components/FlechaEnlace.astro';
-import { telHref, webHref, instagramHref, anchoSeguro } from '../../data/negocio';
+import { telHref, webHref, instagramHref } from '../../data/negocio';
+import { encuadreDe, anchoUtil } from '../../lib/encuadre';
 import { SITIO } from '../../data/sitio';
 
 export const getStaticPaths = (async () => {
@@ -19,8 +20,10 @@ export const getStaticPaths = (async () => {
 const { negocio } = Astro.props;
 const d = negocio.data;
 
-// La ficha muestra la foto a 2:1; se pide como mucho el ancho original.
-const ancho = d.foto ? anchoSeguro(d.foto, 1040) : 0;
+// La ficha muestra la foto a 2:1. Igual que en la tarjeta, un logo se muestra
+// entero sobre el color de su borde en vez de recortarse por la mitad.
+const encuadre = d.foto ? await encuadreDe(d.foto) : null;
+const ancho = d.foto && encuadre ? anchoUtil(d.foto, encuadre, 1040, 1040) : 0;
 /** Respaldo cuando no hay foto, igual que en la tarjeta del catálogo. */
 const inicial = d.nombre.trim().charAt(0).toUpperCase();
 
@@ -69,7 +72,9 @@ const jsonLd = {
             src={d.foto}
             alt={`Foto de ${d.nombre}`}
             width={ancho}
-            height={Math.round(ancho / 2)}
+            height={Math.round(ancho / (d.foto.width / d.foto.height))}
+            data-encaje={encuadre?.encaje}
+            style={encuadre?.fondo ? `--fondo-foto: ${encuadre.fondo}` : undefined}
           />
         ) : (
           <p class="foto sin-foto" aria-hidden="true">{inicial}</p>
@@ -184,6 +189,10 @@ const jsonLd = {
     object-fit: cover;
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-md);
+  }
+  .foto[data-encaje='contener'] {
+    object-fit: contain;
+    background: var(--fondo-foto, var(--surface-subtle));
   }
   .intro :global(.li-eyebrow) {
     display: block;

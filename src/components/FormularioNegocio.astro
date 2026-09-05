@@ -119,9 +119,8 @@ const { endpoint } = Astro.props;
         type="text"
         required
         maxlength={LIMITES.negocioNombre.max}
-      /
         autocomplete="off"
-      >
+      />
       <p class="error" data-error-de="negocio_nombre" hidden></p>
     </div>
 
@@ -164,12 +163,12 @@ const { endpoint } = Astro.props;
         required
         accept={FOTO.accept}
         aria-describedby="ayuda-foto"
-      /
         autocomplete="off"
-      >
+      />
       <p id="ayuda-foto" class="ayuda">
-        Horizontal se ve mejor. La reducimos automáticamente, no te preocupes por
-        el peso.
+        Apaisada se ve mejor: unos 1600×680 llenan el recuadro.
+        <strong>Si es tu logo, no lo recortamos</strong>: se muestra completo.
+        La reducimos automáticamente, no te preocupes por el peso.
       </p>
       <p class="error" data-error-de="foto" hidden></p>
       <div class="previsualizacion" hidden>
@@ -189,9 +188,8 @@ const { endpoint } = Astro.props;
           pattern={PATRON_TELEFONO}
           inputmode="tel"
           aria-describedby="ayuda-tel-negocio"
-        /
         autocomplete="off"
-      >
+      />
         <p id="ayuda-tel-negocio" class="ayuda">Este sí se publica.</p>
         <p class="error" data-error-de="negocio_telefono" hidden></p>
       </div>
@@ -204,9 +202,8 @@ const { endpoint } = Astro.props;
           type="text"
           maxlength={LIMITES.direccion.max}
           aria-describedby="ayuda-direccion"
-        /
         autocomplete="off"
-      >
+      />
         <p id="ayuda-direccion" class="ayuda">
           O la ciudad. Si no tienes local, déjala en blanco: no aparecerá en tu ficha.
         </p>

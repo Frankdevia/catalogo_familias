@@ -4,13 +4,8 @@ import Filtros from './Filtros.astro';
 import TarjetaNegocio from './TarjetaNegocio.astro';
 import ModalNegocio from './ModalNegocio.astro';
 import { CATEGORIAS, TODOS } from '../data/categorias';
-import {
-  telHref,
-  webHref,
-  instagramHref,
-  anchoSeguro,
-  type Negocio,
-} from '../data/negocio';
+import { telHref, webHref, instagramHref, type Negocio } from '../data/negocio';
+import { encuadreDe, anchoUtil } from '../lib/encuadre';
 import type { NegocioModal } from '../scripts/tipos';
 
 interface Props {
@@ -38,13 +33,18 @@ const datos: NegocioModal[] = await Promise.all(
     // 2x de los 520x200 del diálogo, sin pasarse del original (ratio 2.6:1).
     // Solo se optimiza si la ficha trae foto: muchas se inscriben sin ella.
     let foto: string | undefined;
+    let encuadre: Awaited<ReturnType<typeof encuadreDe>> | null = null;
     if (n.data.foto) {
-      const ancho = anchoSeguro(n.data.foto, 1040);
+      // La cabecera del diálogo mide 520x200. Un logo se muestra entero, así
+      // que el recorte no puede cocinarse en la imagen: se pide a su proporción
+      // natural y el encaje lo aplica el CSS, igual que en la tarjeta.
+      encuadre = await encuadreDe(n.data.foto);
+      const ancho = anchoUtil(n.data.foto, encuadre, 1040, 400);
       foto = (
         await getImage({
           src: n.data.foto,
           width: ancho,
-          height: Math.round(ancho / 2.6),
+          height: Math.round(ancho / (n.data.foto.width / n.data.foto.height)),
           format: 'webp',
         })
       ).src;
@@ -56,6 +56,8 @@ const datos: NegocioModal[] = await Promise.all(
       familia: n.data.familia,
       descripcion: n.data.descripcion,
       foto,
+      encaje: encuadre?.encaje,
+      fondo: encuadre?.fondo,
       telefono: n.data.telefono,
       telHref: telHref(n.data.telefono),
       direccion: n.data.direccion,

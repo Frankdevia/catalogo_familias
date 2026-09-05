@@ -59,6 +59,14 @@
     object-fit: cover;
     display: block;
   }
+  /* Igual que en la tarjeta y en la ficha: la misma foto no puede salir entera
+     en un sitio y recortada en otro. */
+  .cabecera[data-encaje='contener'] {
+    background: var(--fondo-foto, var(--surface-subtle));
+  }
+  .cabecera[data-encaje='contener'] img {
+    object-fit: contain;
+  }
   .cerrar {
     position: absolute;
     top: 12px;
