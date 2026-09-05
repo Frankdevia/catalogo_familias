@@ -2,6 +2,7 @@
 import { CATEGORIAS } from '../data/categorias';
 import { SITIO } from '../data/sitio';
 import { LIMITES, PATRON_TELEFONO, FOTO, CAMPO_TRAMPA } from '../data/registro';
+import Consentimiento from './Consentimiento.astro';
 
 interface Props {
   /** URL del webhook de n8n. Vacía = el formulario se muestra deshabilitado. */
@@ -215,37 +216,7 @@ const { endpoint } = Astro.props;
     </div>
   </fieldset>
 
-  <div class="campo campo--consentimiento">
-    <label class="consentimiento">
-      <input id="consentimiento" name="consentimiento" type="checkbox" required />
-      <span>
-        <p>
-          He leído y acepto la
-          {/* «He leído» tiene que poder cumplirse: la política vive en
-              /privacidad y se abre en otra pestaña para no perder el
-              formulario a medio llenar. */}
-          <a href="/privacidad" target="_blank" rel="noopener">
-            Política de Tratamiento de Datos Personales
-          </a> de la Fundación Liceo Inglés de Pereira (NIT 891.412.970-0) y, de
-          manera libre, previa, expresa e informada, autorizo el tratamiento de
-          mis datos personales y los de mi negocio o actividad comercial
-          suministrados en este formulario, con el fin de publicarlos en el
-          directorio de emprendimientos y servicios (marketplace) de la
-          comunidad educativa disponible en la página web del Colegio.
-        </p>
-        <p>
-          Declaro conocer que dicho directorio es un espacio público, por lo que
-          la información allí publicada será visible para cualquier visitante de
-          la página web sin restricción de acceso. Este registro es voluntario y
-          en cualquier momento puedo solicitar la actualización, rectificación,
-          supresión de mis datos o la revocatoria de esta autorización, conforme
-          a los canales indicados en la Política de Tratamiento de Datos
-          Personales.
-        </p>
-      </span>
-    </label>
-    <p class="error" data-error-de="consentimiento" hidden></p>
-  </div>
+  <Consentimiento />
 
   {/* Campo trampa: oculto para personas, irresistible para bots. */}
   <div class="trampa" aria-hidden="true">
@@ -410,43 +381,6 @@ const { endpoint } = Astro.props;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
     display: block;
-  }
-
-  .campo--consentimiento {
-    border-top: 1px solid var(--border-subtle);
-    padding-top: var(--space-6);
-  }
-  .consentimiento {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-3);
-    align-items: start;
-    font-weight: var(--weight-regular);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    line-height: var(--leading-normal);
-    color: var(--text-body);
-    cursor: pointer;
-  }
-  .consentimiento input {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    accent-color: var(--li-red);
-  }
-  /* El texto legal son dos párrafos, no una línea: sin esto se leen como un
-     bloque único. Va un punto por debajo del cuerpo —es letra menuda— pero no
-     más: sigue siendo lo que la persona está aceptando. */
-  .consentimiento p {
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-xs);
-    line-height: var(--leading-relaxed);
-  }
-  .consentimiento p:last-child {
-    margin-bottom: 0;
-  }
-  .consentimiento a {
-    color: var(--text-link);
   }
 
   /* Fuera de la vista pero no `display:none`: algunos bots ignoran lo

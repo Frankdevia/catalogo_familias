@@ -2,6 +2,7 @@
 import { CATEGORIAS_CLASIFICADOS } from '../data/clasificados';
 import { SITIO } from '../data/sitio';
 import { LIMITES, PATRON_TELEFONO, CAMPO_TRAMPA } from '../data/registro';
+import Consentimiento from './Consentimiento.astro';
 
 interface Props {
   /** URL del webhook de n8n. Vacía = el formulario se muestra deshabilitado. */
@@ -129,17 +130,9 @@ const MAX_DESC = 280;
     </div>
   </fieldset>
 
-  <div class="campo campo--consentimiento">
-    <label class="consentimiento">
-      <input id="consentimiento" name="consentimiento" type="checkbox" required />
-      <span>
-        Entiendo que <strong>el teléfono y el correo que escribí arriba se
-        publicarán en un sitio web público</strong>, visible para cualquiera, y
-        autorizo su publicación junto con el texto de mi anuncio.
-      </span>
-    </label>
-    <p class="error" data-error-de="consentimiento" hidden></p>
-  </div>
+  <Consentimiento
+    aviso="Entiendo que <strong>el teléfono y el correo que escribí arriba se publicarán en un sitio web público</strong>, visible para cualquiera, y autorizo su publicación junto con el texto de mi anuncio."
+  />
 
   {/* Campo trampa: oculto para personas, irresistible para bots. */}
   <div class="trampa" aria-hidden="true">
@@ -259,29 +252,6 @@ const MAX_DESC = 280;
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
     color: var(--li-red);
-  }
-
-  .campo--consentimiento {
-    border-top: 1px solid var(--border-subtle);
-    padding-top: var(--space-6);
-  }
-  .consentimiento {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-3);
-    align-items: start;
-    font-weight: var(--weight-regular);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    line-height: var(--leading-normal);
-    color: var(--text-body);
-    cursor: pointer;
-  }
-  .consentimiento input {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    accent-color: var(--li-red);
   }
 
   /* Fuera de la vista pero no `display:none`: algunos bots ignoran lo que

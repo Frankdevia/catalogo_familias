@@ -1,6 +1,7 @@
 ---
 import { SITIO } from '../data/sitio';
 import { LIMITES, PATRON_TELEFONO, CAMPO_TRAMPA } from '../data/registro';
+import Consentimiento from './Consentimiento.astro';
 
 interface Props {
   /** URL de la Edge Function. Vacía = el formulario se muestra deshabilitado. */
@@ -173,17 +174,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
     </div>
   </fieldset>
 
-  <div class="campo campo--consentimiento">
-    <label class="consentimiento">
-      <input id="consentimiento" name="consentimiento" type="checkbox" required />
-      <span>
-        Autorizo a la Fundación Liceo Inglés a publicar esta promoción —negocio,
-        título, descripción, condiciones y teléfono— en el sitio público. Los
-        nombres de mis estudiantes y mi nombre no se publican.
-      </span>
-    </label>
-    <p class="error" data-error-de="consentimiento" hidden></p>
-  </div>
+  <Consentimiento />
 
   <input type="text" name={CAMPO_TRAMPA} tabindex="-1" autocomplete="off" aria-hidden="true" class="trampa" />
 
@@ -287,29 +278,6 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
     color: var(--li-red);
-  }
-
-  .campo--consentimiento {
-    border-top: 1px solid var(--border-subtle);
-    padding-top: var(--space-6);
-  }
-  .consentimiento {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-3);
-    align-items: start;
-    font-weight: var(--weight-regular);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    line-height: var(--leading-normal);
-    color: var(--text-body);
-    cursor: pointer;
-  }
-  .consentimiento input {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    accent-color: var(--li-red);
   }
 
   /* Fuera de la vista pero no `display:none`: algunos bots ignoran lo que
