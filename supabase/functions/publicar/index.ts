@@ -459,29 +459,24 @@ Deno.serve(async (peticion) => {
       }
     }
 
-    // --- avisar al despliegue ------------------------------------------------
+    // --- el despliegue ---------------------------------------------------------
     //
-    // Se llama a EasyPanel directamente en vez de confiar en que GitHub le
-    // notifique el push. Esa notificación ya se atascó dos veces en este
-    // proyecto —la última dejó el sitio nueve horas mostrando contenido viejo
-    // mientras la base y el repositorio estaban al día—, y el síntoma es
-    // silencioso: todo correcto salvo lo que ve la gente.
+    // NO se llama a EasyPanel. Lo dispara el webhook de GitHub al recibir este
+    // commit, y con eso basta.
     //
-    // Va DESPUÉS de sellar, y su fallo no tumba la ejecución: el commit ya
-    // salió y los datos ya son coherentes. Lo que no puede es pasar
-    // desapercibido, así que viaja en la respuesta.
-    const urlDespliegue = Deno.env.get('EASYPANEL_DEPLOY_URL');
-    let despliegue = 'sin configurar · el sitio depende de que GitHub avise';
-    if (urlDespliegue) {
-      try {
-        const r = await fetch(urlDespliegue, { method: 'POST' });
-        despliegue = r.ok ? 'lanzado' : `FALLÓ con ${r.status}`;
-        if (!r.ok) console.error('el despliegue no arrancó', r.status, await r.text());
-      } catch (e) {
-        despliegue = `FALLÓ: ${String(e)}`;
-        console.error('el despliegue no arrancó', String(e));
-      }
-    }
+    // Antes se llamaba, para no depender de una notificación que se había
+    // atascado dos veces. El remedio salió peor: EasyPanel recibía DOS avisos
+    // del mismo commit con un segundo de diferencia —el nuestro y el de
+    // GitHub— y mataba los dos. En el historial se ven por parejas, de uno y
+    // nueve segundos, ambos con «gzip: unexpected end of file / Killed».
+    //
+    // La consecuencia era la que se quería evitar: el 5 de septiembre dos
+    // anuncios recién publicados no llegaron al sitio, con la base y el
+    // repositorio al día. Un disparo único los desplegó en 27 segundos.
+    //
+    // Si alguna vez el webhook vuelve a atascarse, el commit siguiente arrastra
+    // lo pendiente, y siempre queda el botón «Implementar» de EasyPanel.
+    const despliegue = 'lo lanza el webhook de GitHub con este commit';
 
     return responder({
       ok: true,

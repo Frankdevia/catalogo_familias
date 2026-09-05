@@ -150,7 +150,7 @@ carpeta del repo**, que es donde vive el enlace al proyecto:
 | Secreto | Para qué | Si falta |
 |---|---|---|
 | `GITHUB_TOKEN` | Commitear al repositorio. PAT de alcance fino, un solo permiso: *Contents: read and write* | `publicar` devuelve 500 y no publica nada |
-| `EASYPANEL_DEPLOY_URL` | Avisar al despliegue en cuanto el commit sale | El sitio depende de que GitHub avise a EasyPanel, que **ya se atascó dos veces** |
+| ~~`EASYPANEL_DEPLOY_URL`~~ | **Ya no se usa.** Avisaba a EasyPanel además del webhook de GitHub, y los dos avisos del mismo commit se mataban entre sí: parejas de despliegues de uno y nueve segundos con «gzip: unexpected end of file / Killed», y anuncios que no llegaban al sitio. El despliegue lo dispara solo el webhook | — |
 | `SAL_HUELLA` | Sal del hash de IP del limitador | Se usa una sal por defecto y los hashes serían reversibles |
 
 > **`supabase secrets set` sobrescribe sin avisar y actúa sobre el proyecto
