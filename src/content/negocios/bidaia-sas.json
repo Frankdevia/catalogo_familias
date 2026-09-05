@@ -1,0 +1,12 @@
+{
+  "nombre": "Bidaia sas",
+  "categoria": "Servicios",
+  "descripcion": "Somos una agencia de viajes que ofrecemos tiquetes y/ o paquetes turísticos a destinos nacionales e internacionales.",
+  "familia": "Familia — grado K2B",
+  "foto": "../../assets/photos/bidaia-sas.jpg",
+  "telefono": "3127096446",
+  "direccion": "Cañaveral 1 local 17",
+  "web": "Bidaia.com.co",
+  "instagram": "@bidaia_co",
+  "orden": 100
+}
