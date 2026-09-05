@@ -1,0 +1,12 @@
+{
+  "nombre": "OneChat",
+  "categoria": "Tecnología",
+  "descripcion": "Atención omnicanal 24/7 con inteligencia artificial para empresas. OneChat reúne WhatsApp, Instagram, TikTok, Facebook Messenger, Telegram, chat web, correo, SMS, voz y otros canales en una sola bandeja. Sus Agentes de IA responden utilizando la información real de la empresa, automatizan tareas, califican oportunidades y transfieren las conversaciones al equipo humano conservando el historial y el contexto. También puede conectarse con plataformas de comercio electrónico, CRM, ERP, servicio técnico y otros sistemas empresariales.",
+  "familia": "Familia — grado 1C",
+  "foto": "../../assets/photos/onechat.webp",
+  "telefono": "3164254888",
+  "web": "www.onechat.co",
+  "instagram": "@onechat.co",
+  "facebook": "fb.com/onechat.co",
+  "orden": 100
+}
