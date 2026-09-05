@@ -34,20 +34,35 @@ const datos: NegocioModal[] = await Promise.all(
     // Solo se optimiza si la ficha trae foto: muchas se inscriben sin ella.
     let foto: string | undefined;
     let encuadre: Awaited<ReturnType<typeof encuadreDe>> | null = null;
+    let medidas: { ancho: number; alto: number } | null = null;
     if (n.data.foto) {
-      // La cabecera del diálogo mide 520x200. Un logo se muestra entero, así
-      // que el recorte no puede cocinarse en la imagen: se pide a su proporción
-      // natural y el encaje lo aplica el CSS, igual que en la tarjeta.
+      // Un logo se muestra entero, así que el recorte no puede cocinarse en la
+      // imagen: se pide a su proporción natural y el encaje lo aplica el CSS.
       encuadre = await encuadreDe(n.data.foto);
-      const ancho = anchoUtil(n.data.foto, encuadre, 1040, 400);
-      foto = (
-        await getImage({
-          src: n.data.foto,
-          width: ancho,
-          height: Math.round(ancho / (n.data.foto.width / n.data.foto.height)),
-          format: 'webp',
-        })
-      ).src;
+
+      // 800x340, LOS MISMOS que pide `TarjetaNegocio.astro`, aunque la cabecera
+      // del diálogo mida 520x200 y admitiría más.
+      //
+      // Pedir su medida ideal generaba un segundo juego de fotos casi idéntico:
+      // de 24 fichas, tarjeta y modal compartían UNA sola URL, y por casualidad.
+      // Las otras 23 eran 1,35 MB que existían solo para el diálogo, y abrir una
+      // tarjeta descargaba de nuevo la foto que ya estaba en pantalla —entre 121
+      // y 495 ms mirando el negocio anterior—.
+      //
+      // Con las mismas medidas, Astro emite un único archivo y el navegador lo
+      // sirve de su caché: ya está descargado y decodificado porque se está
+      // viendo en la rejilla. El precio es que en pantallas densas el diálogo
+      // recibe 800px donde le cabrían 1040; no se ve, y la apertura es
+      // instantánea.
+      const ancho = anchoUtil(n.data.foto, encuadre, 800, 340);
+      const generada = await getImage({
+        src: n.data.foto,
+        width: ancho,
+        height: Math.round(ancho / (n.data.foto.width / n.data.foto.height)),
+        format: 'webp',
+      });
+      foto = generada.src;
+      medidas = { ancho: Number(generada.attributes.width), alto: Number(generada.attributes.height) };
     }
     return {
       slug: n.id,
@@ -58,6 +73,8 @@ const datos: NegocioModal[] = await Promise.all(
       foto,
       encaje: encuadre?.encaje,
       fondo: encuadre?.fondo,
+      fotoAncho: medidas?.ancho,
+      fotoAlto: medidas?.alto,
       telefono: n.data.telefono,
       telHref: telHref(n.data.telefono),
       direccion: n.data.direccion,

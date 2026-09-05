@@ -64,9 +64,19 @@ if (modal && datosCrudos) {
     return div;
   }
 
+  /*
+   * Qué ficha se está abriendo ahora mismo.
+   *
+   * `decode()` tarda lo que tarde, y dos clics seguidos lo lanzan dos veces. Sin
+   * este testigo, la que acabe primero es la que se enseña, aunque sea la que ya
+   * no quieres ver.
+   */
+  let abriendo: string | null = null;
+
   function abrir(slug: string): void {
     const n = negocios[slug];
     if (!n || !modal) return;
+    abriendo = slug;
 
     // Sin foto se oculta el hueco en vez de dejar una imagen rota. En el modal
     // no cabe el respaldo con la inicial que usan la tarjeta y la ficha: aquí
@@ -74,21 +84,52 @@ if (modal && datosCrudos) {
     if (foto) {
       const hayFoto = Boolean(n.foto);
       foto.hidden = !hayFoto;
+
+      // El encaje y el color van SIEMPRE y van PRIMERO. El diálogo es uno solo
+      // y se reutiliza: si no se limpian, la siguiente ficha hereda el fondo de
+      // la anterior.
+      const cabecera = foto.parentElement;
+      if (cabecera) {
+        cabecera.dataset.encaje = n.encaje ?? 'cubrir';
+        cabecera.style.setProperty('--fondo-foto', n.fondo ?? '');
+      }
+
       if (hayFoto) {
+        /*
+         * Ocultar antes de asignar el `src`.
+         *
+         * Asignar `src` NO borra la imagen: el navegador sigue pintando los
+         * píxeles anteriores hasta decodificar los nuevos. Como el diálogo se
+         * reutiliza, eso significaba ver el negocio anterior entre 121 y 495 ms
+         * en cada apertura.
+         *
+         * Mientras está oculta se ve el color de la banda, que en un logo es su
+         * propio fondo: parece que la imagen aparece, no que se cambia. Con la
+         * foto en caché —lo normal, es la misma que la tarjeta— esto dura un
+         * fotograma y no se nota.
+         */
+        foto.style.visibility = 'hidden';
         foto.src = n.foto!;
         foto.alt = `Foto de ${n.nombre}`;
-        // Un logo se muestra entero sobre el color de su borde en vez de
-        // recortarse. Lo decidió `src/lib/encuadre.ts` al compilar; aquí solo
-        // se aplica, y sobre el contenedor porque el diálogo se reutiliza para
-        // todas las fichas: si no se limpia, la siguiente hereda el fondo.
-        const cabecera = foto.parentElement;
-        if (cabecera) {
-          cabecera.dataset.encaje = n.encaje ?? 'cubrir';
-          cabecera.style.setProperty('--fondo-foto', n.fondo ?? '');
+        // Las medidas reales, no las fijas del HTML: una foto contenida no mide
+        // 1040x400, y declararlo era metadato falso.
+        if (n.fotoAncho && n.fotoAlto) {
+          foto.width = n.fotoAncho;
+          foto.height = n.fotoAlto;
         }
+
+        const mostrar = () => {
+          // Si entretanto se abrió otra ficha, esta ya no manda.
+          if (abriendo === slug) foto.style.visibility = '';
+        };
+        // `decode()` rechaza si el `src` cambia a mitad; da igual, el testigo ya
+        // decide quién gana. Y si el navegador no lo trae, se enseña sin más.
+        if (typeof foto.decode === 'function') foto.decode().then(mostrar, mostrar);
+        else mostrar();
       } else {
         foto.removeAttribute('src');
         foto.alt = '';
+        foto.style.visibility = '';
       }
     }
     if (categoria) categoria.textContent = n.categoria;

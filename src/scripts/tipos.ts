@@ -14,6 +14,10 @@ export interface NegocioModal {
    *  bordes de la imagen; aquí solo viaja la conclusión. */
   encaje?: 'cubrir' | 'contener';
   fondo?: string;
+  /** Medidas reales de la variante servida. El <img> del diálogo las declara
+   *  fijas en el HTML porque no sabe de quién será la foto; aquí se corrigen. */
+  fotoAncho?: number;
+  fotoAlto?: number;
   telefono: string;
   telHref: string;
   /* Estos llegan del esquema de contenido, donde son `.nullish()`: una ficha
