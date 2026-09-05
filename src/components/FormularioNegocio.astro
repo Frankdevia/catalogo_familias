@@ -52,7 +52,7 @@ const { endpoint } = Astro.props;
         required
         maxlength={LIMITES.estudiantes.max}
         autocomplete="off"
-        placeholder="Valeria Gómez 11B, Antonia Ruiz 7A"
+        placeholder="nombre estudiante, 7B"
         aria-describedby="ayuda-estudiantes"
       />
       <p id="ayuda-estudiantes" class="ayuda">
@@ -214,15 +214,15 @@ const { endpoint } = Astro.props;
     <div class="fila fila--tres">
       <div class="campo">
         <label for="web">Página web <span class="opcional">(opcional)</span></label>
-        <input id="web" name="web" type="text" maxlength={LIMITES.web.max} placeholder="tunegocio.co" / autocomplete="off">
+        <input id="web" name="web" type="text" maxlength={LIMITES.web.max} placeholder="tunegocio.co" autocomplete="off" />
       </div>
       <div class="campo">
         <label for="instagram">Instagram <span class="opcional">(opcional)</span></label>
-        <input id="instagram" name="instagram" type="text" maxlength={LIMITES.instagram.max} placeholder="@tunegocio" / autocomplete="off">
+        <input id="instagram" name="instagram" type="text" maxlength={LIMITES.instagram.max} placeholder="@tunegocio" autocomplete="off" />
       </div>
       <div class="campo">
         <label for="facebook">Facebook <span class="opcional">(opcional)</span></label>
-        <input id="facebook" name="facebook" type="text" maxlength={LIMITES.facebook.max} placeholder="Nombre de la página" / autocomplete="off">
+        <input id="facebook" name="facebook" type="text" maxlength={LIMITES.facebook.max} placeholder="Nombre de la página" autocomplete="off" />
       </div>
     </div>
   </fieldset>

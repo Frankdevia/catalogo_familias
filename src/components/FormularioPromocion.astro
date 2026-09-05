@@ -60,7 +60,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
         required
         maxlength={LIMITES.estudiantes.max}
         autocomplete="off"
-        placeholder="Valeria Gómez 11B, Antonia Ruiz 7A"
+        placeholder="nombre estudiante, 7B"
         aria-describedby="ayuda-estudiantes"
       />
       <p id="ayuda-estudiantes" class="ayuda">
@@ -103,7 +103,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
 
     <div class="campo">
       <label for="negocio">¿De qué negocio es?</label>
-      <input id="negocio" name="negocio" type="text" required maxlength="60" / autocomplete="off">
+      <input id="negocio" name="negocio" type="text" required maxlength="60" autocomplete="off" />
       <p class="ayuda">Tal como quieres que aparezca. No hace falta que esté en el catálogo.</p>
       <p class="error" data-error-de="negocio" hidden></p>
     </div>
@@ -148,13 +148,13 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
     <div class="fila">
       <div class="campo">
         <label for="vigente_desde">Válida desde</label>
-        <input id="vigente_desde" name="vigente_desde" type="date" required value={hoy} / autocomplete="off">
+        <input id="vigente_desde" name="vigente_desde" type="date" required value={hoy} autocomplete="off" />
         <p class="error" data-error-de="vigente_desde" hidden></p>
       </div>
 
       <div class="campo">
         <label for="vigente_hasta">Válida hasta</label>
-        <input id="vigente_hasta" name="vigente_hasta" type="date" required value={enUnMes} / autocomplete="off">
+        <input id="vigente_hasta" name="vigente_hasta" type="date" required value={enUnMes} autocomplete="off" />
         <p class="ayuda">Pasada esta fecha se retira sola del sitio.</p>
         <p class="error" data-error-de="vigente_hasta" hidden></p>
       </div>
