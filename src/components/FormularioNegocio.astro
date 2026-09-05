@@ -12,7 +12,12 @@ interface Props {
 const { endpoint } = Astro.props;
 ---
 
-<form id="form-negocio" data-endpoint={endpoint} novalidate>
+{/* `autocomplete="off"` va en CADA campo, no solo aquí: los navegadores
+    ignoran el del formulario cuando creen reconocer el tipo de campo, y varios
+    pedían sugerencias a propósito —`name`, `tel`, `email`— pensando en ahorrar
+    tecleo. En un computador compartido eso es ofrecerle a una familia el nombre
+    y el teléfono de la anterior. */}
+<form id="form-negocio" data-endpoint={endpoint} autocomplete="off" novalidate>
   {
     !endpoint && (
       <p class="aviso aviso--error">
@@ -64,7 +69,7 @@ const { endpoint } = Astro.props;
         type="text"
         required
         maxlength={LIMITES.acudienteNombre.max}
-        autocomplete="name"
+        autocomplete="off"
       />
       <p class="error" data-error-de="acudiente_nombre" hidden></p>
     </div>
@@ -78,7 +83,7 @@ const { endpoint } = Astro.props;
           type="tel"
           required
           pattern={PATRON_TELEFONO}
-          autocomplete="tel"
+          autocomplete="off"
           inputmode="tel"
           aria-describedby="ayuda-tel-acudiente"
         />
@@ -93,10 +98,10 @@ const { endpoint } = Astro.props;
           name="acudiente_correo"
           type="email"
           required
-          autocomplete="email"
+          autocomplete="off"
           aria-describedby="ayuda-correo"
         />
-        <p id="ayuda-correo" class="ayuda">Te avisamos ahí cuando se publique.</p>
+        <p id="ayuda-correo" class="ayuda">Por si necesitamos aclarar algo de tu solicitud.</p>
         <p class="error" data-error-de="acudiente_correo" hidden></p>
       </div>
     </div>
@@ -114,13 +119,15 @@ const { endpoint } = Astro.props;
         type="text"
         required
         maxlength={LIMITES.negocioNombre.max}
-      />
+      /
+        autocomplete="off"
+      >
       <p class="error" data-error-de="negocio_nombre" hidden></p>
     </div>
 
     <div class="campo">
       <label for="categoria">Categoría</label>
-      <select id="categoria" name="categoria" required>
+      <select id="categoria" name="categoria" required autocomplete="off">
         <option value="">Elige una…</option>
         {CATEGORIAS.map((c) => <option value={c}>{c}</option>)}
       </select>
@@ -136,6 +143,7 @@ const { endpoint } = Astro.props;
         rows="6"
         maxlength={LIMITES.descripcion.max}
         aria-describedby="ayuda-descripcion contador-descripcion"
+        autocomplete="off"
       ></textarea>
       <p id="ayuda-descripcion" class="ayuda">
         Cuéntalo con calma: en tu ficha se ve completo. Las primeras líneas son
@@ -156,7 +164,9 @@ const { endpoint } = Astro.props;
         required
         accept={FOTO.accept}
         aria-describedby="ayuda-foto"
-      />
+      /
+        autocomplete="off"
+      >
       <p id="ayuda-foto" class="ayuda">
         Horizontal se ve mejor. La reducimos automáticamente, no te preocupes por
         el peso.
@@ -179,7 +189,9 @@ const { endpoint } = Astro.props;
           pattern={PATRON_TELEFONO}
           inputmode="tel"
           aria-describedby="ayuda-tel-negocio"
-        />
+        /
+        autocomplete="off"
+      >
         <p id="ayuda-tel-negocio" class="ayuda">Este sí se publica.</p>
         <p class="error" data-error-de="negocio_telefono" hidden></p>
       </div>
@@ -192,7 +204,9 @@ const { endpoint } = Astro.props;
           type="text"
           maxlength={LIMITES.direccion.max}
           aria-describedby="ayuda-direccion"
-        />
+        /
+        autocomplete="off"
+      >
         <p id="ayuda-direccion" class="ayuda">
           O la ciudad. Si no tienes local, déjala en blanco: no aparecerá en tu ficha.
         </p>
@@ -203,15 +217,15 @@ const { endpoint } = Astro.props;
     <div class="fila fila--tres">
       <div class="campo">
         <label for="web">Página web <span class="opcional">(opcional)</span></label>
-        <input id="web" name="web" type="text" maxlength={LIMITES.web.max} placeholder="tunegocio.co" />
+        <input id="web" name="web" type="text" maxlength={LIMITES.web.max} placeholder="tunegocio.co" / autocomplete="off">
       </div>
       <div class="campo">
         <label for="instagram">Instagram <span class="opcional">(opcional)</span></label>
-        <input id="instagram" name="instagram" type="text" maxlength={LIMITES.instagram.max} placeholder="@tunegocio" />
+        <input id="instagram" name="instagram" type="text" maxlength={LIMITES.instagram.max} placeholder="@tunegocio" / autocomplete="off">
       </div>
       <div class="campo">
         <label for="facebook">Facebook <span class="opcional">(opcional)</span></label>
-        <input id="facebook" name="facebook" type="text" maxlength={LIMITES.facebook.max} placeholder="Nombre de la página" />
+        <input id="facebook" name="facebook" type="text" maxlength={LIMITES.facebook.max} placeholder="Nombre de la página" / autocomplete="off">
       </div>
     </div>
   </fieldset>

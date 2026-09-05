@@ -15,7 +15,7 @@ const { endpoint } = Astro.props;
 const MAX_DESC = 280;
 ---
 
-<form id="form-clasificado" data-endpoint={endpoint} novalidate>
+<form id="form-clasificado" data-endpoint={endpoint} autocomplete="off" novalidate>
   {
     !endpoint && (
       <p class="aviso aviso--error">
@@ -66,7 +66,7 @@ const MAX_DESC = 280;
         type="text"
         required
         maxlength={LIMITES.acudienteNombre.max}
-        autocomplete="name"
+        autocomplete="off"
       />
       <p class="error" data-error-de="acudiente_nombre" hidden></p>
     </div>
@@ -78,7 +78,7 @@ const MAX_DESC = 280;
 
     <div class="campo">
       <label for="cat">¿Qué quieres publicar?</label>
-      <select id="cat" name="cat" required>
+      <select id="cat" name="cat" required autocomplete="off">
         <option value="">Elige una…</option>
         {CATEGORIAS_CLASIFICADOS.map((c) => <option value={c}>{c}</option>)}
       </select>
@@ -94,6 +94,7 @@ const MAX_DESC = 280;
         rows="4"
         maxlength={MAX_DESC}
         aria-describedby="contador-desc"
+        autocomplete="off"
       ></textarea>
       <p id="contador-desc" class="ayuda contador" aria-live="polite">
         0 de {MAX_DESC} caracteres
@@ -111,7 +112,7 @@ const MAX_DESC = 280;
           required
           pattern={PATRON_TELEFONO}
           inputmode="tel"
-          autocomplete="tel"
+          autocomplete="off"
         />
         <p class="error" data-error-de="phone" hidden></p>
       </div>
@@ -123,7 +124,7 @@ const MAX_DESC = 280;
           name="email"
           type="email"
           required
-          autocomplete="email"
+          autocomplete="off"
         />
         <p class="error" data-error-de="email" hidden></p>
       </div>

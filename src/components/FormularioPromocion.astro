@@ -26,7 +26,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
 });
 ---
 
-<form id="form-promocion" data-endpoint={endpoint} novalidate>
+<form id="form-promocion" data-endpoint={endpoint} autocomplete="off" novalidate>
   {
     !endpoint && (
       <p class="aviso aviso--error">
@@ -77,7 +77,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
         type="text"
         required
         maxlength={LIMITES.acudienteNombre.max}
-        autocomplete="name"
+        autocomplete="off"
       />
       <p class="error" data-error-de="acudiente_nombre" hidden></p>
     </div>
@@ -88,10 +88,10 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
         name="acudiente_correo"
         type="email"
         required
-        autocomplete="email"
+        autocomplete="off"
         aria-describedby="ayuda-correo-promo"
       />
-      <p id="ayuda-correo-promo" class="ayuda">Te avisamos ahí cuando se publique.</p>
+      <p id="ayuda-correo-promo" class="ayuda">Por si necesitamos aclarar algo de tu solicitud.</p>
       <p class="error" data-error-de="acudiente_correo" hidden></p>
     </div>
 
@@ -103,7 +103,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
 
     <div class="campo">
       <label for="negocio">¿De qué negocio es?</label>
-      <input id="negocio" name="negocio" type="text" required maxlength="60" />
+      <input id="negocio" name="negocio" type="text" required maxlength="60" / autocomplete="off">
       <p class="ayuda">Tal como quieres que aparezca. No hace falta que esté en el catálogo.</p>
       <p class="error" data-error-de="negocio" hidden></p>
     </div>
@@ -117,7 +117,9 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
         required
         maxlength="80"
         placeholder="20% de descuento en la libra de café"
-      />
+      /
+        autocomplete="off"
+      >
       <p class="error" data-error-de="titulo" hidden></p>
     </div>
 
@@ -130,6 +132,7 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
         rows="3"
         maxlength={MAX_DESC}
         aria-describedby="contador-descripcion"
+        autocomplete="off"
       ></textarea>
       <p id="contador-descripcion" class="ayuda contador" aria-live="polite">
         0 de {MAX_DESC} caracteres
@@ -139,20 +142,20 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
 
     <div class="campo">
       <label for="condiciones">Condiciones <span class="opcional">(opcional)</span></label>
-      <textarea id="condiciones" name="condiciones" rows="2" maxlength="200"></textarea>
+      <textarea id="condiciones" name="condiciones" rows="2" maxlength="200" autocomplete="off"></textarea>
       <p class="ayuda">Presentando el carné, no acumulable, mínimo de compra…</p>
     </div>
 
     <div class="fila">
       <div class="campo">
         <label for="vigente_desde">Válida desde</label>
-        <input id="vigente_desde" name="vigente_desde" type="date" required value={hoy} />
+        <input id="vigente_desde" name="vigente_desde" type="date" required value={hoy} / autocomplete="off">
         <p class="error" data-error-de="vigente_desde" hidden></p>
       </div>
 
       <div class="campo">
         <label for="vigente_hasta">Válida hasta</label>
-        <input id="vigente_hasta" name="vigente_hasta" type="date" required value={enUnMes} />
+        <input id="vigente_hasta" name="vigente_hasta" type="date" required value={enUnMes} / autocomplete="off">
         <p class="ayuda">Pasada esta fecha se retira sola del sitio.</p>
         <p class="error" data-error-de="vigente_hasta" hidden></p>
       </div>
@@ -168,7 +171,9 @@ const enUnMes = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString('en-CA
         pattern={PATRON_TELEFONO}
         inputmode="tel"
         aria-describedby="ayuda-telefono"
-      />
+      /
+        autocomplete="off"
+      >
       <p id="ayuda-telefono" class="ayuda">Este sí se publica.</p>
       <p class="error" data-error-de="telefono" hidden></p>
     </div>
