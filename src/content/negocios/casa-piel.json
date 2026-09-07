@@ -1,0 +1,13 @@
+{
+  "nombre": "Casa Piel",
+  "categoria": "Salud y bienestar",
+  "descripcion": "En Casa Piel nos especializamos en medicina estética y cuidado integral de la piel. Ofrecemos tratamientos faciales y corporales personalizados, enfocados en el cuidado, prevención y rejuvenecimiento de la piel, buscando siempre resultados naturales y armoniosos. Contamos con procedimientos de medicina estética, tecnologías y protocolos de skincare diseñados según las necesidades de cada paciente.",
+  "familia": "Familia — grado 2C",
+  "foto": "../../assets/photos/casa-piel.jpg",
+  "telefono": "3215576514",
+  "direccion": "Cerritos Mall cons 1008",
+  "web": "Casapiel.co",
+  "instagram": "@casapiel.co",
+  "facebook": "Casa Piel",
+  "orden": 100
+}

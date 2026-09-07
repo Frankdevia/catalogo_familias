@@ -1,0 +1,13 @@
+{
+  "nombre": "PTARCOL SAS",
+  "categoria": "Productos",
+  "descripcion": "En PTARCOL S.A.S. somos fabricantes de Plantas de Tratamiento de Aguas Residuales (PTAR) domésticas, industriales VFL, con más de 35 años de trayectoria en 56 países y certificación de calidad por la PIA GmbH (Alemania). Desde 2006 lideramos el mercado en Colombia con más de 250 plantas instaladas. A diferencia de un pozo séptico tradicional, nuestras PTAR garantizan hasta un 95% de eficiencia en la remoción de contaminantes, ofreciendo una alternativa ecológicamente responsable, altamente eficiente y económicamente rentable para viviendas, comercios e industrias, protegiendo el medio ambiente y asegurando el cumplimiento normativo.",
+  "familia": "Familia — grado 1C",
+  "foto": "../../assets/photos/ptarcol-sas.webp",
+  "telefono": "3115400638",
+  "direccion": "KM 14 VIA ARMENIA VDA LAGUNETA",
+  "web": "www.aquatec.sk",
+  "instagram": "@ptarcolsas",
+  "facebook": "ptarcol tratamiento",
+  "orden": 100
+}
