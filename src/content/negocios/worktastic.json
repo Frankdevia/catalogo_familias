@@ -1,0 +1,13 @@
+{
+  "nombre": "Worktastic",
+  "categoria": "Moda",
+  "descripcion": "Uniformes antifluido y moda profesional",
+  "familia": "Familia — grado K4C",
+  "foto": "../../assets/photos/worktastic.jpg",
+  "telefono": "3107843874",
+  "direccion": "Carrera 9 numero 38-74",
+  "web": "www.worktastic.com",
+  "instagram": "@Worktastic",
+  "facebook": "Worktastic",
+  "orden": 100
+}
