@@ -52,6 +52,33 @@ export const LIMITES = {
 /** Teléfonos colombianos: 7 a 10 dígitos, con o sin espacios. */
 export const PATRON_TELEFONO = '[0-9 ]{7,13}';
 
+/*
+ * El correo, con UNA sola definición.
+ *
+ * Antes había cuatro controles: tres con `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` —el
+ * formulario, la Edge Function y el guardián de publicación— y un cuarto, el
+ * esquema de Astro, con el `.email()` de Zod, más estricto.
+ *
+ * Esa expresión laxa deja que `[^\s@]+` se coma un punto, así que
+ * «juan@hotmail..com» le encaja: `hotmail.` + `.` + `com`. Zod lo rechaza.
+ *
+ * El 5 de septiembre entró un correo con el punto doble, los tres controles lo
+ * dejaron pasar, y Astro lo paró donde más caro sale: en la compilación, que
+ * valida la colección ENTERA antes de renderizar nada. Treinta y siete fichas
+ * correctas estuvieron dos días sin salir por culpa de una, y nadie se enteró
+ * porque la base y el repositorio decían que todo estaba publicado.
+ *
+ * Este patrón es el de Zod. Vive aquí, en el módulo que importan las Edge
+ * Functions y también el sitio a través de `src/data/registro.ts`, para que los
+ * cuatro controles no puedan discrepar: son el mismo.
+ */
+export const PATRON_CORREO =
+  /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i;
+
+export function correoValido(valor: string): boolean {
+  return PATRON_CORREO.test(String(valor ?? '').trim());
+}
+
 /** Foto: lo que se acepta del navegador y el techo tras comprimir. */
 export const FOTO = {
   /** Antes de comprimir. Una foto de celular ronda los 3-12 MB. */

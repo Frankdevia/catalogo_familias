@@ -19,6 +19,7 @@
  *   - El botón «Publicar ahora» del panel, que evita la espera.
  */
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { correoValido } from '../_shared/reglas.ts';
 
 const REPO = Deno.env.get('GITHUB_REPO') ?? 'Frankdevia/catalogo_familias';
 const RAMA = Deno.env.get('GITHUB_RAMA') ?? 'main';
@@ -168,7 +169,9 @@ function problemasDe(cola: string, c: Record<string, unknown>): string[] {
   } else if (cola === 'clasificados') {
     for (const k of ['cat', 'desc', 'phone', 'email', 'publicado']) exigir(k);
     if (!/^[0-9 ]+$/.test(txt('phone'))) malos.push(`teléfono inválido: ${txt('phone')}`);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(txt('email'))) malos.push('correo inválido');
+    // La MISMA regla que el esquema del sitio, importada, no copiada: una copia
+    // laxa dejó pasar «hotmail..com» y tumbó la compilación dos días.
+    if (!correoValido(txt('email'))) malos.push(`correo inválido: ${txt('email')}`);
   } else {
     for (const k of ['negocio', 'titulo', 'desc', 'telefono', 'desde', 'hasta']) exigir(k);
     if (!/^[0-9 ]+$/.test(txt('telefono'))) malos.push(`teléfono inválido: ${txt('telefono')}`);

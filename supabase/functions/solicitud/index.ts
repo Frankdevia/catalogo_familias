@@ -12,7 +12,7 @@
  * una copia: esa lista ya se nos desincronizó dos veces.
  */
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import {
+import { correoValido,
   LIMITES,
   CAMPO_TRAMPA,
   normalizarTelefono,
@@ -147,7 +147,6 @@ Deno.serve(async (peticion) => {
     const digitos = v.replace(/\s/g, '').length;
     return digitos >= 7 && digitos <= 10;
   };
-  const correoValido = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
   const comun = {
     estudiantes,

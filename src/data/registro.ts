@@ -14,6 +14,8 @@
 export {
   LIMITES,
   PATRON_TELEFONO,
+  PATRON_CORREO,
+  correoValido,
   FOTO,
   CAMPO_TRAMPA,
   normalizarTelefono,

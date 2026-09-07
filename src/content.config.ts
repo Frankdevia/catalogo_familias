@@ -12,6 +12,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { CATEGORIAS } from './data/categorias';
+import { correoValido } from './data/registro';
 import { CATEGORIAS_CLASIFICADOS } from './data/clasificados';
 
 const negocios = defineCollection({
@@ -60,7 +61,12 @@ const clasificados = defineCollection({
     phone: z.coerce
       .string()
       .regex(/^[\d ]+$/, 'Solo dígitos y espacios, sin +57'),
-    email: z.coerce.string().email(),
+    /* `.refine()` y no `.email()`: la regla vive en `reglas.ts` y la comparten
+       el formulario, la Edge Function y el guardián de publicación. Con
+       `.email()`, Astro era el ÚNICO estricto y paraba los datos malos en la
+       compilación —donde una sola entrada tumba la colección entera— en vez de
+       en la puerta. */
+    email: z.coerce.string().refine(correoValido, 'Correo inválido'),
     /**
      * Fecha ISO (AAAA-MM-DD). Solo ordena —el más nuevo primero— y no se
      * muestra en la tarjeta. Los anuncios no caducan: se retiran a mano

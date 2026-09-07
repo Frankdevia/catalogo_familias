@@ -97,6 +97,11 @@ const supabaseClave =
         <button type="button" class="li-btn" data-accion="nueva">Crear una entrada</button>
       </div>
 
+      {/* Lo que la base cree publicado frente a lo que la página sirve de
+          verdad. Va arriba y en rojo porque su ausencia es justo lo que dejó el
+          sitio dos días con ocho fichas menos sin que nadie lo notara. */}
+      <p class="desfase" data-desfase hidden role="alert"></p>
+
       <p class="aviso" data-aviso hidden role="status" aria-live="polite"></p>
 
       <form data-formulario class="formulario" hidden></form>
@@ -235,6 +240,16 @@ const supabaseClave =
     background: var(--li-navy);
     border-color: var(--li-navy);
     color: var(--li-white);
+  }
+
+  .desfase {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-left: 4px solid var(--li-red);
+    background: var(--surface-subtle);
+    color: var(--text-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
   }
 
   .aviso {
