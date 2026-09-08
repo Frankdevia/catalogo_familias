@@ -30,9 +30,26 @@ const ancho = foto && encuadre ? anchoUtil(foto, encuadre, 800, 340) : 0;
  * foto y sin ella, que es lo que de verdad se nota.
  */
 const inicial = nombre.trim().charAt(0).toUpperCase();
+
+/*
+ * Lo que la barra de búsqueda mira.
+ *
+ * Se prepara AQUÍ, al compilar, y no en el navegador con cada tecla: sin
+ * tildes y en minúsculas, para que «cafe» encuentre «Café» y «disenno» no haga
+ * falta escribirlo con eñe. Leerlo del DOM en cada pulsación obligaría a
+ * normalizar cuarenta descripciones cada vez.
+ *
+ * Va el nombre, la descripción y la categoría: quien busca «postres» espera
+ * encontrar la repostería aunque esa palabra solo esté en su descripción.
+ */
+const buscable = [nombre, descripcion, categoria]
+  .join(' ')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase();
 ---
 
-<article class="tarjeta" data-negocio data-categoria={categoria}>
+<article class="tarjeta" data-negocio data-categoria={categoria} data-busca={buscable}>
   <a
     class="foto"
     href={href}

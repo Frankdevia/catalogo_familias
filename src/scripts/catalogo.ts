@@ -15,6 +15,8 @@ if (seccionCatalogo) {
     vacio: document.getElementById('catalogo-vacio'),
     singular: 'negocio',
     plural: 'negocios',
+    busqueda: document.querySelector<HTMLInputElement>('#catalogo-busca'),
+    terminoVacio: document.querySelector<HTMLElement>('[data-termino]'),
   });
 }
 

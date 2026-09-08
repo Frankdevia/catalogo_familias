@@ -26,6 +26,19 @@ interface Opciones {
   /** Para el texto del conteo: "1 negocio" / "3 negocios". */
   singular: string;
   plural: string;
+  /** Campo de búsqueda libre. Opcional: los clasificados no lo tienen. */
+  busqueda?: HTMLInputElement | null;
+  /** Se rellena con lo buscado cuando no hay resultados. */
+  terminoVacio?: HTMLElement | null;
+}
+
+/** Sin tildes y en minúsculas, igual que el `data-busca` de cada tarjeta. */
+export function normalizar(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 }
 
 export function montarFiltro(op: Opciones): void {
@@ -37,12 +50,27 @@ export function montarFiltro(op: Opciones): void {
   );
   if (chips.length === 0) return;
 
-  /** Aplica el filtro sin tocar la URL. */
-  function aplicar(categoria: string): void {
+  // Los dos filtros se guardan aquí y se aplican JUNTOS. Si cada uno escondiera
+  // y mostrara por su cuenta, el último en ejecutarse desharía al otro: buscar
+  // algo devolvería tarjetas de categorías que estaban filtradas.
+  let categoriaActual = TODOS;
+  let terminoActual = '';
+
+  /** Aplica los dos filtros a la vez, sin tocar la URL. */
+  function aplicar(categoria = categoriaActual, termino = terminoActual): void {
+    categoriaActual = categoria;
+    terminoActual = termino;
+
+    // Cada palabra por separado y todas tienen que estar: «cafe pereira»
+    // encuentra el café de Pereira aunque las dos palabras estén lejos.
+    const palabras = termino.split(/\s+/).filter(Boolean);
+
     let visibles = 0;
     for (const tarjeta of tarjetas) {
-      const coincide =
+      const deCategoria =
         categoria === TODOS || tarjeta.dataset.categoria === categoria;
+      const texto = tarjeta.dataset.busca ?? '';
+      const coincide = deCategoria && palabras.every((p) => texto.includes(p));
       tarjeta.hidden = !coincide;
       if (coincide) visibles++;
     }
@@ -58,29 +86,47 @@ export function montarFiltro(op: Opciones): void {
         visibles === 1 ? `1 ${op.singular}` : `${visibles} ${op.plural}`;
     }
     if (op.vacio) op.vacio.hidden = visibles > 0;
+    if (op.terminoVacio) op.terminoVacio.textContent = termino;
+    // El mensaje de «no hay nada» cambia según por qué no hay nada.
+    if (op.vacio) op.vacio.dataset.motivo = termino ? 'busqueda' : 'categoria';
   }
 
-  /** Refleja el filtro en la URL para poder compartirlo o recargar. */
-  function sincronizarUrl(categoria: string): void {
+  /** Refleja los filtros en la URL para poder compartirlos o recargar. */
+  function sincronizarUrl(): void {
     const url = new URL(window.location.href);
-    if (categoria === TODOS) {
-      url.searchParams.delete(op.paramUrl);
-    } else {
-      url.searchParams.set(op.paramUrl, categoria);
-    }
+    if (categoriaActual === TODOS) url.searchParams.delete(op.paramUrl);
+    else url.searchParams.set(op.paramUrl, categoriaActual);
+
+    if (!terminoActual) url.searchParams.delete(`${op.paramUrl}-q`);
+    else url.searchParams.set(`${op.paramUrl}-q`, terminoActual);
+
     window.history.replaceState(null, '', url);
   }
 
   for (const chip of chips) {
     chip.addEventListener('click', () => {
-      const categoria = chip.dataset.filtro ?? TODOS;
-      aplicar(categoria);
-      sincronizarUrl(categoria);
+      aplicar(chip.dataset.filtro ?? TODOS);
+      sincronizarUrl();
     });
   }
 
+  if (op.busqueda) {
+    const campo = op.busqueda;
+    // `input` y no `keyup`: también recoge pegar, dictar y la «x» de limpiar
+    // que el propio navegador dibuja en un type="search".
+    campo.addEventListener('input', () => {
+      aplicar(categoriaActual, normalizar(campo.value));
+      sincronizarUrl();
+    });
+    // En un formulario suelto, Enter recargaría la página y perdería el filtro.
+    campo.form?.addEventListener('submit', (e) => e.preventDefault());
+  }
+
   // Estado inicial desde la URL. Un valor desconocido cae en "Todos".
-  const pedida = new URL(window.location.href).searchParams.get(op.paramUrl);
+  const parametros = new URL(window.location.href).searchParams;
+  const pedida = parametros.get(op.paramUrl);
   const valida = pedida && chips.some((c) => c.dataset.filtro === pedida);
-  aplicar(valida ? (pedida as string) : TODOS);
+  const buscado = normalizar(parametros.get(`${op.paramUrl}-q`) ?? '');
+  if (op.busqueda && buscado) op.busqueda.value = buscado;
+  aplicar(valida ? (pedida as string) : TODOS, buscado);
 }
