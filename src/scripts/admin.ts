@@ -150,48 +150,60 @@ if (raiz) {
   }
 
   /**
-   * ¿Está el sitio enseñando lo que la base cree publicado?
+   * ¿Ha llegado al sitio lo último que se publicó?
    *
-   * El 5 de septiembre un correo con un punto de más tumbó la compilación, y el
-   * sitio se quedó dos días con ocho fichas menos. Nada lo dijo: la base decía
-   * «publicado», el panel decía «publicado», el repositorio estaba al día, y la
-   * página mostraba otra cosa. Se descubrió por casualidad.
+   * Antes esto contaba fichas: cuántas hay en la base frente a cuántas en el
+   * sitemap. Servía para el caso de septiembre en que una compilación rota dejó
+   * ocho fuera, y no servía para nada más. El 8 de septiembre se marcó «foto
+   * completa» en una ficha, el sitio no reconstruyó, y el aviso calló: 52 y 52.
+   * La ficha estaba en los dos lados; lo que había cambiado era su contenido.
    *
-   * El panel se sirve del MISMO origen que el sitio, así que puede leer su
-   * sitemap sin permisos ni backend nuevo y contar las fichas que de verdad
-   * llegaron. Si no cuadran, la compilación falló.
+   * Ahora se comparan FECHAS. El sitio sella su hora de compilación en
+   * `/version.json` y aquí se mira contra la publicación más reciente. Si se
+   * publicó algo después de la última compilación, ese cambio no está en la
+   * página, sea del tipo que sea.
    *
-   * Es una comprobación de cortesía: si algo de esto falla —red, sitemap que
-   * cambia de forma— se calla y no estorba. Prefiero no avisar a dar una alarma
-   * falsa cada vez que el sitio esté reconstruyéndose.
+   * Es una comprobación de cortesía: si algo falla —red, archivo ausente— se
+   * calla. Prefiero no avisar a dar una alarma falsa.
    */
   async function comprobarSitio() {
     const aviso = $('[data-desfase]');
     if (!aviso) return;
 
-    const enLaBase = datos.negocios.filter(
-      (f) => f.estado === 'aprobado' && f.publicado_en && !f.retirado_en && f.slug,
-    ).length;
-    if (!enLaBase) return;
+    // La publicación más reciente de las tres colas: cualquiera de ellas
+    // debería estar ya en la página.
+    const publicaciones = (Object.keys(TABLA) as Cola[])
+      .flatMap((c) => datos[c])
+      .filter((f) => f.publicado_en)
+      .map((f) => new Date(f.publicado_en as string).getTime())
+      .filter((t) => Number.isFinite(t));
+    if (!publicaciones.length) return;
+    const ultimaPublicacion = Math.max(...publicaciones);
 
     try {
-      const r = await fetch('/sitemap-0.xml', { cache: 'no-store' });
+      const r = await fetch('/version.json', { cache: 'no-store' });
       if (!r.ok) return;
-      const enElSitio = ((await r.text()).match(/\/negocio\//g) ?? []).length;
+      const { construido } = (await r.json()) as { construido?: string };
+      const compilado = new Date(construido ?? '').getTime();
+      if (!Number.isFinite(compilado)) return;
 
-      // Solo se avisa si FALTAN. Que sobre una es normal durante los minutos
-      // que van entre retirar algo y la reconstrucción.
-      const faltan = enLaBase - enElSitio;
-      aviso.hidden = faltan < 1;
-      if (faltan > 0) {
+      // Cinco minutos de margen: entre que se publica y que el contenedor
+      // arranca pasa un rato, y avisar en esa ventana sería ruido.
+      const MARGEN = 5 * 60 * 1000;
+      const atrasado = ultimaPublicacion > compilado + MARGEN;
+
+      aviso.hidden = !atrasado;
+      if (atrasado) {
+        const hora = (t: number) =>
+          new Date(t).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
         aviso.textContent =
-          `El sitio va ${faltan} ficha${faltan === 1 ? '' : 's'} por detrás: ` +
-          `la base tiene ${enLaBase} publicadas y la página muestra ${enElSitio}. ` +
-          `Si sigue así en unos minutos, la última compilación falló — revisa el ` +
-          `historial de despliegues en EasyPanel.`;
+          `Lo último se publicó el ${hora(ultimaPublicacion)} y el sitio se ` +
+          `construyó por última vez el ${hora(compilado)}: ese cambio todavía no ` +
+          `está en la página. La compilación falló — revisa el historial de ` +
+          `despliegues en EasyPanel.`;
       }
     } catch {
-      // Sin red o sin sitemap: no se puede saber, y no saber no es una alarma.
+      // Sin red o sin sello: no se puede saber, y no saber no es una alarma.
     }
   }
 

@@ -18,6 +18,8 @@ export interface NegocioModal {
    *  fijas en el HTML porque no sabe de quién será la foto; aquí se corrigen. */
   fotoAncho?: number;
   fotoAlto?: number;
+  /** La misma foto a 1600px, para el visor. Solo se descarga al pulsarla. */
+  fotoGrande?: string;
   telefono: string;
   telHref: string;
   /* Estos llegan del esquema de contenido, donde son `.nullish()`: una ficha

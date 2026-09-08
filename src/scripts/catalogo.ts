@@ -36,6 +36,7 @@ if (modal && datosCrudos) {
     document.getElementById(id) as T | null;
 
   const foto = el<HTMLImageElement>('modal-foto');
+  const ampliar = el<HTMLButtonElement>('modal-ampliar');
   const categoria = el('modal-categoria');
   const familia = el('modal-familia');
   const nombre = el('modal-nombre');
@@ -86,11 +87,21 @@ if (modal && datosCrudos) {
     if (foto) {
       const hayFoto = Boolean(n.foto);
       foto.hidden = !hayFoto;
+      // Sin foto no hay botón: un control que no lleva a ninguna parte confunde.
+      if (ampliar) {
+        ampliar.hidden = !hayFoto;
+        ampliar.dataset.visor = n.fotoGrande ?? '';
+        ampliar.dataset.visorAlt = `Foto de ${n.nombre}`;
+      }
 
       // El encaje y el color van SIEMPRE y van PRIMERO. El diálogo es uno solo
       // y se reutiliza: si no se limpian, la siguiente ficha hereda el fondo de
       // la anterior.
-      const cabecera = foto.parentElement;
+      //
+      // Se busca `.cabecera` por su clase y no con `parentElement`: desde que la
+      // imagen va dentro de un botón para poder ampliarla, su padre es ese botón
+      // y el encaje se aplicaba ahí, donde no hace nada.
+      const cabecera = foto.closest<HTMLElement>('.cabecera');
       if (cabecera) {
         cabecera.dataset.encaje = n.encaje ?? 'cubrir';
         cabecera.style.setProperty('--fondo-foto', n.fondo ?? '');

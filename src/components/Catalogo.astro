@@ -3,6 +3,7 @@ import { getImage } from 'astro:assets';
 import Filtros from './Filtros.astro';
 import TarjetaNegocio from './TarjetaNegocio.astro';
 import ModalNegocio from './ModalNegocio.astro';
+import VisorFoto from './VisorFoto.astro';
 import { CATEGORIAS, TODOS } from '../data/categorias';
 import { telHref, webHref, instagramHref, type Negocio } from '../data/negocio';
 import { encuadreDe, anchoUtil } from '../lib/encuadre';
@@ -35,6 +36,7 @@ const datos: NegocioModal[] = await Promise.all(
     let foto: string | undefined;
     let encuadre: Awaited<ReturnType<typeof encuadreDe>> | null = null;
     let medidas: { ancho: number; alto: number } | null = null;
+    let fotoGrande: string | undefined;
     if (n.data.foto) {
       // Un logo se muestra entero, así que el recorte no puede cocinarse en la
       // imagen: se pide a su proporción natural y el encaje lo aplica el CSS.
@@ -63,6 +65,16 @@ const datos: NegocioModal[] = await Promise.all(
       });
       foto = generada.src;
       medidas = { ancho: Number(generada.attributes.width), alto: Number(generada.attributes.height) };
+
+      // La misma foto a 1600px para el visor. No la descarga nadie hasta que
+      // se pulsa: solo viaja la URL.
+      fotoGrande = (
+        await getImage({
+          src: n.data.foto,
+          width: Math.min(1600, n.data.foto.width),
+          format: 'webp',
+        })
+      ).src;
     }
     return {
       slug: n.id,
@@ -75,6 +87,7 @@ const datos: NegocioModal[] = await Promise.all(
       fondo: encuadre?.fondo,
       fotoAncho: medidas?.ancho,
       fotoAlto: medidas?.alto,
+      fotoGrande,
       telefono: n.data.telefono,
       telHref: telHref(n.data.telefono),
       direccion: n.data.direccion,
@@ -145,6 +158,7 @@ const datosJson = JSON.stringify(datos).replace(/</g, '\\u003c');
 </section>
 
 <ModalNegocio />
+<VisorFoto />
 
 <script id="negocios-datos" type="application/json" is:inline set:html={datosJson} />
 

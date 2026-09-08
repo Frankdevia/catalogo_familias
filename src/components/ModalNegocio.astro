@@ -10,7 +10,12 @@
 
 <dialog id="modal-negocio" aria-labelledby="modal-nombre">
   <div class="cabecera">
-    <img id="modal-foto" alt="" width="1040" height="400" />
+    {/* La foto se pulsa para verla entera y en grande. Es un <button> para que
+        también se abra con el teclado; `catalogo.ts` lo esconde cuando la ficha
+        no trae foto. */}
+    <button type="button" id="modal-ampliar" class="ampliar" aria-label="Ver la foto completa">
+      <img id="modal-foto" alt="" width="1040" height="400" />
+    </button>
     <button type="button" id="modal-cerrar" class="cerrar" aria-label="Cerrar">
       <span aria-hidden="true">×</span>
     </button>
@@ -52,6 +57,19 @@
     position: relative;
     height: 200px;
     background: var(--surface-subtle);
+  }
+  .ampliar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+  }
+  .ampliar:focus-visible {
+    outline: 2px solid var(--li-white);
+    outline-offset: -4px;
   }
   .cabecera img {
     width: 100%;

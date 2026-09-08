@@ -1,9 +1,10 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaInscribe from '../../components/CtaInscribe.astro';
+import VisorFoto from '../../components/VisorFoto.astro';
 import FlechaEnlace from '../../components/FlechaEnlace.astro';
 import { telHref, webHref, instagramHref } from '../../data/negocio';
 import { encuadreDe, anchoUtil } from '../../lib/encuadre';
@@ -23,6 +24,13 @@ const d = negocio.data;
 // La ficha muestra la foto a 2:1. Igual que en la tarjeta, un logo se muestra
 // entero sobre el color de su borde en vez de recortarse por la mitad.
 const encuadre = d.foto ? await encuadreDe(d.foto, d.foto_completa === true) : null;
+
+/* La foto para verla en grande. 1600px a su proporción natural: la del recuadro
+   mide 1040 y basta para el hueco, pero se queda corta a pantalla completa. Solo
+   se descarga al pulsar, así que no pesa en la carga de la ficha. */
+const grande = d.foto
+  ? (await getImage({ src: d.foto, width: Math.min(1600, d.foto.width), format: 'webp' })).src
+  : undefined;
 const ancho = d.foto && encuadre ? anchoUtil(d.foto, encuadre, 1040, 1040) : 0;
 /** Respaldo cuando no hay foto, igual que en la tarjeta del catálogo. */
 const inicial = d.nombre.trim().charAt(0).toUpperCase();
@@ -64,18 +72,22 @@ const jsonLd = {
       <span>{d.nombre}</span>
     </nav>
 
+    {/* La foto va dentro de un <button> y no suelta: así se abre también con el
+        teclado, no solo con el ratón. Sin foto no hay botón. */}
     <div class="cabecera">
       {
         d.foto ? (
-          <Image
-            class="foto"
-            src={d.foto}
-            alt={`Foto de ${d.nombre}`}
-            width={ancho}
-            height={Math.round(ancho / (d.foto.width / d.foto.height))}
-            data-encaje={encuadre?.encaje}
-            style={encuadre?.fondo ? `--fondo-foto: ${encuadre.fondo}` : undefined}
-          />
+          <button type="button" class="abrir-foto" data-visor={grande} data-visor-alt={`Foto de ${d.nombre}`}>
+            <Image
+              class="foto"
+              src={d.foto}
+              alt={`Foto de ${d.nombre}`}
+              width={ancho}
+              height={Math.round(ancho / (d.foto.width / d.foto.height))}
+              data-encaje={encuadre?.encaje}
+              style={encuadre?.fondo ? `--fondo-foto: ${encuadre.fondo}` : undefined}
+            />
+          </button>
         ) : (
           <p class="foto sin-foto" aria-hidden="true">{inicial}</p>
         )
@@ -142,6 +154,7 @@ const jsonLd = {
   </article>
 
   <CtaInscribe />
+  <VisorFoto />
 </BaseLayout>
 
 <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
@@ -181,6 +194,21 @@ const jsonLd = {
     font-size: var(--text-5xl);
     letter-spacing: var(--tracking-display);
     user-select: none;
+  }
+  /* El botón no se ve: es la foto la que se pulsa. Solo aporta el foco de
+     teclado y el cursor que dice que ahí hay algo. */
+  .abrir-foto {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    border-radius: var(--radius-card);
+  }
+  .abrir-foto:focus-visible {
+    outline: 2px solid var(--li-navy);
+    outline-offset: 3px;
   }
   .foto {
     width: 100%;
