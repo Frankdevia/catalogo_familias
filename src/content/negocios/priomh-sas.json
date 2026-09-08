@@ -1,0 +1,13 @@
+{
+  "nombre": "PRIOMH SAS",
+  "categoria": "Productos",
+  "descripcion": "SOLUCIONES EN RADIOPROTECCIÓN",
+  "familia": "Familia — grado 3A",
+  "foto": "../../assets/photos/priomh-sas.webp",
+  "telefono": "3185879677",
+  "direccion": "Pereira",
+  "web": "www.priomh.com.co",
+  "instagram": "@priomh.sas",
+  "orden": 100,
+  "foto_completa": true
+}
