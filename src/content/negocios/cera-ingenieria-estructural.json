@@ -5,5 +5,6 @@
   "familia": "Familia — grado 8C",
   "foto": "../../assets/photos/cera-ingenieria-estructural.webp",
   "telefono": "3217232834",
-  "orden": 100
+  "orden": 100,
+  "foto_completa": true
 }
