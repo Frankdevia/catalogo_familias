@@ -1,0 +1,11 @@
+{
+  "nombre": "DCA INGENIERÍA",
+  "categoria": "Servicios",
+  "descripcion": "Somos una empresa de ingeniería que brindamos servicios de Automatización Industrial y electricidad para el sector productivo. Nuestro compromiso de calidad se basa en la premisa de que cada cliente tiene necesidades diferentes que deben ser evaluadas para aportar soluciones óptimas que satisfagan y superen los objetivos planteados logrando eficiencia y mejora en la productividad. Servicios: Automatización, Electricidad, Instrumentación, Telemetría y Telecomunicaciones.",
+  "familia": "Familia — grado 7A",
+  "foto": "../../assets/photos/dca-ingenieria.webp",
+  "telefono": "3122860843",
+  "web": "www.dcaingenieria.com.co",
+  "instagram": "@dcaingenieria",
+  "orden": 100
+}
