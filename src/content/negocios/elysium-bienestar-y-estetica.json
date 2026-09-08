@@ -1,0 +1,11 @@
+{
+  "nombre": "ELYSIUM BIENESTAR Y ESTÉTICA",
+  "categoria": "Salud y bienestar",
+  "descripcion": "En Elysium ofrecemos servicios de bienestar, salud y belleza: • Medicina estética con la Dra. Valentina Valencia: armonización facial. • Estudio de Barré: clases basadas en un método de entrenamiento de bajo impacto que combina elementos del ballet clásico, el yoga y el pilates. Se trabaja con la barra como apoyo, a través de movimientos pequeños y controlados que fortalecen el cuerpo, mejoran la postura, la flexibilidad y el equilibrio, combinando trabajo isométrico, rangos de movimiento pequeños y repeticiones altas. Ideal para tonificar sin generar volumen excesivo, fortalecer el core y trabajar cuerpo y mente de forma equilibrada. • Spa: limpieza facial profunda, masaje relajante y masaje de drenaje linfático.",
+  "familia": "Familia — grado 1A",
+  "foto": "../../assets/photos/elysium-bienestar-y-estetica.jpg",
+  "telefono": "3147556700",
+  "direccion": "Carrera 10 -# 48-177 - Maraya",
+  "instagram": "@elysiumcentrodebienestar",
+  "orden": 100
+}
