@@ -105,6 +105,9 @@ neg_altas as (
                               lower(coalesce(nullif(regexp_replace(n.foto_ruta, '^.*\.', ''), n.foto_ruta), 'webp'))
                             )
                      end,
+      -- Solo si está activado: `jsonb_strip_nulls` quita la clave cuando no,
+      -- y así los JSON no se llenan de «false» que no dicen nada.
+      'foto_completa', case when n.foto_completa then true end,
       'telefono',    n.telefono,
       'direccion',   n.direccion,
       'web',         n.web,

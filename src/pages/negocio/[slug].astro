@@ -22,7 +22,7 @@ const d = negocio.data;
 
 // La ficha muestra la foto a 2:1. Igual que en la tarjeta, un logo se muestra
 // entero sobre el color de su borde en vez de recortarse por la mitad.
-const encuadre = d.foto ? await encuadreDe(d.foto) : null;
+const encuadre = d.foto ? await encuadreDe(d.foto, d.foto_completa === true) : null;
 const ancho = d.foto && encuadre ? anchoUtil(d.foto, encuadre, 1040, 1040) : 0;
 /** Respaldo cuando no hay foto, igual que en la tarjeta del catálogo. */
 const inicial = d.nombre.trim().charAt(0).toUpperCase();

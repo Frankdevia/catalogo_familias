@@ -10,6 +10,7 @@ interface Props {
 
 const { negocio } = Astro.props;
 const { nombre, categoria, descripcion, familia, foto } = negocio.data;
+const forzarCompleta = negocio.data.foto_completa === true;
 const href = `/negocio/${negocio.id}/`;
 
 // El recuadro mide 400x170 (2.35:1) y se pide al doble para pantallas densas.
@@ -18,7 +19,7 @@ const href = `/negocio/${negocio.id}/`;
 // así que `encuadreDe` decide si esta foto se recorta o se muestra entera sobre
 // el color de su propio borde. Contenida, el ancho útil sale del ALTO del
 // recuadro y no del ancho: pedir 800px para enseñar 120 era descargar de más.
-const encuadre = foto ? await encuadreDe(foto) : null;
+const encuadre = foto ? await encuadreDe(foto, forzarCompleta) : null;
 const ancho = foto && encuadre ? anchoUtil(foto, encuadre, 800, 340) : 0;
 
 /*

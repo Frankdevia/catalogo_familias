@@ -304,6 +304,25 @@ const supabaseClave =
   .formulario :global(.campo.ancho) {
     grid-column: 1 / -1;
   }
+  /* La casilla lleva su texto al lado, no encima: un cuadradito bajo un título
+     se lee como un campo sin rellenar. Y el <label> envuelve a los dos, así que
+     se puede pulsar el texto para marcarla. */
+  .formulario :global(.campo--casilla label) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-weight: var(--weight-regular);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--text-body);
+  }
+  .formulario :global(.campo--casilla input) {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--li-red);
+  }
   .formulario :global(label) {
     font-family: var(--font-subhead);
     font-size: var(--text-xs);

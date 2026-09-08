@@ -29,6 +29,10 @@ const negocios = defineCollection({
        *  Opcional: muchas familias se inscriben sin foto, y exigirla obligaba a
        *  inventarse una o a no publicarlas. La tarjeta dibuja un respaldo. */
       foto: image().optional(),
+      /** Fuerza que la foto se vea entera. Lo activa quien revisa, en el panel,
+       *  para las que `src/lib/encuadre.ts` no reconoce solo —un volante con
+       *  fotos dentro se le parece demasiado a una fotografía—. */
+      foto_completa: z.boolean().optional(),
       /** Solo dígitos y espacios, sin indicativo: "310 456 7890". El +57 lo pone la UI. */
       telefono: z.coerce
         .string()

@@ -138,23 +138,46 @@ async function borde(archivo: string, x: number, ancho: number, alto: number) {
   return { color: mediana, uniformidad: parecidos / total };
 }
 
-export async function encuadreDe(foto: ImageMetadata): Promise<Encuadre> {
-  const cacheado = cache.get(foto.src);
+/**
+ * @param forzarCompleta Lo marca quien revisa en el panel. Manda sobre todo lo
+ *   demás: ninguna medida distingue un volante con fotos dentro de una
+ *   fotografía —se compararon las 44 una a una y las cifras se solapan—, así
+ *   que cuando la regla se equivoca, decide una persona.
+ */
+/** Color medio de toda la imagen, para la banda cuando el borde no es liso. */
+async function dominante(archivo: string): Promise<string> {
+  const { data } = await sharp(archivo)
+    .removeAlpha()
+    .resize(1, 1, { fit: 'fill' })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+}
+
+export async function encuadreDe(
+  foto: ImageMetadata,
+  forzarCompleta = false,
+): Promise<Encuadre> {
+  const llave = `${foto.src}|${forzarCompleta}`;
+  const cacheado = cache.get(llave);
   if (cacheado) return cacheado;
 
   const recortar: Encuadre = { encaje: 'cubrir' };
   const decidir = (r: Encuadre) => {
-    cache.set(foto.src, r);
+    cache.set(llave, r);
     return r;
   };
 
   const proporcion = foto.width / foto.height;
-  if (proporcion >= PROPORCION_MAXIMA) return decidir(recortar);
+  // Con el interruptor puesto se mira igualmente el borde, porque si es liso su
+  // color sigue siendo la mejor banda posible. Lo que cambia es que, si no lo
+  // es, se contiene de todas formas en vez de recortar.
+  if (!forzarCompleta && proporcion >= PROPORCION_MAXIMA) return decidir(recortar);
 
   const archivo = rutaPorNombre.get(nombreOriginal(foto.src));
   if (!archivo) {
     console.warn(`[encuadre] sin archivo original para ${foto.src}: se recorta`);
-    return decidir(recortar);
+    return decidir(forzarCompleta ? { encaje: 'contener' } : recortar);
   }
 
   try {
@@ -169,16 +192,24 @@ export async function encuadreDe(foto: ImageMetadata): Promise<Encuadre> {
 
     // Los dos bordes tienen que ser lisos Y del mismo color. Con solo lo
     // segundo, una fotografía simétrica pasaría por logo.
-    if (izquierda.uniformidad < UNIFORMIDAD_MINIMA || derecha.uniformidad < UNIFORMIDAD_MINIMA) {
-      return decidir(recortar);
-    }
     const diferencia = Math.max(
       ...izquierda.color.map((v, i) => Math.abs(v - derecha.color[i])),
     );
-    if (diferencia >= TOLERANCIA) return decidir(recortar);
+    const bordeLiso =
+      izquierda.uniformidad >= UNIFORMIDAD_MINIMA &&
+      derecha.uniformidad >= UNIFORMIDAD_MINIMA &&
+      diferencia < TOLERANCIA;
 
-    const [r, g, b] = izquierda.color;
-    return decidir({ encaje: 'contener', fondo: `rgb(${r}, ${g}, ${b})` });
+    if (bordeLiso) {
+      const [r, g, b] = izquierda.color;
+      return decidir({ encaje: 'contener', fondo: `rgb(${r}, ${g}, ${b})` });
+    }
+    if (!forzarCompleta) return decidir(recortar);
+
+    // Forzada y sin borde liso: la banda va del color dominante de la imagen,
+    // no de un gris del sistema. Un volante de fondo oscuro entre bandas claras
+    // se ve como un error; con su propio tono se ve como un marco.
+    return decidir({ encaje: 'contener', fondo: await dominante(archivo) });
   } catch (e) {
     // Leer la imagen es una mejora, no la tarea: si falla se recorta, como
     // siempre, en vez de tumbar la compilación del sitio entero. Pero se DICE.

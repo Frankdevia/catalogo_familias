@@ -25,7 +25,7 @@ const TABLA: Record<Cola, string> = {
 interface Campo {
   nombre: string;
   etiqueta: string;
-  tipo: 'texto' | 'area' | 'lista' | 'fecha' | 'archivo';
+  tipo: 'texto' | 'area' | 'lista' | 'fecha' | 'archivo' | 'casilla';
   requerido?: boolean;
   /** No sale nunca al sitio público. Se marca en el formulario. */
   interno?: boolean;
@@ -62,6 +62,15 @@ const CAMPOS: Record<Cola, Campo[]> = {
     { nombre: 'instagram', etiqueta: 'Instagram (con @)', tipo: 'texto', max: 40 },
     { nombre: 'facebook', etiqueta: 'Facebook', tipo: 'texto', max: 80 },
     { nombre: 'foto', etiqueta: 'Foto', tipo: 'archivo', ancho: true },
+    // El sitio decide solo si una foto se recorta o se ve entera, mirando si
+    // sus bordes son de un color liso. Acierta con los logos; con un volante
+    // que lleva fotos dentro, no. Esto es el desempate manual.
+    {
+      nombre: 'foto_completa',
+      etiqueta: 'Mostrar la foto completa, sin recortar',
+      tipo: 'casilla',
+      ancho: true,
+    },
   ],
   clasificados: [
     ...COMUNES,
@@ -328,12 +337,22 @@ if (raiz) {
             .map((o) => `<option value="${escapar(o)}"${f?.[c.nombre] === o ? ' selected' : ''}>${escapar(o)}</option>`)
             .join('');
           control = `<select name="${c.nombre}"${req}><option value="">Elige…</option>${ops}</select>`;
+        } else if (c.tipo === 'casilla') {
+          control = `<input type="checkbox" name="${c.nombre}" value="si"${f?.[c.nombre] ? ' checked' : ''}>`;
         } else if (c.tipo === 'archivo') {
           // Al editar, la foto existente se conserva si no se elige otra.
           control = `<input type="file" name="${c.nombre}" accept="image/jpeg,image/png,image/webp">`;
         } else {
           const tipo = c.tipo === 'fecha' ? 'date' : 'text';
           control = `<input type="${tipo}" name="${c.nombre}" value="${valor(c)}"${req}${max}>`;
+        }
+        // La casilla va con su texto AL LADO y dentro del propio <label>: una
+        // etiqueta encima de un cuadradito se lee como un título huérfano, y
+        // así además se puede pulsar el texto para marcarla.
+        if (c.tipo === 'casilla') {
+          return `<div class="campo ancho campo--casilla">
+            <label>${control}<span>${escapar(c.etiqueta)}${marca}</span></label>
+          </div>`;
         }
         return `<div class="campo${c.ancho ? ' ancho' : ''}">
           <label for="${c.nombre}">${escapar(c.etiqueta)}${marca}</label>${control}
@@ -358,6 +377,13 @@ if (raiz) {
       if (c.tipo === 'archivo') continue;
       // Se colapsan los espacios internos, no solo los extremos: un doble
       // espacio en el nombre acaba en el slug de la ficha publicada.
+      // Una casilla no marcada no aparece en el FormData: su ausencia ES el
+      // «false», y tratarla como texto vacío la guardaría como null, que en una
+      // columna `not null` revienta.
+      if (c.tipo === 'casilla') {
+        fila[c.nombre] = datosForm.get(c.nombre) === 'si';
+        continue;
+      }
       const v = String(datosForm.get(c.nombre) ?? '').replace(/\s+/g, ' ').trim();
       // Los opcionales vacíos van como null y no como cadena vacía: el esquema
       // distingue "sin dato" de "cadena vacía", y varios `check` rechazan la
