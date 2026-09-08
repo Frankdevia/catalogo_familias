@@ -1,0 +1,11 @@
+{
+  "nombre": "Caiman Cocina S.A.",
+  "categoria": "Productos",
+  "descripcion": "Todo lo relacionado con artículos de cocina y electrodomésticos",
+  "familia": "Familia — grado K3B",
+  "foto": "../../assets/photos/caiman-cocina-s-a.webp",
+  "telefono": "3128338228",
+  "direccion": "Cra 9 17-57",
+  "instagram": "@Caimancocina",
+  "orden": 100
+}
