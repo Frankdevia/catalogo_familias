@@ -1,0 +1,13 @@
+{
+  "nombre": "Zelva Rooftop",
+  "categoria": "Gastronomía",
+  "descripcion": "Zelva RoofTop es un rooftop en Pereira que combina gastronomía internacional contemporánea, coctelería de autor y un ambiente moderno rodeado de naturaleza, con una vista privilegiada de la ciudad. Ofrece opciones para brunch, almuerzos, cenas, celebraciones y noches de música, convirtiéndose en un lugar ideal para disfrutar comida, cócteles y una experiencia diferente tanto de día como de noche.",
+  "familia": "Familia — grado 6C",
+  "foto": "../../assets/photos/zelva-rooftop.jpg",
+  "telefono": "302 233 8992",
+  "direccion": "Cra. 16 Bis #8-11",
+  "web": "zelvarooftop.com",
+  "instagram": "@zelva.rooftop",
+  "facebook": "Zelva Rooftop",
+  "orden": 100
+}
