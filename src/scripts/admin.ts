@@ -432,6 +432,27 @@ if (raiz) {
         avisar(`Foto optimizada: ${pesoLegible(foto.size)} → ${pesoLegible(subir.size)}.`);
       }
       fila.foto_ruta = ruta;
+
+      /*
+       * Reemplazar una foto NO funcionaba, y hacía falta limpiar estos dos.
+       *
+       * `foto_borrada_en` lo pone la publicación cuando ya subió la foto al
+       * repositorio y la borró de Storage. Mientras siga puesto,
+       * `pendientes_de_publicar()` devuelve `foto_ruta` en null y la función no
+       * sube nada: el commit sale vacío y la foto nueva se queda en Storage
+       * para siempre. Le pasó a SCQ SAS el 9 de septiembre.
+       *
+       * `foto_archivo` es el nombre con el que la foto entró al repositorio, y
+       * es lo que el JSON publica. La función escribe la nueva en
+       * `<slug>.<extensión de la nueva>`, así que si el nombre viejo se queda,
+       * la ficha acaba apuntando a un archivo que ya no es el suyo: un .jpg que
+       * fue reemplazado por un .webp deja la ficha señalando al .jpg.
+       *
+       * Con los dos en null, la foto nueva se trata como lo que es: una foto
+       * que todavía no ha llegado al repositorio.
+       */
+      fila.foto_borrada_en = null;
+      fila.foto_archivo = null;
     }
 
     const { error } = editando
