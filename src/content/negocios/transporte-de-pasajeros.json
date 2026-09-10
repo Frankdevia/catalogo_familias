@@ -1,0 +1,10 @@
+{
+  "nombre": "Transporte de Pasajeros",
+  "categoria": "Servicios",
+  "descripcion": "Viaja a donde quieras con Comodidad y Seguridad. Buseta con capacidad de 28 pasajeros. Turismo, Eventos, Empresas y Traslados Especiales.",
+  "familia": "Familia — grado 4C",
+  "foto": "../../assets/photos/transporte-de-pasajeros.webp",
+  "telefono": "3187349707",
+  "direccion": "Pereira",
+  "orden": 100
+}
