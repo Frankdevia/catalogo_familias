@@ -1,0 +1,11 @@
+{
+  "nombre": "Macava",
+  "categoria": "Gastronomía",
+  "descripcion": "Vendemos todo tipo de cortes de carne de res, cerdo y pollo",
+  "familia": "Familia — grado K5A",
+  "foto": "../../assets/photos/macava.jpg",
+  "telefono": "3103901266",
+  "direccion": "Carrera 10 # 41-37",
+  "instagram": "@macava.col",
+  "orden": 100
+}
