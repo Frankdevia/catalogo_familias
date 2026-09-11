@@ -1,0 +1,11 @@
+{
+  "nombre": "MAE Cocina Asiática",
+  "categoria": "Gastronomía",
+  "descripcion": "Descubre una amplia variedad de platos de comida asiática preparados con ingredientes frescos y cuidadosamente seleccionados. Una propuesta gastronómica pensada para quienes disfrutan de sabores auténticos, preparaciones especiales y una excelente combinación de ingredientes. Encuentra deliciosas opciones de sushi, ramen, wok, arroces y diferentes especialidades asiáticas, preparadas al momento para conservar todo su sabor, textura y frescura.",
+  "familia": "Familia — grado 4C",
+  "foto": "../../assets/photos/mae-cocina-asiatica.webp",
+  "telefono": "3114339980",
+  "direccion": "Castilla Plaza, KM 10 Via Pereira-Cerritos",
+  "instagram": "@mae.asiancuisine",
+  "orden": 100
+}
