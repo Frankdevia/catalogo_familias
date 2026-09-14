@@ -1,0 +1,13 @@
+{
+  "nombre": "IPLER",
+  "categoria": "Servicios",
+  "descripcion": "IPLER ofrece programas presenciales y virtuales de apoyo y fortalecimiento académico para niños, jóvenes y adultos, enfocados en lectura comprensiva y rápida, escritura y ortografía, matemáticas, técnicas de estudio, atención, memoria y hábitos de aprendizaje. También cuenta con preparación para pruebas como Saber 11, orientación profesional y talleres de habilidades socioemocionales, con una metodología personalizada que permite a cada estudiante avanzar según su nivel y necesidades..",
+  "familia": "Familia — grado K2A",
+  "foto": "../../assets/photos/ipler.webp",
+  "telefono": "601 4824080",
+  "direccion": "Calle 98 # 22-64 local 4 (Bogotá D.C.)",
+  "web": "www.ipler.edu.co",
+  "instagram": "@ipler_edu",
+  "facebook": "https://www.facebook.com/IPLERcisa",
+  "orden": 100
+}

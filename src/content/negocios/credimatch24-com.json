@@ -1,0 +1,12 @@
+{
+  "nombre": "Credimatch24.com",
+  "categoria": "Servicios",
+  "descripcion": "CrediMatch24 es una plataforma digital de comparación y conexión de créditos en Colombia que permite a los usuarios completar una sola solicitud y acceder a opciones de más de 10 entidades financieras y fintechs. Su tecnología busca hacer match entre el perfil del usuario y las alternativas con mayor probabilidad de ajustarse a sus necesidades, ofreciendo un proceso 100% digital, gratuito, rápido y sin afectar inicialmente el puntaje crediticio. CrediMatch24 no presta dinero directamente: funciona como intermediario tecnológico entre los usuarios y las entidades financieras aliadas.",
+  "familia": "Familia — grado 3C",
+  "foto": "../../assets/photos/credimatch24-com.webp",
+  "telefono": "3202232025",
+  "direccion": "Edificio Ecotek, Cl. 99 #10-57, Bogotá, Cundinamarca",
+  "web": "credimatch24.com",
+  "instagram": "@credimatch24",
+  "orden": 100
+}
