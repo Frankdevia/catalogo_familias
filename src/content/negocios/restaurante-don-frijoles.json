@@ -1,0 +1,12 @@
+{
+  "nombre": "Restaurante Don Frijoles",
+  "categoria": "Gastronomía",
+  "descripcion": "Comida Colombiana Bandeja paisa, ajiaco , mondongo, sancocho de res y de pollo , carnes a la parrilla, chuletas de cerdo y pollo, parrillada, trucha ,mojarra,",
+  "familia": "Familia — grado 11",
+  "foto": "../../assets/photos/restaurante-don-frijoles.jpg",
+  "telefono": "3167867777",
+  "direccion": "Kilómetro 10 vía Cerritos hacia Pereira",
+  "instagram": "@Restaurantedonfrijolespereira",
+  "facebook": "Restaurantedonfrijolespereira",
+  "orden": 100
+}
