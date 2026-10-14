@@ -1,5 +1,10 @@
 # Clasificados: puesta en marcha
 
+> **Histórico.** El circuito de n8n y el Google Sheet que se describen abajo
+> ya no se usan: hoy las solicitudes llegan a Supabase, se revisan en `/admin`
+> y las publica la Edge Function `publicar` (ver `supabase/README.md`). Lo que
+> sigue vigente es la tabla de qué se publica y la sección de caducidad.
+
 Cómo se conecta `/clasificados/nuevo` con n8n, el Google Sheet y este
 repositorio. Es el mismo circuito que los negocios, con dos pasos menos porque
 no hay foto.
@@ -83,16 +88,25 @@ publicación durante dos días (ver `docs/postulaciones.md`).
 > familias, la salida es armar el `mailto:` con JavaScript en
 > `Clasificados.astro`: los rastreadores leen el HTML crudo y no lo encontrarían.
 
-## Los anuncios no caducan
+## Los anuncios caducan a los 30 días
 
-Se decidió que se retiran a mano. Consecuencia práctica: **nadie recibe un aviso
-cuando un anuncio envejece**. El correo de publicación le dice a la familia cómo
-pedir que lo quiten, pero la sección se irá llenando de anuncios viejos si no se
-revisa cada cierto tiempo.
+Cada clasificado dura **30 días desde su primera publicación**
+(`supabase/17-caducidad-clasificados.sql`):
 
-Si más adelante se quiere caducidad automática, el campo `publicado` de cada
-JSON ya guarda la fecha: bastaría con filtrar por ella en `index.astro`, sin
-tocar n8n ni el Sheet.
+- Una vez al día, a las 00:05 hora de Bogotá, la tarea de pg_cron
+  `caducar-clasificados` pasa a `retirado` todo anuncio aprobado que ya cumplió
+  30 días, y deja la nota *"Retirado automáticamente a los 30 días."* en
+  `notas_revision`.
+- El cron `publicar-catalogo`, que corre cada minuto, lo recoge como baja y
+  borra su JSON del repositorio, igual que un retiro a mano.
+- **Editar un anuncio no reinicia el plazo.** Se cuenta desde la columna
+  `primera_publicacion`, no desde `publicado_en`, que cambia con cada
+  republicación.
+- **Volver a aprobar un anuncio retirado sí lo reinicia:** sale de nuevo por
+  otros 30 días.
+
+Retirarlo antes sigue siendo lo mismo de siempre: `estado = retirado` en el
+panel. La familia no recibe aviso cuando su anuncio vence.
 
 ## Si cambian las categorías
 

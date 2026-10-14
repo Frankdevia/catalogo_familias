@@ -84,6 +84,11 @@ nadie tenga que reaprender el circuito:
 | `rechazado` | No se publica. Se conserva para tener histórico |
 | `retirado` | Estuvo publicada y el cron la borró del repo |
 
+Dos colas llegan solas a `retirado`: las promociones al pasar su
+`vigente_hasta` (`caducar_promociones()`) y los clasificados a los 30 días de
+su primera publicación (`caducar_clasificados()`, tarea diaria de pg_cron; ver
+`17-caducidad-clasificados.sql`).
+
 ## Dos reglas que la base impone y antes no
 
 1. **No se puede aprobar un negocio sin grado.** Antes era un `throw` dentro de
