@@ -1,0 +1,12 @@
+{
+  "nombre": "Natus",
+  "categoria": "Salud y bienestar",
+  "descripcion": "Consulta de pediatría, de ginecología y obstetricia",
+  "familia": "Familia — grado 8C",
+  "foto": "../../assets/photos/natus.jpg",
+  "telefono": "3052361749",
+  "direccion": "Edificio oval medica consultorio 1008",
+  "instagram": "@Natuscuidadomaterno",
+  "facebook": "Natus",
+  "orden": 100
+}
